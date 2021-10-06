@@ -1,0 +1,21 @@
+{
+  "name": "message-drop-server",
+  "version": "1.0.0",
+  "description": "Backend for MessageDrop app",
+  "main": "index.js",
+  "scripts": {
+    "watch": "tsc -w",
+    "dev": "nodemon dist/index.js",
+    "start": "node dist/index.js"
+  },
+  "author": "Michał Warchoł",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^16.10.3",
+    "nodemon": "^2.0.13",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "mongoose": "^6.0.9"
+  }
+}
