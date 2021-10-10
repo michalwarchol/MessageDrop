@@ -40,9 +40,20 @@ export class UserResolver {
     return await UserModel.find();
   }
 
+  @Query(()=>User, {nullable: true})
+  async me(
+    @Ctx(){ req }: Context
+  ): Promise<User|null>{
+    if(!req.session.userId){
+      return null;
+    }
+    const user = await UserModel.findById(req.session.userId) as User;
+    return user;
+  }
+
   @Mutation(() => UserResponse)
   async register(
-    @Ctx() { req, redis }: Context,
+    @Ctx() { req }: Context,
     @Arg("registerInput", () => RegisterInput) registerInput: RegisterInput
   ): Promise<UserResponse> {
     const errors = validateCredentials(registerInput);
@@ -62,20 +73,21 @@ export class UserResolver {
       } as User);
 
       await user.save();
+      req.session.userId = user._id.toString();
 
       //sends verification code to redis
-      while (true) {
-        let code = generateVerificationCode();
-        let key = VERIFICATION_PREFIX + code;
-        let isInDb = await redis.get(key);
-        if (!isInDb) {
-          await redis.set(key, user._id.toString(), "EX", 1000 * 60);
+      // while (true) {
+      //   let code = generateVerificationCode();
+      //   let key = VERIFICATION_PREFIX + code;
+      //   let isInDb = await redis.get(key);
+      //   if (!isInDb) {
+      //     await redis.set(key, user._id.toString(), "EX", 1000 * 60);
 
-          //TODO: send email with this code
+      //     //TODO: send email with this code
 
-          break;
-        }
-      }
+      //     break;
+      //   }
+      // }
     } catch (err) {
       //checks if name and email are unique
       if (err.message.includes("duplicate key error")) {
@@ -101,5 +113,31 @@ export class UserResolver {
     return {
       user,
     };
+  }
+
+  @Mutation(()=>UserResponse, {nullable: true})
+  async login(
+    @Arg("name", ()=>String) name: string,
+    @Arg("password", ()=>String) password: string,
+    @Ctx() {req}: Context
+  ): Promise<UserResponse|null>{
+    const user = await UserModel.findOne({name}) as User;
+    if(!user){
+      return {
+        errors: [{field: "password", message: "Credentials you provided don't match any account!"}]
+      };
+    }
+    const check = await bcrypt.compare(password, user.password);
+
+    if(!check){
+      return {
+        errors: [{field: "password", message: "Credentials you provided don't match any account!"}]
+      };
+      
+    }
+    req.session.userId = user._id.toString();
+      return {
+        user,
+      };
   }
 }

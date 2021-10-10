@@ -9,6 +9,8 @@ import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 import { UserResolver } from "./resolvers/UserResolver";
 import { COOKIE_NAME, __prod__ } from "./constants";
+import cors from "cors";
+import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 
 const main = async () => {
   await mongoose.connect(process.env.DB_URL, {
@@ -21,17 +23,24 @@ const main = async () => {
   const redis = new Redis();
 
   app.use(
+    cors({
+      credentials: true,
+      origin: "http://localhost:3000"
+    })
+  )
+
+  app.use(
     session({
       name: COOKIE_NAME,
       store: new RedisStore({ client: redis, disableTouch: true }),
-      saveUninitialized: false,
+      saveUninitialized: true,
       secret: process.env.SESSION_SECRET,
       resave: false,
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 30, //1 month
         httpOnly: true,
         sameSite: "lax",
-        secure: __prod__,
+        secure: __prod__
       },
     })
   );
@@ -42,11 +51,14 @@ const main = async () => {
       req,
       res,
       redis
-    })
+    }),
+    plugins: [
+      ApolloServerPluginLandingPageGraphQLPlayground()
+    ]
   });
 
   await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, cors: false });
 
   app.listen(4000, () => {
     console.log("Server started on localhost:4000");
