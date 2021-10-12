@@ -10,4 +10,7 @@ export class RegisterInput {
 
     @Field()
     email: string;
+
+    @Field()
+    phone: string;
 }

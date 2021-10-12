@@ -33,7 +33,7 @@ const main = async () => {
     session({
       name: COOKIE_NAME,
       store: new RedisStore({ client: redis, disableTouch: true }),
-      saveUninitialized: true,
+      saveUninitialized: false,
       secret: process.env.SESSION_SECRET,
       resave: false,
       cookie: {

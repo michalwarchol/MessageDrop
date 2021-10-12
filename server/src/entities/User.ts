@@ -22,6 +22,10 @@ export class User {
   @Property({ type: () => String, unique: true })
   email: string;
 
+  @Field()
+  @Property({ type: () => String, unique: true })
+  phone: string;
+
   @Field({ nullable: true })
   @Property({ type: () => String, required: false, default: null })
   avatarId: string;

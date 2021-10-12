@@ -69,6 +69,7 @@ export class UserResolver {
       user = new UserModel({
         name: registerInput.name,
         email: registerInput.email,
+        phone: registerInput.phone,
         password: hashedPassword,
       } as User);
 
@@ -89,10 +90,14 @@ export class UserResolver {
       //   }
       // }
     } catch (err) {
-      //checks if name and email are unique
+      //checks if name, email and phone are unique
       if (err.message.includes("duplicate key error")) {
         let field = Object.keys(err.keyValue)[0];
         let message = "This " + field + " is already taken!";
+        if(field=="phone"){
+          message = "This phone number is already taken!";
+        }
+        
         return {
           errors: [{ field, message }],
         };
@@ -108,7 +113,10 @@ export class UserResolver {
           errors: [{ field, message }],
         };
       }
+
+      console.log(err)
     }
+
 
     return {
       user,
@@ -117,11 +125,11 @@ export class UserResolver {
 
   @Mutation(()=>UserResponse, {nullable: true})
   async login(
-    @Arg("name", ()=>String) name: string,
+    @Arg("email", ()=>String) email: string,
     @Arg("password", ()=>String) password: string,
     @Ctx() {req}: Context
   ): Promise<UserResponse|null>{
-    const user = await UserModel.findOne({name}) as User;
+    const user = await UserModel.findOne({email}) as User;
     if(!user){
       return {
         errors: [{field: "password", message: "Credentials you provided don't match any account!"}]
