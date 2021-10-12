@@ -1,3 +1,27 @@
-.wrapper{
-    color: red;
+@import "../../styles/_config";
+
+.wrapperLg{
+    color: $textColor;
+    width: 100%;
+}
+
+.wrapperMd{
+    color: $textColor;
+    margin: 0 auto;
+    @media screen and (min-width: 1000px) {
+        max-width: 768px;
+    }
+    @media screen and (min-width: 1200px){
+        max-width: 992px;
+    }
+    @media screen and (min-width: 1400px){
+        max-width: 1100px;
+    }
+    
+}
+
+.wrapperSm {
+    color: $textColor;
+    margin: 0 auto;
+    max-width: 500px;
 }

@@ -1,9 +1,29 @@
 import React from 'react'
 import styles from "./Wrapper.module.scss";
 
-const Wrapper:React.FC = () => {
+interface Props {
+    size?: "sm" | "md" | "lg";
+}
+
+const Wrapper:React.FC<Props> = ({size="md", children}) => {
+    let cn = styles.wrapperMd;
+    switch(size){
+        case "lg":
+            cn = styles.wrapperLg;
+            break;
+        case "md":
+            cn = styles.wrapperMd;
+            break;
+        case "sm":
+            cn= styles.wrapperSm;
+            break;
+        default: 
+            cn=styles.wrapperMd;
+    }
     return(
-        <div className={styles.wrapper}>wrapper</div>
+        <div className={cn}>
+            {children}
+        </div>
     )
 }
 export default Wrapper;
