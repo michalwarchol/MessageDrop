@@ -1,0 +1,10 @@
+fragment RegularUser on User {
+    _id
+    name
+    email
+    phone
+    verified
+    avatarId
+    createdAt
+    updatedAt
+}
