@@ -1,0 +1,56 @@
+@import "../../styles/config";
+
+@mixin buttonDefaults {
+  display: flex;
+  justify-content: center;
+  color: $textColor;
+  width: 100%;
+  padding: 10px;
+  font-size: 20px;
+  border-radius: 8px;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
+  transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.buttonFill {
+  @include buttonDefaults();
+  border: none;
+  background-color: $alternativeColor;
+  &:hover {
+    background-color: darken($color: $alternativeColor, $amount: 10);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+}
+.buttonOutline {
+  @include buttonDefaults();
+  border: 2px solid $alternativeColor;
+  background-color: transparent;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px $alternativeColor;
+  }
+}
+
+.buttonLoadingSpan {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border-top: 2px solid white;
+  border-right: 2px solid white;
+  border-bottom: 2px solid $alternativeColor;
+  border-left: 2px solid $alternativeColor;
+  animation-name: roll;
+  animation-duration: 0.5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.250, 0.250, 0.750, 0.750);
+}
+
+@keyframes roll {
+  from{
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
