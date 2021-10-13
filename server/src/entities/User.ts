@@ -12,7 +12,7 @@ export class User {
   readonly _id: mongoose.Types.ObjectId;
 
   @Field()
-  @Property({ type: () => String, unique: true, minlength: 6 })
+  @Property({ type: () => String, unique: true, minlength: 6, maxlength: 16 })
   name: string;
 
   @Property({ type: () => String })

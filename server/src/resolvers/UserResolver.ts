@@ -40,14 +40,12 @@ export class UserResolver {
     return await UserModel.find();
   }
 
-  @Query(()=>User, {nullable: true})
-  async me(
-    @Ctx(){ req }: Context
-  ): Promise<User|null>{
-    if(!req.session.userId){
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req }: Context): Promise<User | null> {
+    if (!req.session.userId) {
       return null;
     }
-    const user = await UserModel.findById(req.session.userId) as User;
+    const user = (await UserModel.findById(req.session.userId)) as User;
     return user;
   }
 
@@ -60,7 +58,6 @@ export class UserResolver {
     if (errors) {
       return errors;
     }
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(registerInput.password, salt);
 
@@ -94,16 +91,16 @@ export class UserResolver {
       if (err.message.includes("duplicate key error")) {
         let field = Object.keys(err.keyValue)[0];
         let message = "This " + field + " is already taken!";
-        if(field=="phone"){
+        if (field == "phone") {
           message = "This phone number is already taken!";
         }
-        
+
         return {
           errors: [{ field, message }],
         };
       }
 
-      //checks length of name and password
+      //checks min length of name and password
       if (err.message.includes("is shorter than the minimum allowed length")) {
         let minLength = err.errors.name.properties.minlength;
         let field = err.errors.name.properties.path;
@@ -114,38 +111,55 @@ export class UserResolver {
         };
       }
 
-      console.log(err)
+      //checks max length of name and password
+      if (err.message.includes("is longer than the maximum allowed length")) {
+        let maxLength = err.errors.name.properties.maxlength;
+        let field = err.errors.name.properties.path;
+        let message =
+          field + " should be at most " + maxLength + " characters long!";
+        return {
+          errors: [{ field, message }],
+        };
+      }
     }
-
 
     return {
       user,
     };
   }
 
-  @Mutation(()=>UserResponse, {nullable: true})
+  @Mutation(() => UserResponse, { nullable: true })
   async login(
-    @Arg("email", ()=>String) email: string,
-    @Arg("password", ()=>String) password: string,
-    @Ctx() {req}: Context
-  ): Promise<UserResponse|null>{
-    const user = await UserModel.findOne({email}) as User;
-    if(!user){
+    @Arg("email", () => String) email: string,
+    @Arg("password", () => String) password: string,
+    @Ctx() { req }: Context
+  ): Promise<UserResponse | null> {
+    const user = (await UserModel.findOne({ email })) as User;
+    if (!user) {
       return {
-        errors: [{field: "password", message: "Credentials you provided don't match any account!"}]
+        errors: [
+          {
+            field: "password",
+            message: "Credentials you provided don't match any account!",
+          },
+        ],
       };
     }
     const check = await bcrypt.compare(password, user.password);
 
-    if(!check){
+    if (!check) {
       return {
-        errors: [{field: "password", message: "Credentials you provided don't match any account!"}]
+        errors: [
+          {
+            field: "password",
+            message: "Credentials you provided don't match any account!",
+          },
+        ],
       };
-      
     }
     req.session.userId = user._id.toString();
-      return {
-        user,
-      };
+    return {
+      user,
+    };
   }
 }
