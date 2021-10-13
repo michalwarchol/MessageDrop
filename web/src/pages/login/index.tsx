@@ -39,14 +39,12 @@ const login: React.FC = () => {
                 <h5>Welcome back</h5>
                 <InputField
                   name="email"
-                  label="email"
                   autoComplete="off"
                   placeholder="email"
                   type="email"
                 />
                 <InputField
                   name="password"
-                  label="password"
                   autoComplete="off"
                   placeholder="password"
                   type="password"

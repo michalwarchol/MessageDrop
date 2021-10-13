@@ -4,10 +4,9 @@ import styles from "./InputField.module.scss";
 
 type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
     name: string;
-    label: string;
 }
 
-const InputField:React.FC<InputFieldProps> = ({label, ...props}) => {
+const InputField:React.FC<InputFieldProps> = (props) => {
     const [field, {error}] = useField(props);
     return(
         <div className={styles.inputContainer}>

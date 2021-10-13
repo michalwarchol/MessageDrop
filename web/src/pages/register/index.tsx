@@ -1,6 +1,6 @@
 import React from "react";
 import { Formik, Form } from "formik";
-import NextLink from 'next/link';
+import NextLink from "next/link";
 import Wrapper from "../../components/Wrapper/Wrapper";
 import styles from "./register.module.scss";
 import InputField from "../../components/InputField/InputField";
@@ -10,8 +10,7 @@ import { toErrorMap } from "../../utils/toErrorMap";
 import { useRouter } from "next/dist/client/router";
 
 const Register: React.FC = () => {
-
-  const [register, {loading}] = useRegisterMutation();
+  const [register, { loading }] = useRegisterMutation();
   const router = useRouter();
 
   return (
@@ -19,30 +18,27 @@ const Register: React.FC = () => {
       <Wrapper size="sm">
         <div className={styles.formContainer}>
           <Formik
-            initialValues={{ name: "", password: "", email: "", phone: "", repeatpassword: "" }}
-            onSubmit={async (values, {setErrors}) => {
-
-              if(values.password != values.repeatpassword){
+            initialValues={{
+              name: "",
+              password: "",
+              email: "",
+              phone: "",
+              repeatpassword: "",
+            }}
+            onSubmit={async ({ repeatpassword, ...values }, { setErrors }) => {
+              if (values.password != repeatpassword) {
                 setErrors({
-                  repeatpassword: "Repeated password doesn't match"
-                })
+                  repeatpassword: "Repeated password doesn't match",
+                });
                 return;
               }
-              
-              const response = await register({variables: {
-                name: values.name,
-                email: values.email,
-                phone: values.phone,
-                password: values.password
-              }})
+              const response = await register({ variables: { ...values } });
 
-              if(response.data?.register.errors){
+              if (response.data?.register.errors) {
                 setErrors(toErrorMap(response.data.register.errors));
-              }else if(response.data?.register.user){
+              } else if (response.data?.register.user) {
                 router.push("/home");
               }
-
-              console.log(response);
             }}
           >
             {() => (
@@ -51,35 +47,30 @@ const Register: React.FC = () => {
                 <h5>It's quick and easy</h5>
                 <InputField
                   name="name"
-                  label="name"
                   autoComplete="off"
                   placeholder="name"
                   type="text"
                 />
                 <InputField
                   name="email"
-                  label="email"
                   autoComplete="off"
                   placeholder="email"
                   type="email"
                 />
                 <InputField
                   name="phone"
-                  label="phone"
                   autoComplete="off"
                   placeholder="phone"
                   type="phone"
                 />
                 <InputField
                   name="password"
-                  label="password"
                   autoComplete="off"
                   placeholder="password"
                   type="password"
                 />
                 <InputField
                   name="repeatpassword"
-                  label="repeat-password"
                   autoComplete="off"
                   placeholder="repeat password"
                   type="password"
@@ -96,7 +87,9 @@ const Register: React.FC = () => {
         </div>
       </Wrapper>
       <div className={styles.footer}>
-          <p>Michał Warchoł {new Date().getFullYear()} &copy;. All rights reserved</p>
+        <p>
+          Michał Warchoł {new Date().getFullYear()} &copy;. All rights reserved
+        </p>
       </div>
     </div>
   );
