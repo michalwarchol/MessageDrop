@@ -6,7 +6,9 @@ import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import { ApolloServer } from "apollo-server-express";
+import { graphqlUploadExpress } from "graphql-upload";
 import { buildSchema } from "type-graphql";
+import { S3 } from "@aws-sdk/client-s3";
 import { UserResolver } from "./resolvers/UserResolver";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import cors from "cors";
@@ -25,9 +27,9 @@ const main = async () => {
   app.use(
     cors({
       credentials: true,
-      origin: "http://localhost:3000"
+      origin: "http://localhost:3000",
     })
-  )
+  );
 
   app.use(
     session({
@@ -40,21 +42,33 @@ const main = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 30, //1 month
         httpOnly: true,
         sameSite: "lax",
-        secure: __prod__
+        secure: __prod__,
       },
     })
   );
 
+  app.use(
+    "/graphql",
+    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 1 })
+  );
+
+  const s3 = new S3({
+    region: process.env.AWS_REGION,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  });
+
   const apolloServer = new ApolloServer({
     schema: await buildSchema({ resolvers: [UserResolver], validate: false }),
-    context: ({req, res}) => ({
+    context: ({ req, res }) => ({
       req,
       res,
-      redis
+      redis,
+      s3
     }),
-    plugins: [
-      ApolloServerPluginLandingPageGraphQLPlayground()
-    ]
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
   });
 
   await apolloServer.start();
@@ -65,4 +79,6 @@ const main = async () => {
   });
 };
 
-main();
+main().catch((err) => {
+  console.log(err.message);
+});
