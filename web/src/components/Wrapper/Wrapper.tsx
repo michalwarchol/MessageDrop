@@ -11,9 +11,6 @@ const Wrapper:React.FC<Props> = ({size="md", children}) => {
         case "lg":
             cn = styles.wrapperLg;
             break;
-        case "md":
-            cn = styles.wrapperMd;
-            break;
         case "sm":
             cn= styles.wrapperSm;
             break;
