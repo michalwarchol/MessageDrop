@@ -1,15 +1,13 @@
 @import "../../styles/config";
 
-.iconButton {
-  display: flex;
-  justify-content: center;
-  color: $textColor;
+.iconButtonFill {
+  @include buttonDefaults();
   border: none;
   background-color: $alternativeColor;
-  padding: 10px;
-  font-size: 20px;
-  border-radius: 8px;
-  font-family: "Poppins", sans-serif;
-  cursor: pointer;
-  transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.iconButtonOutline {
+  @include buttonDefaults();
+  border: 2px solid $alternativeColor;
+  background-color: transparent;
 }
