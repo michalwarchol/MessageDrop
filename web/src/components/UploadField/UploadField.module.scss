@@ -1,0 +1,21 @@
+@import "../../styles/config";
+
+.uploadField {
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+
+  label {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: $alternativeColor;
+    &:hover {
+      background-color: darken($color: $alternativeColor, $amount: 10);
+    }
+  }
+  input {
+    display: none;
+  }
+}
