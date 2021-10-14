@@ -1,0 +1,22 @@
+@import "../../styles/config";
+
+.chatSidebar {
+    background-color: $secondaryColor;
+    margin-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 8px;
+
+    @media screen and (min-width: $md) {
+        width: 100px;
+    }
+    @media screen and (min-width: $xl) {
+        width: 300px;
+    }
+
+    .create {
+        display: flex;
+        justify-content: center;
+        padding: 0 10px;
+    }
+}
