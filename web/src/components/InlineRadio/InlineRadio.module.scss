@@ -1,0 +1,35 @@
+@import "../../styles/config";
+
+@mixin radioButtonDefaults {
+    padding: 0 10px;
+    margin-right: 6px;
+    color: $textColor;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    text-align: center;
+    &:nth-child(1)  {
+        border-radius: 8px 0 0 8px;
+    }
+    &:nth-child(3) {
+        border-radius: 0 8px 8px 0;
+    }
+
+    input {
+        display: none;
+    }
+}
+
+.inlineRadioFill {
+    @include radioButtonDefaults();
+    background-color: $alternativeColor;
+    border: 2px solid $alternativeColor;
+    
+}
+
+.inlineRadioOutline {
+    @include radioButtonDefaults();
+    background-color: transparent;
+    border: 2px solid $alternativeColor;
+}
