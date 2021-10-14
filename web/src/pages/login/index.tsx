@@ -50,7 +50,7 @@ const login: React.FC = () => {
                   type="password"
                 />
                 <div className={styles.buttons}>
-                  <Button text="Log in" loading={loading} />
+                  <Button text="Log in" loading={loading} className={styles.submitButton} />
                   <NextLink href="/register">
                     <p>I don't have an account</p>
                   </NextLink>

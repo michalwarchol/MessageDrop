@@ -76,7 +76,7 @@ const Register: React.FC = () => {
                   type="password"
                 />
                 <div className={styles.buttons}>
-                  <Button text="Sign Up" loading={loading} />
+                  <Button text="Sign Up" loading={loading} className={styles.submitButton} />
                   <NextLink href="/login">
                     <p>I already have an account</p>
                   </NextLink>
