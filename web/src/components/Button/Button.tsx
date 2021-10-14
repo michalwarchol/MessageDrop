@@ -1,17 +1,21 @@
 import React, { ButtonHTMLAttributes } from "react";
+import { IconType } from "react-icons";
 import styles from "./Button.module.scss";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   text: string;
-
+  Icon?: IconType;
   variant?: "fill" | "outline";
   loading?: boolean;
+  className?: string;
 };
 
 const Button: React.FC<ButtonProps> = ({
   text,
+  Icon,
   variant = "fill",
   loading = false,
+  className,
   ...props
 }) => {
   let cn = styles.buttonFill;
@@ -25,7 +29,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={cn}
+      className={cn+" "+className}
       {...props}
       disabled={loading}
       style={
@@ -34,11 +38,14 @@ const Button: React.FC<ButtonProps> = ({
           : undefined
       }
     >
-      {
-        loading ?
+      {loading ? (
         <span className={styles.buttonLoadingSpan}></span>
-        :text
-      }
+      ) : (
+        <>
+          <span>{Icon && <Icon />}</span>
+          {text}
+        </>
+      )}
     </button>
   );
 };
