@@ -1,0 +1,44 @@
+@import "../../styles/config";
+
+.modal {
+    
+    .modalBody {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0,0,0, 0.2);
+
+        .modalBodyInner {
+            width: 500px;
+            background-color: $secondaryColor;
+            border-radius: 16px;
+
+            .modalHeader {
+                position: relative;
+                display: flex;
+                padding: 10px;
+
+                h5 {
+                    margin: 0;
+                    padding: 4px 0;
+                    text-align: center;
+                    width: 100%;
+                    font-size: 22px;
+                }
+
+                .closeButton {
+                    width: 40px;
+                    height: 40px;
+                    position: absolute;
+                    right: 10px;
+                    top: 10px;
+                }
+            }
+        }
+    }
+}
