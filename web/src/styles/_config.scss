@@ -1,5 +1,47 @@
+
+//colors
 $mainColor: #17181a;
 $secondaryColor: #262930;
 $alternativeColor: #0e5bcf;
-
 $textColor: #ffffff;
+
+
+//breakpoints
+$sm: 500px;
+$md: 700px;
+$lg: 1000px;
+$xl: 1200px;
+$xxl: 1400px;
+
+//mixins
+@mixin buttonDefaults {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $textColor;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: "Poppins", sans-serif;
+    cursor: pointer;
+    transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    span {
+      font-size: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+    }
+    .buttonLoadingSpan {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border-top: 2px solid white;
+        border-right: 2px solid white;
+        border-bottom: 2px solid $alternativeColor;
+        border-left: 2px solid $alternativeColor;
+        animation-name: roll;
+        animation-duration: 0.5s;
+        animation-iteration-count: infinite;
+        animation-timing-function: cubic-bezier(0.250, 0.250, 0.750, 0.750);
+      }
+  }
