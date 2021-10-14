@@ -1,0 +1,88 @@
+@import "../../styles/config";
+
+.createButton {
+    font-size: 18px;
+    @media screen and (max-width: $xl){
+        display: none !important;
+    }
+}
+
+.createIconButton {
+    font-size: 30px;
+    border-radius: 50%;
+    width: 54px;
+    height: 54px;
+    @media screen and (min-width: $xl){
+        display: none;
+    }
+}
+
+.creator {
+    padding: 10px;
+
+    .regularField {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+        .nameLabel {
+            width: 30%;
+        }
+    }
+
+    .radioButtons {
+        margin: 10px 0 0 0;
+        width: 100%;
+        display: flex;
+    }
+
+    .accessInfo {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .photo {
+        margin-bottom: 20px;
+        .photoContent {
+            margin: 0 auto;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 2px solid $alternativeColor;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            overflow: hidden;
+
+            img{
+                object-fit: cover;
+            }
+        }
+
+        .photoFallback {
+            margin: 0 auto;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            font-size: 100px;
+            border: 2px solid $alternativeColor;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+    }
+
+    .buttons {
+        display: flex;
+        font-size: 20px;
+
+        .leftButton {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        .rightButton {
+            font-size: 20px;
+        }
+    }
+}
