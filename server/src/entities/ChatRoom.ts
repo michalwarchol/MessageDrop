@@ -23,7 +23,7 @@ export class ChatRoom {
   readonly _id: mongoose.Types.ObjectId;
 
   @Field(() => RoomAccess)
-  @Property({ type: () => RoomAccess })
+  @Property({ type: () => String, enum: RoomAccess })
   access: RoomAccess;
 
   @Field()
