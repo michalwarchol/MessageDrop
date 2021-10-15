@@ -11,18 +11,11 @@ import { User, UserModel } from "../entities/User";
 import { Context } from "../types";
 import { validateCredentials } from "../utils/validateCredentials";
 import { RegisterInput } from "./types/RegisterInput";
+import {FieldError } from "./types/FieldError";
 import bcrypt from "bcrypt";
 import { generateVerificationCode } from "../utils/generateVerificationCode";
 import { VERIFICATION_PREFIX } from "../constants";
 
-@ObjectType()
-class FieldError {
-  @Field()
-  field: string;
-
-  @Field()
-  message: string;
-}
 
 @ObjectType()
 class UserResponse {
