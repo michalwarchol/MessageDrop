@@ -13,6 +13,7 @@ import { UserResolver } from "./resolvers/UserResolver";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import cors from "cors";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import { ChatRoomResolver } from "./resolvers/ChatRoomResolver";
 
 const main = async () => {
   await mongoose.connect(process.env.DB_URL, {
@@ -47,10 +48,7 @@ const main = async () => {
     })
   );
 
-  app.use(
-    "/graphql",
-    graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 1 })
-  );
+  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 1 }));
 
   const s3 = new S3({
     region: process.env.AWS_REGION,
@@ -61,12 +59,15 @@ const main = async () => {
   });
 
   const apolloServer = new ApolloServer({
-    schema: await buildSchema({ resolvers: [UserResolver], validate: false }),
+    schema: await buildSchema({
+      resolvers: [UserResolver, ChatRoomResolver],
+      validate: false,
+    }),
     context: ({ req, res }) => ({
       req,
       res,
       redis,
-      s3
+      s3,
     }),
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
   });
