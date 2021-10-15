@@ -1,0 +1,12 @@
+fragment RegularChatRoom on ChatRoom {
+    _id
+    name
+    description
+    access
+    imageId
+    adminId
+    modIds
+    userIds
+    createdAt
+    updatedAt
+}

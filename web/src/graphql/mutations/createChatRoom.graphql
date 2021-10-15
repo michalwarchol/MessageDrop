@@ -1,0 +1,11 @@
+mutation CreateChatRoom($input: ChatRoomInput!, $image: Upload) {
+  createChatRoom(input: $input, image: $image) {
+    chatRoom {
+      ...RegularChatRoom
+    }
+    errors {
+        field
+        message
+    }
+  }
+}

@@ -14,6 +14,34 @@ export type Scalars = {
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: any;
+};
+
+export type ChatRoom = {
+  __typename?: 'ChatRoom';
+  _id: Scalars['ID'];
+  access: RoomAccess;
+  adminId: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  description: Scalars['String'];
+  imageId?: Maybe<Scalars['String']>;
+  modIds: Array<Scalars['String']>;
+  name: Scalars['String'];
+  updatedAt: Scalars['DateTime'];
+  userIds: Array<Scalars['String']>;
+};
+
+export type ChatRoomInput = {
+  access: RoomAccess;
+  description: Scalars['String'];
+  name: Scalars['String'];
+};
+
+export type ChatRoomResponse = {
+  __typename?: 'ChatRoomResponse';
+  chatRoom?: Maybe<ChatRoom>;
+  errors?: Maybe<Array<FieldError>>;
 };
 
 export type FieldError = {
@@ -24,8 +52,15 @@ export type FieldError = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createChatRoom: ChatRoomResponse;
   login?: Maybe<UserResponse>;
   register: UserResponse;
+};
+
+
+export type MutationCreateChatRoomArgs = {
+  image?: Maybe<Scalars['Upload']>;
+  input: ChatRoomInput;
 };
 
 
@@ -41,6 +76,7 @@ export type MutationRegisterArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  getChatRooms: Array<ChatRoom>;
   getUsers: Array<User>;
   me?: Maybe<User>;
 };
@@ -51,6 +87,13 @@ export type RegisterInput = {
   password: Scalars['String'];
   phone: Scalars['String'];
 };
+
+/** Defines user access to a chat room */
+export enum RoomAccess {
+  Private = 'private',
+  Public = 'public',
+  Restricted = 'restricted'
+}
 
 export type User = {
   __typename?: 'User';
@@ -70,7 +113,17 @@ export type UserResponse = {
   user?: Maybe<User>;
 };
 
+export type RegularChatRoomFragment = { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any };
+
 export type RegularUserFragment = { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any };
+
+export type CreateChatRoomMutationVariables = Exact<{
+  input: ChatRoomInput;
+  image?: Maybe<Scalars['Upload']>;
+}>;
+
+
+export type CreateChatRoomMutation = { __typename?: 'Mutation', createChatRoom: { __typename?: 'ChatRoomResponse', chatRoom?: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
 
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
@@ -95,6 +148,20 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } | null | undefined };
 
+export const RegularChatRoomFragmentDoc = gql`
+    fragment RegularChatRoom on ChatRoom {
+  _id
+  name
+  description
+  access
+  imageId
+  adminId
+  modIds
+  userIds
+  createdAt
+  updatedAt
+}
+    `;
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
   _id
@@ -107,6 +174,46 @@ export const RegularUserFragmentDoc = gql`
   updatedAt
 }
     `;
+export const CreateChatRoomDocument = gql`
+    mutation CreateChatRoom($input: ChatRoomInput!, $image: Upload) {
+  createChatRoom(input: $input, image: $image) {
+    chatRoom {
+      ...RegularChatRoom
+    }
+    errors {
+      field
+      message
+    }
+  }
+}
+    ${RegularChatRoomFragmentDoc}`;
+export type CreateChatRoomMutationFn = Apollo.MutationFunction<CreateChatRoomMutation, CreateChatRoomMutationVariables>;
+
+/**
+ * __useCreateChatRoomMutation__
+ *
+ * To run a mutation, you first call `useCreateChatRoomMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateChatRoomMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createChatRoomMutation, { data, loading, error }] = useCreateChatRoomMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *      image: // value for 'image'
+ *   },
+ * });
+ */
+export function useCreateChatRoomMutation(baseOptions?: Apollo.MutationHookOptions<CreateChatRoomMutation, CreateChatRoomMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateChatRoomMutation, CreateChatRoomMutationVariables>(CreateChatRoomDocument, options);
+      }
+export type CreateChatRoomMutationHookResult = ReturnType<typeof useCreateChatRoomMutation>;
+export type CreateChatRoomMutationResult = Apollo.MutationResult<CreateChatRoomMutation>;
+export type CreateChatRoomMutationOptions = Apollo.BaseMutationOptions<CreateChatRoomMutation, CreateChatRoomMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
