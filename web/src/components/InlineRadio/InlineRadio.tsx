@@ -8,16 +8,16 @@ type RadioProps = InputHTMLAttributes<HTMLInputElement> & {
 
 const InlineRadio: React.FC<RadioProps> = (props) => {
   const [field] = useField(props);
-  console.log(props.value, props.checked)
-  
+
   return (
-    <label htmlFor={props.id} className={props.checked ? styles.inlineRadioFill : styles.inlineRadioOutline}>
-        {props.value}
-      <input
-        type="radio"
-        {...field}
-        {...props}
-      />
+    <label
+      htmlFor={props.id}
+      className={
+        props.checked ? styles.inlineRadioFill : styles.inlineRadioOutline
+      }
+    >
+      {props.value}
+      <input type="radio" {...field} {...props} />
     </label>
   );
 };
