@@ -1,0 +1,3 @@
+query GetChatRoomImage($image:String!){
+	getChatRoomImage(imageId: $image)
+}

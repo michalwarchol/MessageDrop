@@ -76,9 +76,15 @@ export type MutationRegisterArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  getChatRoomImage?: Maybe<Scalars['String']>;
   getChatRooms: Array<ChatRoom>;
   getUsers: Array<User>;
   me?: Maybe<User>;
+};
+
+
+export type QueryGetChatRoomImageArgs = {
+  imageId: Scalars['String'];
 };
 
 export type RegisterInput = {
@@ -142,6 +148,13 @@ export type RegisterMutationVariables = Exact<{
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
+
+export type GetChatRoomImageQueryVariables = Exact<{
+  image: Scalars['String'];
+}>;
+
+
+export type GetChatRoomImageQuery = { __typename?: 'Query', getChatRoomImage?: string | null | undefined };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -298,6 +311,39 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const GetChatRoomImageDocument = gql`
+    query GetChatRoomImage($image: String!) {
+  getChatRoomImage(imageId: $image)
+}
+    `;
+
+/**
+ * __useGetChatRoomImageQuery__
+ *
+ * To run a query within a React component, call `useGetChatRoomImageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChatRoomImageQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChatRoomImageQuery({
+ *   variables: {
+ *      image: // value for 'image'
+ *   },
+ * });
+ */
+export function useGetChatRoomImageQuery(baseOptions: Apollo.QueryHookOptions<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>(GetChatRoomImageDocument, options);
+      }
+export function useGetChatRoomImageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>(GetChatRoomImageDocument, options);
+        }
+export type GetChatRoomImageQueryHookResult = ReturnType<typeof useGetChatRoomImageQuery>;
+export type GetChatRoomImageLazyQueryHookResult = ReturnType<typeof useGetChatRoomImageLazyQuery>;
+export type GetChatRoomImageQueryResult = Apollo.QueryResult<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
