@@ -44,6 +44,12 @@ export type ChatRoomResponse = {
   errors?: Maybe<Array<FieldError>>;
 };
 
+export type ChatRoomWithImage = {
+  __typename?: 'ChatRoomWithImage';
+  chatRoom: ChatRoom;
+  image?: Maybe<Scalars['String']>;
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
@@ -78,6 +84,7 @@ export type Query = {
   __typename?: 'Query';
   getChatRoomImage?: Maybe<Scalars['String']>;
   getChatRooms: Array<ChatRoom>;
+  getCreatorChatRooms: Array<ChatRoomWithImage>;
   getUsers: Array<User>;
   me?: Maybe<User>;
 };
@@ -148,6 +155,11 @@ export type RegisterMutationVariables = Exact<{
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
+
+export type GetCreatorChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCreatorChatRoomsQuery = { __typename?: 'Query', getCreatorChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
 
 export type GetChatRoomImageQueryVariables = Exact<{
   image: Scalars['String'];
@@ -311,6 +323,43 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const GetCreatorChatRoomsDocument = gql`
+    query GetCreatorChatRooms {
+  getCreatorChatRooms {
+    chatRoom {
+      ...RegularChatRoom
+    }
+    image
+  }
+}
+    ${RegularChatRoomFragmentDoc}`;
+
+/**
+ * __useGetCreatorChatRoomsQuery__
+ *
+ * To run a query within a React component, call `useGetCreatorChatRoomsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCreatorChatRoomsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCreatorChatRoomsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetCreatorChatRoomsQuery(baseOptions?: Apollo.QueryHookOptions<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>(GetCreatorChatRoomsDocument, options);
+      }
+export function useGetCreatorChatRoomsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>(GetCreatorChatRoomsDocument, options);
+        }
+export type GetCreatorChatRoomsQueryHookResult = ReturnType<typeof useGetCreatorChatRoomsQuery>;
+export type GetCreatorChatRoomsLazyQueryHookResult = ReturnType<typeof useGetCreatorChatRoomsLazyQuery>;
+export type GetCreatorChatRoomsQueryResult = Apollo.QueryResult<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>;
 export const GetChatRoomImageDocument = gql`
     query GetChatRoomImage($image: String!) {
   getChatRoomImage(imageId: $image)

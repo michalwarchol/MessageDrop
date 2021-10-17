@@ -1,0 +1,8 @@
+query GetCreatorChatRooms {
+  getCreatorChatRooms{
+    chatRoom {
+      ...RegularChatRoom
+    }
+    image
+  }
+}
