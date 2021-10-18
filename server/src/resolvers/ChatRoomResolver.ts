@@ -5,20 +5,17 @@ import {
   Arg,
   Ctx,
   Field,
-  FieldResolver,
   Mutation,
   ObjectType,
   Query,
   Resolver,
-  Root,
   UseMiddleware,
 } from "type-graphql";
-import { ChatRoom, ChatRoomModel } from "../entities/ChatRoom";
+import { ChatRoom, ChatRoomModel, RoomAccess } from "../entities/ChatRoom";
 import { Context } from "../types";
 import { ChatRoomInput } from "./types/ChatRoomInput";
 import { FieldError } from "./types/FieldError";
 import { isAuth } from "../middleware/isAuth";
-import fs from "fs";
 import { Readable } from "stream";
 
 @ObjectType()
@@ -48,9 +45,42 @@ export class ChatRoomResolver {
 
   @Query(() => [ChatRoomWithImage])
   @UseMiddleware(isAuth)
-  async getCreatorChatRooms(@Ctx() context: Context) {
+  async getCreatorChatRooms(
+    @Ctx() context: Context
+  ): Promise<ChatRoomWithImage[]> {
     const chatRooms = await ChatRoomModel.find({
-      adminId: context.req.session.userId,
+      $or: [
+        { adminId: context.req.session.userId },
+        { modIds: { $in: [context.req.session.userId] } },
+        { userIds: { $in: [context.req.session.userId] } },
+      ],
+    });
+
+    let chatRoomsWithImages: ChatRoomWithImage[] = await Promise.all(
+      chatRooms.map(async (elem) => {
+        const image = await this.getChatRoomImage(context, elem.imageId);
+        return {
+          chatRoom: elem as ChatRoom,
+          image,
+        };
+      })
+    );
+
+    return chatRoomsWithImages;
+  }
+
+  @Query(() => [ChatRoomWithImage])
+  async getSuggestedChatRooms(
+    @Ctx() context: Context
+  ): Promise<ChatRoomWithImage[]> {
+    let userId = context.req.session.userId;
+    const chatRooms = await ChatRoomModel.find({
+      $and: [
+        { adminId: { $ne: userId } },
+        { userIds: { $ne: userId } },
+        { modIds: { $ne: userId } },
+        { access: { $ne: RoomAccess.private } },
+      ],
     });
 
     let chatRoomsWithImages: ChatRoomWithImage[] = await Promise.all(
@@ -130,6 +160,20 @@ export class ChatRoomResolver {
     }
 
     return { chatRoom: newChatRoom };
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async joinRoom(
+    @Ctx() { req }: Context,
+    @Arg("roomId", () => String) roomId: string,
+    @Arg("userId", () => String, { nullable: true }) userId?: string
+  ): Promise<boolean> {
+    await ChatRoomModel.findByIdAndUpdate(roomId, {
+      $push: { userIds: userId || req.session.userId },
+    });
+
+    return true;
   }
 
   @Query(() => String, { nullable: true })
