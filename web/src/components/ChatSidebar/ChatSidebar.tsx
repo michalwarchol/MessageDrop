@@ -15,7 +15,6 @@ const ChatSidebar: React.FC = () => {
         <CreateChatButton />
       </div>
       <Divider />
-      <div><p>Your chats</p></div>
       <div className={styles.userRooms}>
         {data?.getCreatorChatRooms.map((elem, index) => (<ChatRoomShortCut chatRoomWithImage={elem} key={index} />))}
       </div>
