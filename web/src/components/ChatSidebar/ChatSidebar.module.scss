@@ -6,6 +6,7 @@
     padding-top: 10px;
     padding-bottom: 10px;
     border-radius: 8px;
+    z-index: 99;
 
     @media screen and (min-width: $md) {
         width: 100px;
