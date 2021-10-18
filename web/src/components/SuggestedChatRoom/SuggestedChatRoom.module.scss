@@ -1,0 +1,55 @@
+@import "../../styles/config";
+
+.suggestedChatRoom {
+    width: 100%;
+    @media screen and (min-width: $xl){
+        width: 40%;
+    }
+    @media screen and (min-width: $xxl){
+        width: 30%;
+    }
+    padding: 10px;
+
+    .imageOrIcon {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+
+        .imageContainer{
+            border-radius: 50%;
+            overflow: hidden;
+            width: 100px;
+            height: 100px;
+            font-size: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            img{
+                object-fit: cover;
+            }
+        }
+    }
+
+    .info {
+        .chatName {
+            font-weight: bold;
+            font-size: 20px;
+            margin: 0;
+            margin-bottom: 10px;
+
+        }
+        .chatDescription {
+            text-align: start;
+            margin: 0;
+            margin-bottom: 10px;
+        }
+
+        .joinButton {
+            font-size: 18px;
+            span {
+                margin-right: 10px;
+            }
+        }
+    }
+
+}
