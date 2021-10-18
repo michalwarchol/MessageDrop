@@ -10,6 +10,7 @@ interface Props {
 }
 
 const ChatRoomShortCut: React.FC<Props> = ({ chatRoomWithImage }) => {
+
   return (
     <div className={styles.chatRoomShortcut}>
       {chatRoomWithImage.image ? (
@@ -32,6 +33,7 @@ const ChatRoomShortCut: React.FC<Props> = ({ chatRoomWithImage }) => {
       <div className={styles.info}>
         <p className={styles.chatName}>{chatRoomWithImage.chatRoom.name}</p>
       </div>
+      <div className={styles.chatRoomLabel}><p>{chatRoomWithImage.chatRoom.name}</p></div>
     </div>
   );
 };
