@@ -5,11 +5,12 @@ import { useIsAuth } from "../../utils/useIsAuth";
 import Navbar from "../../components/Navbar/Navbar";
 import { useMeQuery } from "../../generated/graphql";
 import ChatSidebar from "../../components/ChatSidebar/ChatSidebar";
+import ExploreContent from "../../components/ExploreContent/ExploreContent";
 
 const Home: React.FC = () => {
   useIsAuth();
   const { data } = useMeQuery();
-
+  
   return (
     <Wrapper size="lg">
       <div className={styles.home}>
@@ -24,7 +25,9 @@ const Home: React.FC = () => {
           <Wrapper size="md">
             <div className={styles.content}>
               <ChatSidebar />
-              <div className={styles.contentInner}></div>
+              <div className={styles.contentInner}>
+                <ExploreContent />
+              </div>
             </div>
           </Wrapper>
         </div>

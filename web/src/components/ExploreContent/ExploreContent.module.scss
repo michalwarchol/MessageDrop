@@ -1,0 +1,21 @@
+.exploreContent {
+    margin: 10px;
+
+    .search {
+
+        .formik {
+            display: flex;
+            align-items: center;
+
+            .searchLabel {
+                margin-right: 10px;
+            }
+        }
+    }
+
+    .suggestedChats {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+}
