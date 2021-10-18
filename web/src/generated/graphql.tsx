@@ -59,6 +59,7 @@ export type FieldError = {
 export type Mutation = {
   __typename?: 'Mutation';
   createChatRoom: ChatRoomResponse;
+  joinRoom: Scalars['Boolean'];
   login?: Maybe<UserResponse>;
   register: UserResponse;
 };
@@ -67,6 +68,12 @@ export type Mutation = {
 export type MutationCreateChatRoomArgs = {
   image?: Maybe<Scalars['Upload']>;
   input: ChatRoomInput;
+};
+
+
+export type MutationJoinRoomArgs = {
+  roomId: Scalars['String'];
+  userId?: Maybe<Scalars['String']>;
 };
 
 
@@ -85,6 +92,7 @@ export type Query = {
   getChatRoomImage?: Maybe<Scalars['String']>;
   getChatRooms: Array<ChatRoom>;
   getCreatorChatRooms: Array<ChatRoomWithImage>;
+  getSuggestedChatRooms: Array<ChatRoomWithImage>;
   getUsers: Array<User>;
   me?: Maybe<User>;
 };
@@ -138,6 +146,14 @@ export type CreateChatRoomMutationVariables = Exact<{
 
 export type CreateChatRoomMutation = { __typename?: 'Mutation', createChatRoom: { __typename?: 'ChatRoomResponse', chatRoom?: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
 
+export type JoinRoomMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  userId?: Maybe<Scalars['String']>;
+}>;
+
+
+export type JoinRoomMutation = { __typename?: 'Mutation', joinRoom: boolean };
+
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -167,6 +183,11 @@ export type GetChatRoomImageQueryVariables = Exact<{
 
 
 export type GetChatRoomImageQuery = { __typename?: 'Query', getChatRoomImage?: string | null | undefined };
+
+export type GetSuggestedChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetSuggestedChatRoomsQuery = { __typename?: 'Query', getSuggestedChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -239,6 +260,38 @@ export function useCreateChatRoomMutation(baseOptions?: Apollo.MutationHookOptio
 export type CreateChatRoomMutationHookResult = ReturnType<typeof useCreateChatRoomMutation>;
 export type CreateChatRoomMutationResult = Apollo.MutationResult<CreateChatRoomMutation>;
 export type CreateChatRoomMutationOptions = Apollo.BaseMutationOptions<CreateChatRoomMutation, CreateChatRoomMutationVariables>;
+export const JoinRoomDocument = gql`
+    mutation JoinRoom($roomId: String!, $userId: String) {
+  joinRoom(roomId: $roomId, userId: $userId)
+}
+    `;
+export type JoinRoomMutationFn = Apollo.MutationFunction<JoinRoomMutation, JoinRoomMutationVariables>;
+
+/**
+ * __useJoinRoomMutation__
+ *
+ * To run a mutation, you first call `useJoinRoomMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useJoinRoomMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [joinRoomMutation, { data, loading, error }] = useJoinRoomMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useJoinRoomMutation(baseOptions?: Apollo.MutationHookOptions<JoinRoomMutation, JoinRoomMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<JoinRoomMutation, JoinRoomMutationVariables>(JoinRoomDocument, options);
+      }
+export type JoinRoomMutationHookResult = ReturnType<typeof useJoinRoomMutation>;
+export type JoinRoomMutationResult = Apollo.MutationResult<JoinRoomMutation>;
+export type JoinRoomMutationOptions = Apollo.BaseMutationOptions<JoinRoomMutation, JoinRoomMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
@@ -393,6 +446,43 @@ export function useGetChatRoomImageLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type GetChatRoomImageQueryHookResult = ReturnType<typeof useGetChatRoomImageQuery>;
 export type GetChatRoomImageLazyQueryHookResult = ReturnType<typeof useGetChatRoomImageLazyQuery>;
 export type GetChatRoomImageQueryResult = Apollo.QueryResult<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>;
+export const GetSuggestedChatRoomsDocument = gql`
+    query GetSuggestedChatRooms {
+  getSuggestedChatRooms {
+    chatRoom {
+      ...RegularChatRoom
+    }
+    image
+  }
+}
+    ${RegularChatRoomFragmentDoc}`;
+
+/**
+ * __useGetSuggestedChatRoomsQuery__
+ *
+ * To run a query within a React component, call `useGetSuggestedChatRoomsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetSuggestedChatRoomsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetSuggestedChatRoomsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetSuggestedChatRoomsQuery(baseOptions?: Apollo.QueryHookOptions<GetSuggestedChatRoomsQuery, GetSuggestedChatRoomsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetSuggestedChatRoomsQuery, GetSuggestedChatRoomsQueryVariables>(GetSuggestedChatRoomsDocument, options);
+      }
+export function useGetSuggestedChatRoomsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetSuggestedChatRoomsQuery, GetSuggestedChatRoomsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetSuggestedChatRoomsQuery, GetSuggestedChatRoomsQueryVariables>(GetSuggestedChatRoomsDocument, options);
+        }
+export type GetSuggestedChatRoomsQueryHookResult = ReturnType<typeof useGetSuggestedChatRoomsQuery>;
+export type GetSuggestedChatRoomsLazyQueryHookResult = ReturnType<typeof useGetSuggestedChatRoomsLazyQuery>;
+export type GetSuggestedChatRoomsQueryResult = Apollo.QueryResult<GetSuggestedChatRoomsQuery, GetSuggestedChatRoomsQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {

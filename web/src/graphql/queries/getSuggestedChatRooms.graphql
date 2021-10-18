@@ -1,0 +1,8 @@
+query GetSuggestedChatRooms {
+  getSuggestedChatRooms {
+    chatRoom{
+      ...RegularChatRoom
+    }
+    image
+  }
+}
