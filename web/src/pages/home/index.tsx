@@ -6,6 +6,7 @@ import Navbar from "../../components/Navbar/Navbar";
 import { useMeQuery } from "../../generated/graphql";
 import ChatSidebar from "../../components/ChatSidebar/ChatSidebar";
 import ExploreContent from "../../components/ExploreContent/ExploreContent";
+import { withApollo } from "../../utils/withApollo";
 
 const Home: React.FC = () => {
   useIsAuth();
@@ -35,4 +36,4 @@ const Home: React.FC = () => {
     </Wrapper>
   );
 };
-export default Home;
+export default withApollo()(Home);

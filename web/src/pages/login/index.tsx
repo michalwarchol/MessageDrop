@@ -8,8 +8,9 @@ import Button from "../../components/Button/Button";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { useRouter } from "next/dist/client/router";
 import { useLoginMutation } from "../../generated/graphql";
+import { withApollo } from "../../utils/withApollo";
 
-const login: React.FC = () => {
+const Login: React.FC = () => {
 
   const [login, {loading}] = useLoginMutation();
   const router = useRouter();
@@ -66,4 +67,4 @@ const login: React.FC = () => {
     </div>
   );
 };
-export default login;
+export default withApollo()(Login);

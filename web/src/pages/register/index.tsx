@@ -8,6 +8,7 @@ import Button from "../../components/Button/Button";
 import { useRegisterMutation } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { useRouter } from "next/dist/client/router";
+import { withApollo } from "../../utils/withApollo";
 
 const Register: React.FC = () => {
   const [register, { loading }] = useRegisterMutation();
@@ -94,4 +95,4 @@ const Register: React.FC = () => {
     </div>
   );
 };
-export default Register;
+export default withApollo()(Register);
