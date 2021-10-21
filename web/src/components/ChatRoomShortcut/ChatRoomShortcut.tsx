@@ -4,6 +4,7 @@ import { ChatRoomWithImage } from "../../generated/graphql";
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import { BsFillChatDotsFill } from "react-icons/bs";
+import NextLink from "next/link";
 
 interface Props {
   chatRoomWithImage: ChatRoomWithImage;
@@ -12,6 +13,7 @@ interface Props {
 const ChatRoomShortCut: React.FC<Props> = ({ chatRoomWithImage }) => {
 
   return (
+    <NextLink href={"/chatroom/"+chatRoomWithImage.chatRoom._id}>
     <div className={styles.chatRoomShortcut}>
       {chatRoomWithImage.image ? (
         <div className={styles.imageOrIcon}>
@@ -35,6 +37,7 @@ const ChatRoomShortCut: React.FC<Props> = ({ chatRoomWithImage }) => {
       </div>
       <div className={styles.chatRoomLabel}><p>{chatRoomWithImage.chatRoom.name}</p></div>
     </div>
+    </NextLink>
   );
 };
 export default ChatRoomShortCut;
