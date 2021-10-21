@@ -94,12 +94,18 @@ export type Query = {
   getCreatorChatRooms: Array<ChatRoomWithImage>;
   getSuggestedChatRooms: Array<ChatRoomWithImage>;
   getUsers: Array<User>;
+  isChatMember: Scalars['Boolean'];
   me?: Maybe<User>;
 };
 
 
 export type QueryGetChatRoomImageArgs = {
   imageId: Scalars['String'];
+};
+
+
+export type QueryIsChatMemberArgs = {
+  roomId: Scalars['String'];
 };
 
 export type RegisterInput = {
@@ -188,6 +194,13 @@ export type GetSuggestedChatRoomsQueryVariables = Exact<{ [key: string]: never; 
 
 
 export type GetSuggestedChatRoomsQuery = { __typename?: 'Query', getSuggestedChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
+
+export type IsChatMemberQueryVariables = Exact<{
+  roomId: Scalars['String'];
+}>;
+
+
+export type IsChatMemberQuery = { __typename?: 'Query', isChatMember: boolean };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -483,6 +496,39 @@ export function useGetSuggestedChatRoomsLazyQuery(baseOptions?: Apollo.LazyQuery
 export type GetSuggestedChatRoomsQueryHookResult = ReturnType<typeof useGetSuggestedChatRoomsQuery>;
 export type GetSuggestedChatRoomsLazyQueryHookResult = ReturnType<typeof useGetSuggestedChatRoomsLazyQuery>;
 export type GetSuggestedChatRoomsQueryResult = Apollo.QueryResult<GetSuggestedChatRoomsQuery, GetSuggestedChatRoomsQueryVariables>;
+export const IsChatMemberDocument = gql`
+    query IsChatMember($roomId: String!) {
+  isChatMember(roomId: $roomId)
+}
+    `;
+
+/**
+ * __useIsChatMemberQuery__
+ *
+ * To run a query within a React component, call `useIsChatMemberQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIsChatMemberQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIsChatMemberQuery({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useIsChatMemberQuery(baseOptions: Apollo.QueryHookOptions<IsChatMemberQuery, IsChatMemberQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IsChatMemberQuery, IsChatMemberQueryVariables>(IsChatMemberDocument, options);
+      }
+export function useIsChatMemberLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IsChatMemberQuery, IsChatMemberQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IsChatMemberQuery, IsChatMemberQueryVariables>(IsChatMemberDocument, options);
+        }
+export type IsChatMemberQueryHookResult = ReturnType<typeof useIsChatMemberQuery>;
+export type IsChatMemberLazyQueryHookResult = ReturnType<typeof useIsChatMemberLazyQuery>;
+export type IsChatMemberQueryResult = Apollo.QueryResult<IsChatMemberQuery, IsChatMemberQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
