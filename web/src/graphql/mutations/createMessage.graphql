@@ -1,0 +1,5 @@
+mutation CreateMessage($roomId: String!, $text: String, $media: Upload, $file: Upload){
+    createMessage(roomId: $roomId, text: $text, media: $media, file: $file) {
+    ...RegularMessage
+    }
+}

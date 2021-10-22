@@ -1,0 +1,14 @@
+fragment RegularMessage on Message {
+    _id
+    text
+    roomId
+    creatorId
+    mediaId
+    fileId
+    messageReactions {
+        reaction
+        value
+    }
+    createdAt
+    updatedAt
+}
