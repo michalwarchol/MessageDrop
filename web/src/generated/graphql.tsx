@@ -56,9 +56,29 @@ export type FieldError = {
   message: Scalars['String'];
 };
 
+export type Message = {
+  __typename?: 'Message';
+  _id: Scalars['ID'];
+  createdAt: Scalars['DateTime'];
+  creatorId: Scalars['String'];
+  fileId?: Maybe<Scalars['String']>;
+  mediaId?: Maybe<Scalars['String']>;
+  messageReactions: Array<MessageReactions>;
+  roomId: Scalars['String'];
+  text?: Maybe<Scalars['String']>;
+  updatedAt: Scalars['DateTime'];
+};
+
+export type MessageReactions = {
+  __typename?: 'MessageReactions';
+  reaction: Scalars['String'];
+  value: Scalars['Int'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createChatRoom: ChatRoomResponse;
+  createMessage: Message;
   joinRoom: Scalars['Boolean'];
   login?: Maybe<UserResponse>;
   register: UserResponse;
@@ -68,6 +88,14 @@ export type Mutation = {
 export type MutationCreateChatRoomArgs = {
   image?: Maybe<Scalars['Upload']>;
   input: ChatRoomInput;
+};
+
+
+export type MutationCreateMessageArgs = {
+  file?: Maybe<Scalars['Upload']>;
+  media?: Maybe<Scalars['Upload']>;
+  roomId: Scalars['String'];
+  text?: Maybe<Scalars['String']>;
 };
 
 
@@ -89,9 +117,10 @@ export type MutationRegisterArgs = {
 
 export type Query = {
   __typename?: 'Query';
-  getChatRoomImage?: Maybe<Scalars['String']>;
+  getChatRoomById: ChatRoomWithImage;
   getChatRooms: Array<ChatRoom>;
   getCreatorChatRooms: Array<ChatRoomWithImage>;
+  getMessages: Array<Message>;
   getSuggestedChatRooms: Array<ChatRoomWithImage>;
   getUsers: Array<User>;
   isChatMember: Scalars['Boolean'];
@@ -99,8 +128,8 @@ export type Query = {
 };
 
 
-export type QueryGetChatRoomImageArgs = {
-  imageId: Scalars['String'];
+export type QueryGetChatRoomByIdArgs = {
+  roomId: Scalars['String'];
 };
 
 
@@ -142,6 +171,8 @@ export type UserResponse = {
 
 export type RegularChatRoomFragment = { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any };
 
+export type RegularMessageFragment = { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, fileId?: string | null | undefined, createdAt: any, updatedAt: any, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> };
+
 export type RegularUserFragment = { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any };
 
 export type CreateChatRoomMutationVariables = Exact<{
@@ -151,6 +182,16 @@ export type CreateChatRoomMutationVariables = Exact<{
 
 
 export type CreateChatRoomMutation = { __typename?: 'Mutation', createChatRoom: { __typename?: 'ChatRoomResponse', chatRoom?: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
+
+export type CreateMessageMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  text?: Maybe<Scalars['String']>;
+  media?: Maybe<Scalars['Upload']>;
+  file?: Maybe<Scalars['Upload']>;
+}>;
+
+
+export type CreateMessageMutation = { __typename?: 'Mutation', createMessage: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, fileId?: string | null | undefined, createdAt: any, updatedAt: any, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } };
 
 export type JoinRoomMutationVariables = Exact<{
   roomId: Scalars['String'];
@@ -183,12 +224,12 @@ export type GetCreatorChatRoomsQueryVariables = Exact<{ [key: string]: never; }>
 
 export type GetCreatorChatRoomsQuery = { __typename?: 'Query', getCreatorChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
 
-export type GetChatRoomImageQueryVariables = Exact<{
-  image: Scalars['String'];
+export type GetChatRoomByIdQueryVariables = Exact<{
+  roomId: Scalars['String'];
 }>;
 
 
-export type GetChatRoomImageQuery = { __typename?: 'Query', getChatRoomImage?: string | null | undefined };
+export type GetChatRoomByIdQuery = { __typename?: 'Query', getChatRoomById: { __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } } };
 
 export type GetSuggestedChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -217,6 +258,22 @@ export const RegularChatRoomFragmentDoc = gql`
   adminId
   modIds
   userIds
+  createdAt
+  updatedAt
+}
+    `;
+export const RegularMessageFragmentDoc = gql`
+    fragment RegularMessage on Message {
+  _id
+  text
+  roomId
+  creatorId
+  mediaId
+  fileId
+  messageReactions {
+    reaction
+    value
+  }
   createdAt
   updatedAt
 }
@@ -273,6 +330,42 @@ export function useCreateChatRoomMutation(baseOptions?: Apollo.MutationHookOptio
 export type CreateChatRoomMutationHookResult = ReturnType<typeof useCreateChatRoomMutation>;
 export type CreateChatRoomMutationResult = Apollo.MutationResult<CreateChatRoomMutation>;
 export type CreateChatRoomMutationOptions = Apollo.BaseMutationOptions<CreateChatRoomMutation, CreateChatRoomMutationVariables>;
+export const CreateMessageDocument = gql`
+    mutation CreateMessage($roomId: String!, $text: String, $media: Upload, $file: Upload) {
+  createMessage(roomId: $roomId, text: $text, media: $media, file: $file) {
+    ...RegularMessage
+  }
+}
+    ${RegularMessageFragmentDoc}`;
+export type CreateMessageMutationFn = Apollo.MutationFunction<CreateMessageMutation, CreateMessageMutationVariables>;
+
+/**
+ * __useCreateMessageMutation__
+ *
+ * To run a mutation, you first call `useCreateMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createMessageMutation, { data, loading, error }] = useCreateMessageMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      text: // value for 'text'
+ *      media: // value for 'media'
+ *      file: // value for 'file'
+ *   },
+ * });
+ */
+export function useCreateMessageMutation(baseOptions?: Apollo.MutationHookOptions<CreateMessageMutation, CreateMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateMessageMutation, CreateMessageMutationVariables>(CreateMessageDocument, options);
+      }
+export type CreateMessageMutationHookResult = ReturnType<typeof useCreateMessageMutation>;
+export type CreateMessageMutationResult = Apollo.MutationResult<CreateMessageMutation>;
+export type CreateMessageMutationOptions = Apollo.BaseMutationOptions<CreateMessageMutation, CreateMessageMutationVariables>;
 export const JoinRoomDocument = gql`
     mutation JoinRoom($roomId: String!, $userId: String) {
   joinRoom(roomId: $roomId, userId: $userId)
@@ -426,39 +519,44 @@ export function useGetCreatorChatRoomsLazyQuery(baseOptions?: Apollo.LazyQueryHo
 export type GetCreatorChatRoomsQueryHookResult = ReturnType<typeof useGetCreatorChatRoomsQuery>;
 export type GetCreatorChatRoomsLazyQueryHookResult = ReturnType<typeof useGetCreatorChatRoomsLazyQuery>;
 export type GetCreatorChatRoomsQueryResult = Apollo.QueryResult<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>;
-export const GetChatRoomImageDocument = gql`
-    query GetChatRoomImage($image: String!) {
-  getChatRoomImage(imageId: $image)
+export const GetChatRoomByIdDocument = gql`
+    query GetChatRoomById($roomId: String!) {
+  getChatRoomById(roomId: $roomId) {
+    chatRoom {
+      ...RegularChatRoom
+    }
+    image
+  }
 }
-    `;
+    ${RegularChatRoomFragmentDoc}`;
 
 /**
- * __useGetChatRoomImageQuery__
+ * __useGetChatRoomByIdQuery__
  *
- * To run a query within a React component, call `useGetChatRoomImageQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetChatRoomImageQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetChatRoomByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChatRoomByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetChatRoomImageQuery({
+ * const { data, loading, error } = useGetChatRoomByIdQuery({
  *   variables: {
- *      image: // value for 'image'
+ *      roomId: // value for 'roomId'
  *   },
  * });
  */
-export function useGetChatRoomImageQuery(baseOptions: Apollo.QueryHookOptions<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>) {
+export function useGetChatRoomByIdQuery(baseOptions: Apollo.QueryHookOptions<GetChatRoomByIdQuery, GetChatRoomByIdQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>(GetChatRoomImageDocument, options);
+        return Apollo.useQuery<GetChatRoomByIdQuery, GetChatRoomByIdQueryVariables>(GetChatRoomByIdDocument, options);
       }
-export function useGetChatRoomImageLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>) {
+export function useGetChatRoomByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatRoomByIdQuery, GetChatRoomByIdQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>(GetChatRoomImageDocument, options);
+          return Apollo.useLazyQuery<GetChatRoomByIdQuery, GetChatRoomByIdQueryVariables>(GetChatRoomByIdDocument, options);
         }
-export type GetChatRoomImageQueryHookResult = ReturnType<typeof useGetChatRoomImageQuery>;
-export type GetChatRoomImageLazyQueryHookResult = ReturnType<typeof useGetChatRoomImageLazyQuery>;
-export type GetChatRoomImageQueryResult = Apollo.QueryResult<GetChatRoomImageQuery, GetChatRoomImageQueryVariables>;
+export type GetChatRoomByIdQueryHookResult = ReturnType<typeof useGetChatRoomByIdQuery>;
+export type GetChatRoomByIdLazyQueryHookResult = ReturnType<typeof useGetChatRoomByIdLazyQuery>;
+export type GetChatRoomByIdQueryResult = Apollo.QueryResult<GetChatRoomByIdQuery, GetChatRoomByIdQueryVariables>;
 export const GetSuggestedChatRoomsDocument = gql`
     query GetSuggestedChatRooms {
   getSuggestedChatRooms {

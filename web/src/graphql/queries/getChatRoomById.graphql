@@ -1,0 +1,8 @@
+query GetChatRoomById($roomId: String!) {
+    	getChatRoomById(roomId: $roomId){
+            chatRoom {
+                ...RegularChatRoom
+            }
+            image
+        }
+}

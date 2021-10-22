@@ -1,4 +1,4 @@
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 } from "uuid";
 import { FileUpload, GraphQLUpload } from "graphql-upload";
 import {
@@ -16,7 +16,8 @@ import { Context } from "../types";
 import { ChatRoomInput } from "./types/ChatRoomInput";
 import { FieldError } from "./types/FieldError";
 import { isAuth } from "../middleware/isAuth";
-import { Readable } from "stream";
+import { getFile } from "../utils/getFile";
+import { createFileBuffer } from "../utils/createFileBuffer";
 
 @ObjectType()
 class ChatRoomResponse {
@@ -43,22 +44,39 @@ export class ChatRoomResolver {
     return ChatRoomModel.find();
   }
 
+  @Query(()=> ChatRoomWithImage)
+  async getChatRoomById(
+    @Ctx() {s3}: Context,
+    @Arg("roomId", ()=>String) roomId: string
+  ):Promise<ChatRoomWithImage|null>{
+    const chatRoom = await ChatRoomModel.findById(roomId);
+    if(!chatRoom){
+      return null;
+    }
+
+    const image = await getFile(s3, chatRoom.imageId);
+    return {
+      chatRoom,
+      image
+    }
+  }
+
   @Query(() => [ChatRoomWithImage])
   @UseMiddleware(isAuth)
   async getCreatorChatRooms(
-    @Ctx() context: Context
+    @Ctx() {s3, req}: Context
   ): Promise<ChatRoomWithImage[]> {
     const chatRooms = await ChatRoomModel.find({
       $or: [
-        { adminId: context.req.session.userId },
-        { modIds: { $in: [context.req.session.userId] } },
-        { userIds: { $in: [context.req.session.userId] } },
+        { adminId: req.session.userId },
+        { modIds: { $in: [req.session.userId] } },
+        { userIds: { $in: [req.session.userId] } },
       ],
     });
 
     let chatRoomsWithImages: ChatRoomWithImage[] = await Promise.all(
       chatRooms.map(async (elem) => {
-        const image = await this.getChatRoomImage(context, elem.imageId);
+        const image = await getFile(s3, elem.imageId);
         return {
           chatRoom: elem as ChatRoom,
           image,
@@ -69,11 +87,35 @@ export class ChatRoomResolver {
     return chatRoomsWithImages;
   }
 
+  @Query(()=>Boolean)
+  async isChatMember(
+    @Ctx(){req}: Context,
+    @Arg("roomId", ()=>String) roomId: string
+  ){
+    const chatRoom = await ChatRoomModel.findById(roomId);
+
+    if (!chatRoom) {
+      return false;
+    }
+    if (chatRoom.adminId == req.session.userId) {
+      return true;
+    }
+  
+    if (chatRoom.modIds.indexOf(req.session.userId) != -1) {
+      return true;
+    }
+  
+    if (chatRoom.userIds.indexOf(req.session.userId) != -1) {
+      return true;
+    }
+    return false;
+  }
+
   @Query(() => [ChatRoomWithImage])
   async getSuggestedChatRooms(
-    @Ctx() context: Context
+    @Ctx() {s3, req}: Context
   ): Promise<ChatRoomWithImage[]> {
-    let userId = context.req.session.userId;
+    let userId = req.session.userId;
     const chatRooms = await ChatRoomModel.find({
       $and: [
         { adminId: { $ne: userId } },
@@ -85,7 +127,7 @@ export class ChatRoomResolver {
 
     let chatRoomsWithImages: ChatRoomWithImage[] = await Promise.all(
       chatRooms.map(async (elem) => {
-        const image = await this.getChatRoomImage(context, elem.imageId);
+        const image = await getFile(s3, elem.imageId);
         return {
           chatRoom: elem as ChatRoom,
           image,
@@ -119,15 +161,7 @@ export class ChatRoomResolver {
       await newChatRoom.save();
 
       if (image && imageKey) {
-        const buffer: Buffer = await new Promise((resolve, reject) => {
-          let chunks: any[] = [];
-          let streamReader = image.createReadStream();
-          streamReader.on("data", (chunk) => chunks.push(chunk as Buffer));
-          streamReader.once("end", () => resolve(Buffer.concat(chunks)));
-          streamReader.on("error", (err) =>
-            reject(`error converting stream - ${err}`)
-          );
-        });
+        const buffer: Buffer = await createFileBuffer(image);
         await s3.send(
           new PutObjectCommand({
             Bucket: process.env.AWS_BUCKET_NAME,
@@ -174,33 +208,5 @@ export class ChatRoomResolver {
     });
 
     return true;
-  }
-
-  @Query(() => String, { nullable: true })
-  async getChatRoomImage(
-    @Ctx() { s3 }: Context,
-    @Arg("imageId", () => String) imageId: string
-  ): Promise<string | null> {
-    if (imageId == null) {
-      return null;
-    }
-
-    const image = await s3.send(
-      new GetObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: imageId,
-      })
-    );
-    const buffer: Buffer = await new Promise((resolve, reject) => {
-      let readableStream = image?.Body as Readable;
-      let chunks: any[] = [];
-      readableStream.on("data", (chunk) => chunks.push(chunk));
-      readableStream.once("end", () => resolve(Buffer.concat(chunks)));
-      readableStream.on("error", (err) =>
-        reject(`error converting stream - ${err}`)
-      );
-    });
-
-    return buffer.toString("base64");
   }
 }
