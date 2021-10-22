@@ -14,6 +14,7 @@ import { COOKIE_NAME, __prod__ } from "./constants";
 import cors from "cors";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { ChatRoomResolver } from "./resolvers/ChatRoomResolver";
+import { MessageResolver } from "./resolvers/MessageResolver";
 
 const main = async () => {
   await mongoose.connect(process.env.DB_URL, {
@@ -60,7 +61,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, ChatRoomResolver],
+      resolvers: [UserResolver, ChatRoomResolver, MessageResolver],
       validate: false,
     }),
     context: ({ req, res }) => ({
