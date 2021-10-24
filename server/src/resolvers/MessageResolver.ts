@@ -4,8 +4,9 @@ import {
   Arg,
   Ctx,
   Field,
-  InputType,
+  Int,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
   UseMiddleware,
@@ -17,11 +18,36 @@ import { isRoomMember } from "../middleware/isRoomMember";
 import { Context } from "../types";
 import { createFileBuffer } from "../utils/createFileBuffer";
 
+@ObjectType()
+class PaginatedMessages {
+  @Field(()=>[Message])
+  messages: Message[]
+
+  @Field(()=>Boolean)
+  hasMore: boolean;
+}
+
 @Resolver(Message)
 export class MessageResolver {
-  @Query(() => [Message])
-  async getMessages(): Promise<Message[]> {
-    return MessageModel.find({});
+  @Query(() => PaginatedMessages)
+  async getRoomMessages(
+    @Arg("roomId", () => String) roomId: string,
+    @Arg("limit", () => Int) limit: number,
+    @Arg("skip", () => Int, { nullable: true }) skip?: number
+  ): Promise<PaginatedMessages> {
+
+    const realLimit = limit + 1;
+
+    const messages = await MessageModel.find({ roomId }, null, {
+      limit: realLimit,
+      skip: skip || 0,
+      sort: { createdAt: "desc" },
+    });
+
+    return {
+      messages: messages.slice(0, limit).reverse(),
+      hasMore: messages.length === realLimit
+    }
   }
 
   @Mutation(() => Message)
@@ -29,7 +55,7 @@ export class MessageResolver {
   async createMessage(
     @Ctx() { req, s3 }: Context,
     @Arg("roomId", () => String) roomId: string,
-    @Arg("text", ()=> String, {nullable: true}) text: string,
+    @Arg("text", () => String, { nullable: true }) text: string,
     @Arg("media", () => GraphQLUpload, { nullable: true }) media?: FileUpload,
     @Arg("file", () => GraphQLUpload, { nullable: true }) file?: FileUpload
   ): Promise<Message> {
