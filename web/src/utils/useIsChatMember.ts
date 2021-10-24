@@ -7,7 +7,7 @@ export const useIsChatMember = (roomId: string) => {
     const router = useRouter();
     useEffect(()=>{
         if(!data?.isChatMember && !loading){
-            router.back();
+            router.replace("/login?next=" + router.pathname);
         }
-    }, [data, loading])
+    }, [data, loading, router])
 }
