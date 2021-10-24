@@ -115,12 +115,18 @@ export type MutationRegisterArgs = {
   registerInput: RegisterInput;
 };
 
+export type PaginatedMessages = {
+  __typename?: 'PaginatedMessages';
+  hasMore: Scalars['Boolean'];
+  messages: Array<Message>;
+};
+
 export type Query = {
   __typename?: 'Query';
   getChatRoomById: ChatRoomWithImage;
   getChatRooms: Array<ChatRoom>;
   getCreatorChatRooms: Array<ChatRoomWithImage>;
-  getMessages: Array<Message>;
+  getRoomMessages: PaginatedMessages;
   getSuggestedChatRooms: Array<ChatRoomWithImage>;
   getUsers: Array<User>;
   isChatMember: Scalars['Boolean'];
@@ -130,6 +136,13 @@ export type Query = {
 
 export type QueryGetChatRoomByIdArgs = {
   roomId: Scalars['String'];
+};
+
+
+export type QueryGetRoomMessagesArgs = {
+  limit: Scalars['Int'];
+  roomId: Scalars['String'];
+  skip?: Maybe<Scalars['Int']>;
 };
 
 
@@ -230,6 +243,15 @@ export type GetChatRoomByIdQueryVariables = Exact<{
 
 
 export type GetChatRoomByIdQuery = { __typename?: 'Query', getChatRoomById: { __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } } };
+
+export type GetRoomMessagesQueryVariables = Exact<{
+  roomId: Scalars['String'];
+  limit: Scalars['Int'];
+  skip?: Maybe<Scalars['Int']>;
+}>;
+
+
+export type GetRoomMessagesQuery = { __typename?: 'Query', getRoomMessages: { __typename?: 'PaginatedMessages', hasMore: boolean, messages: Array<{ __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, fileId?: string | null | undefined, createdAt: any, updatedAt: any, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> }> } };
 
 export type GetSuggestedChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -557,6 +579,46 @@ export function useGetChatRoomByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetChatRoomByIdQueryHookResult = ReturnType<typeof useGetChatRoomByIdQuery>;
 export type GetChatRoomByIdLazyQueryHookResult = ReturnType<typeof useGetChatRoomByIdLazyQuery>;
 export type GetChatRoomByIdQueryResult = Apollo.QueryResult<GetChatRoomByIdQuery, GetChatRoomByIdQueryVariables>;
+export const GetRoomMessagesDocument = gql`
+    query GetRoomMessages($roomId: String!, $limit: Int!, $skip: Int) {
+  getRoomMessages(roomId: $roomId, limit: $limit, skip: $skip) {
+    hasMore
+    messages {
+      ...RegularMessage
+    }
+  }
+}
+    ${RegularMessageFragmentDoc}`;
+
+/**
+ * __useGetRoomMessagesQuery__
+ *
+ * To run a query within a React component, call `useGetRoomMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetRoomMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetRoomMessagesQuery({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      limit: // value for 'limit'
+ *      skip: // value for 'skip'
+ *   },
+ * });
+ */
+export function useGetRoomMessagesQuery(baseOptions: Apollo.QueryHookOptions<GetRoomMessagesQuery, GetRoomMessagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetRoomMessagesQuery, GetRoomMessagesQueryVariables>(GetRoomMessagesDocument, options);
+      }
+export function useGetRoomMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetRoomMessagesQuery, GetRoomMessagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetRoomMessagesQuery, GetRoomMessagesQueryVariables>(GetRoomMessagesDocument, options);
+        }
+export type GetRoomMessagesQueryHookResult = ReturnType<typeof useGetRoomMessagesQuery>;
+export type GetRoomMessagesLazyQueryHookResult = ReturnType<typeof useGetRoomMessagesLazyQuery>;
+export type GetRoomMessagesQueryResult = Apollo.QueryResult<GetRoomMessagesQuery, GetRoomMessagesQueryVariables>;
 export const GetSuggestedChatRoomsDocument = gql`
     query GetSuggestedChatRooms {
   getSuggestedChatRooms {
