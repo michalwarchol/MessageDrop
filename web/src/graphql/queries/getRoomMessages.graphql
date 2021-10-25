@@ -2,7 +2,11 @@ query GetRoomMessages($roomId: String!, $limit: Int!, $skip: Int) {
     getRoomMessages(roomId: $roomId, limit: $limit, skip: $skip){
         hasMore,
         messages {
+            message {
             ...RegularMessage
+            }
+            media
+            file
         }
     }
 }

@@ -4,7 +4,11 @@ fragment RegularMessage on Message {
     roomId
     creatorId
     mediaId
-    fileId
+    fileData {
+        fileId
+        filename
+        mimeType
+    }
     messageReactions {
         reaction
         value
