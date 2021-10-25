@@ -16,6 +16,21 @@ export class MessageReactions {
 }
 
 @ObjectType()
+export class FileData {
+  @Field()
+  @Property({type: () => String})
+  fileId: string;
+
+  @Field()
+  @Property({type: () => String})
+  filename: string;
+
+  @Field()
+  @Property({type: () => String})
+  mimeType: string;
+}
+
+@ObjectType()
 export class Message {
   @Field(() => GraphQLID)
   readonly _id: mongoose.Types.ObjectId;
@@ -37,8 +52,8 @@ export class Message {
   mediaId: string;
 
   @Field({ nullable: true })
-  @Property({ type: () => String })
-  fileId: string;
+  @Property({ type: () => FileData })
+  fileData: FileData;
 
   @Field(() => [MessageReactions])
   @Property({ type: () => [MessageReactions], default: [] })

@@ -12,18 +12,31 @@ import {
   UseMiddleware,
 } from "type-graphql";
 import { v4 } from "uuid";
-import { Message, MessageModel } from "../entities/Message";
+import { FileData, Message, MessageModel } from "../entities/Message";
 import { isAuth } from "../middleware/isAuth";
 import { isRoomMember } from "../middleware/isRoomMember";
 import { Context } from "../types";
 import { createFileBuffer } from "../utils/createFileBuffer";
+import { getFile } from "../utils/getFile";
+
+@ObjectType()
+class MessageWithMedia {
+  @Field(() => Message)
+  message: Message;
+
+  @Field(() => String, { nullable: true })
+  media: string | null;
+
+  @Field(() => String, { nullable: true })
+  file: string | null;
+}
 
 @ObjectType()
 class PaginatedMessages {
-  @Field(()=>[Message])
-  messages: Message[]
+  @Field(() => [MessageWithMedia])
+  messages: MessageWithMedia[];
 
-  @Field(()=>Boolean)
+  @Field(() => Boolean)
   hasMore: boolean;
 }
 
@@ -31,11 +44,11 @@ class PaginatedMessages {
 export class MessageResolver {
   @Query(() => PaginatedMessages)
   async getRoomMessages(
+    @Ctx() { s3 }: Context,
     @Arg("roomId", () => String) roomId: string,
     @Arg("limit", () => Int) limit: number,
     @Arg("skip", () => Int, { nullable: true }) skip?: number
   ): Promise<PaginatedMessages> {
-
     const realLimit = limit + 1;
 
     const messages = await MessageModel.find({ roomId }, null, {
@@ -44,10 +57,25 @@ export class MessageResolver {
       sort: { createdAt: "desc" },
     });
 
+    const messagesWithMedia: MessageWithMedia[] = await Promise.all(
+      messages.map(async (elem) => {
+        let media = await getFile(s3, elem.mediaId);
+        let file = null;
+        if (elem.fileData) {
+          file = await getFile(s3, elem.fileData.fileId);
+        }
+        return {
+          message: elem,
+          media,
+          file,
+        };
+      })
+    );
+
     return {
-      messages: messages.slice(0, limit).reverse(),
-      hasMore: messages.length === realLimit
-    }
+      messages: messagesWithMedia.slice(0, realLimit).reverse(),
+      hasMore: messages.length === realLimit,
+    };
   }
 
   @Mutation(() => Message)
@@ -68,7 +96,6 @@ export class MessageResolver {
     if (file) {
       fileKey = v4();
     }
-
     let newMessage;
     try {
       newMessage = new MessageModel({
@@ -76,7 +103,13 @@ export class MessageResolver {
         text,
         creatorId: req.session.userId,
         mediaId: mediaKey,
-        fileId: fileKey,
+        fileData: file != null
+          ? {
+              fileId: fileKey,
+              filename: file.filename,
+              mimeType: file.mimetype,
+            } as FileData
+          : null,
       });
       await newMessage.save();
 
