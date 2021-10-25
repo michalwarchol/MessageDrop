@@ -15,6 +15,7 @@ import {FieldError } from "./types/FieldError";
 import bcrypt from "bcrypt";
 import { generateVerificationCode } from "../utils/generateVerificationCode";
 import { VERIFICATION_PREFIX } from "../constants";
+import { getFile } from "../utils/getFile";
 
 
 @ObjectType()
@@ -24,6 +25,15 @@ class UserResponse {
 
   @Field(() => User, { nullable: true })
   user?: User;
+}
+
+@ObjectType()
+class UserWithAvatar {
+  @Field(()=>User)
+  user: User;
+
+  @Field(()=>String, {nullable: true})
+  avatar?: string;
 }
 
 @Resolver(() => User)
@@ -40,6 +50,22 @@ export class UserResolver {
     }
     const user = (await UserModel.findById(req.session.userId)) as User;
     return user;
+  }
+
+  @Query(()=>UserWithAvatar)
+  async getUserById(
+    @Ctx() {s3}: Context,
+    @Arg("userId", ()=>String) userId: string
+  ){
+    const user = await UserModel.findOne({_id: userId});
+    let avatar = null;
+    if(user?.avatarId){
+      avatar = getFile(s3, user.avatarId);
+    }
+    return {
+      user,
+      avatar
+    }
   }
 
   @Mutation(() => UserResponse)

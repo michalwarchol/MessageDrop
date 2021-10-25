@@ -1,0 +1,8 @@
+query GetUserById($userId: String!) {
+  getUserById(userId: $userId) {
+    user {
+      ...RegularUser
+    }
+    avatar
+  }
+}

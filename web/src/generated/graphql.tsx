@@ -56,12 +56,19 @@ export type FieldError = {
   message: Scalars['String'];
 };
 
+export type FileData = {
+  __typename?: 'FileData';
+  fileId: Scalars['String'];
+  filename: Scalars['String'];
+  mimeType: Scalars['String'];
+};
+
 export type Message = {
   __typename?: 'Message';
   _id: Scalars['ID'];
   createdAt: Scalars['DateTime'];
   creatorId: Scalars['String'];
-  fileId?: Maybe<Scalars['String']>;
+  fileData?: Maybe<FileData>;
   mediaId?: Maybe<Scalars['String']>;
   messageReactions: Array<MessageReactions>;
   roomId: Scalars['String'];
@@ -73,6 +80,13 @@ export type MessageReactions = {
   __typename?: 'MessageReactions';
   reaction: Scalars['String'];
   value: Scalars['Int'];
+};
+
+export type MessageWithMedia = {
+  __typename?: 'MessageWithMedia';
+  file?: Maybe<Scalars['String']>;
+  media?: Maybe<Scalars['String']>;
+  message: Message;
 };
 
 export type Mutation = {
@@ -118,7 +132,7 @@ export type MutationRegisterArgs = {
 export type PaginatedMessages = {
   __typename?: 'PaginatedMessages';
   hasMore: Scalars['Boolean'];
-  messages: Array<Message>;
+  messages: Array<MessageWithMedia>;
 };
 
 export type Query = {
@@ -128,6 +142,7 @@ export type Query = {
   getCreatorChatRooms: Array<ChatRoomWithImage>;
   getRoomMessages: PaginatedMessages;
   getSuggestedChatRooms: Array<ChatRoomWithImage>;
+  getUserById: UserWithAvatar;
   getUsers: Array<User>;
   isChatMember: Scalars['Boolean'];
   me?: Maybe<User>;
@@ -143,6 +158,11 @@ export type QueryGetRoomMessagesArgs = {
   limit: Scalars['Int'];
   roomId: Scalars['String'];
   skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryGetUserByIdArgs = {
+  userId: Scalars['String'];
 };
 
 
@@ -182,9 +202,15 @@ export type UserResponse = {
   user?: Maybe<User>;
 };
 
+export type UserWithAvatar = {
+  __typename?: 'UserWithAvatar';
+  avatar?: Maybe<Scalars['String']>;
+  user: User;
+};
+
 export type RegularChatRoomFragment = { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any };
 
-export type RegularMessageFragment = { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, fileId?: string | null | undefined, createdAt: any, updatedAt: any, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> };
+export type RegularMessageFragment = { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> };
 
 export type RegularUserFragment = { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any };
 
@@ -204,7 +230,7 @@ export type CreateMessageMutationVariables = Exact<{
 }>;
 
 
-export type CreateMessageMutation = { __typename?: 'Mutation', createMessage: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, fileId?: string | null | undefined, createdAt: any, updatedAt: any, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } };
+export type CreateMessageMutation = { __typename?: 'Mutation', createMessage: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } };
 
 export type JoinRoomMutationVariables = Exact<{
   roomId: Scalars['String'];
@@ -251,12 +277,19 @@ export type GetRoomMessagesQueryVariables = Exact<{
 }>;
 
 
-export type GetRoomMessagesQuery = { __typename?: 'Query', getRoomMessages: { __typename?: 'PaginatedMessages', hasMore: boolean, messages: Array<{ __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, fileId?: string | null | undefined, createdAt: any, updatedAt: any, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> }> } };
+export type GetRoomMessagesQuery = { __typename?: 'Query', getRoomMessages: { __typename?: 'PaginatedMessages', hasMore: boolean, messages: Array<{ __typename?: 'MessageWithMedia', media?: string | null | undefined, file?: string | null | undefined, message: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } }> } };
 
 export type GetSuggestedChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetSuggestedChatRoomsQuery = { __typename?: 'Query', getSuggestedChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
+
+export type GetUserByIdQueryVariables = Exact<{
+  userId: Scalars['String'];
+}>;
+
+
+export type GetUserByIdQuery = { __typename?: 'Query', getUserById: { __typename?: 'UserWithAvatar', avatar?: string | null | undefined, user: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } } };
 
 export type IsChatMemberQueryVariables = Exact<{
   roomId: Scalars['String'];
@@ -291,7 +324,11 @@ export const RegularMessageFragmentDoc = gql`
   roomId
   creatorId
   mediaId
-  fileId
+  fileData {
+    fileId
+    filename
+    mimeType
+  }
   messageReactions {
     reaction
     value
@@ -584,7 +621,11 @@ export const GetRoomMessagesDocument = gql`
   getRoomMessages(roomId: $roomId, limit: $limit, skip: $skip) {
     hasMore
     messages {
-      ...RegularMessage
+      message {
+        ...RegularMessage
+      }
+      media
+      file
     }
   }
 }
@@ -656,6 +697,44 @@ export function useGetSuggestedChatRoomsLazyQuery(baseOptions?: Apollo.LazyQuery
 export type GetSuggestedChatRoomsQueryHookResult = ReturnType<typeof useGetSuggestedChatRoomsQuery>;
 export type GetSuggestedChatRoomsLazyQueryHookResult = ReturnType<typeof useGetSuggestedChatRoomsLazyQuery>;
 export type GetSuggestedChatRoomsQueryResult = Apollo.QueryResult<GetSuggestedChatRoomsQuery, GetSuggestedChatRoomsQueryVariables>;
+export const GetUserByIdDocument = gql`
+    query GetUserById($userId: String!) {
+  getUserById(userId: $userId) {
+    user {
+      ...RegularUser
+    }
+    avatar
+  }
+}
+    ${RegularUserFragmentDoc}`;
+
+/**
+ * __useGetUserByIdQuery__
+ *
+ * To run a query within a React component, call `useGetUserByIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserByIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserByIdQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useGetUserByIdQuery(baseOptions: Apollo.QueryHookOptions<GetUserByIdQuery, GetUserByIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUserByIdQuery, GetUserByIdQueryVariables>(GetUserByIdDocument, options);
+      }
+export function useGetUserByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserByIdQuery, GetUserByIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUserByIdQuery, GetUserByIdQueryVariables>(GetUserByIdDocument, options);
+        }
+export type GetUserByIdQueryHookResult = ReturnType<typeof useGetUserByIdQuery>;
+export type GetUserByIdLazyQueryHookResult = ReturnType<typeof useGetUserByIdLazyQuery>;
+export type GetUserByIdQueryResult = Apollo.QueryResult<GetUserByIdQuery, GetUserByIdQueryVariables>;
 export const IsChatMemberDocument = gql`
     query IsChatMember($roomId: String!) {
   isChatMember(roomId: $roomId)
