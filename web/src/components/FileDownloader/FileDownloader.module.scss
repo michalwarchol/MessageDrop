@@ -1,0 +1,15 @@
+@import "../../styles/config";
+
+.fileDownloader {
+    margin-top: 2px;
+    padding: 2px 10px;
+    border-radius: 8px;
+    background-color: $lightColor;
+    color: $textColor;
+    display: flex;
+    align-items: center;
+
+    .icon {
+        font-size: 34px;
+    }
+}
