@@ -13,6 +13,9 @@ import { UserResolver } from "./resolvers/UserResolver";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import cors from "cors";
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { execute, subscribe } from 'graphql';
+import { createServer } from 'http';
 import { ChatRoomResolver } from "./resolvers/ChatRoomResolver";
 import { MessageResolver } from "./resolvers/MessageResolver";
 
@@ -59,24 +62,46 @@ const main = async () => {
     },
   });
 
+  const schema = await buildSchema({
+    resolvers: [UserResolver, ChatRoomResolver, MessageResolver],
+    validate: false,
+  })
+
+  const httpServer = createServer(app);
+
   const apolloServer = new ApolloServer({
-    schema: await buildSchema({
-      resolvers: [UserResolver, ChatRoomResolver, MessageResolver],
-      validate: false,
-    }),
+    schema,
     context: ({ req, res }) => ({
       req,
       res,
       redis,
       s3,
     }),
-    plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground(),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              subscriptionServer.close();
+            }
+          };
+        }
+      }],
   });
+
+  const subscriptionServer = SubscriptionServer.create({
+    schema,
+    execute,
+    subscribe
+  },{
+    server: httpServer,
+    path: apolloServer.graphqlPath,
+  })
 
   await apolloServer.start();
   apolloServer.applyMiddleware({ app, cors: false });
 
-  app.listen(4000, () => {
+  httpServer.listen(4000, () => {
     console.log("Server started on localhost:4000");
   });
 };
