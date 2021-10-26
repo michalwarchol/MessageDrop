@@ -22,10 +22,10 @@ const MessageNode: React.FC<Props> = ({ message, newUser }) => {
     variables: { userId: message.message.creatorId },
   });
 
-  let position = "start";
+  let position = "flex-start";
   let backgroundColor = "#4C5057";
   if (me?.me?._id == message.message.creatorId) {
-    position = "end";
+    position = "flex-end";
     backgroundColor = "#0e5bcf";
   }
 

@@ -7,7 +7,7 @@
     width: fit-content;
     display: flex;
     flex-direction: column;
-    align-items: end;
+    align-items: flex-end;
 
     .creator {
         font-size: 14px;
@@ -21,7 +21,7 @@
     }
     .media{
         display: flex;
-        justify-content: end;
+        justify-content: flex-end;
         border-radius: 8px;
         overflow: hidden;
         margin-top: 2px;
