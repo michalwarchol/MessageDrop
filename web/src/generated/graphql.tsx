@@ -132,6 +132,7 @@ export type MutationRegisterArgs = {
 export type PaginatedMessages = {
   __typename?: 'PaginatedMessages';
   hasMore: Scalars['Boolean'];
+  isSubFeed: Scalars['Boolean'];
   messages: Array<MessageWithMedia>;
 };
 
@@ -183,6 +184,16 @@ export enum RoomAccess {
   Public = 'public',
   Restricted = 'restricted'
 }
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  newMessage: MessageWithMedia;
+};
+
+
+export type SubscriptionNewMessageArgs = {
+  roomId: Scalars['String'];
+};
 
 export type User = {
   __typename?: 'User';
@@ -277,7 +288,7 @@ export type GetRoomMessagesQueryVariables = Exact<{
 }>;
 
 
-export type GetRoomMessagesQuery = { __typename?: 'Query', getRoomMessages: { __typename?: 'PaginatedMessages', hasMore: boolean, messages: Array<{ __typename?: 'MessageWithMedia', media?: string | null | undefined, file?: string | null | undefined, message: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } }> } };
+export type GetRoomMessagesQuery = { __typename?: 'Query', getRoomMessages: { __typename?: 'PaginatedMessages', hasMore: boolean, isSubFeed: boolean, messages: Array<{ __typename?: 'MessageWithMedia', media?: string | null | undefined, file?: string | null | undefined, message: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } }> } };
 
 export type GetSuggestedChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -302,6 +313,13 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } | null | undefined };
+
+export type NewMessageSubscriptionVariables = Exact<{
+  roomId: Scalars['String'];
+}>;
+
+
+export type NewMessageSubscription = { __typename?: 'Subscription', newMessage: { __typename?: 'MessageWithMedia', media?: string | null | undefined, file?: string | null | undefined, message: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } } };
 
 export const RegularChatRoomFragmentDoc = gql`
     fragment RegularChatRoom on ChatRoom {
@@ -620,6 +638,7 @@ export const GetRoomMessagesDocument = gql`
     query GetRoomMessages($roomId: String!, $limit: Int!, $skip: Int) {
   getRoomMessages(roomId: $roomId, limit: $limit, skip: $skip) {
     hasMore
+    isSubFeed
     messages {
       message {
         ...RegularMessage
@@ -802,3 +821,37 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const NewMessageDocument = gql`
+    subscription NewMessage($roomId: String!) {
+  newMessage(roomId: $roomId) {
+    message {
+      ...RegularMessage
+    }
+    media
+    file
+  }
+}
+    ${RegularMessageFragmentDoc}`;
+
+/**
+ * __useNewMessageSubscription__
+ *
+ * To run a query within a React component, call `useNewMessageSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useNewMessageSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNewMessageSubscription({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useNewMessageSubscription(baseOptions: Apollo.SubscriptionHookOptions<NewMessageSubscription, NewMessageSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<NewMessageSubscription, NewMessageSubscriptionVariables>(NewMessageDocument, options);
+      }
+export type NewMessageSubscriptionHookResult = ReturnType<typeof useNewMessageSubscription>;
+export type NewMessageSubscriptionResult = Apollo.SubscriptionResult<NewMessageSubscription>;

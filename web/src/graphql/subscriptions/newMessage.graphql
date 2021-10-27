@@ -1,0 +1,9 @@
+subscription NewMessage($roomId: String!) {
+  newMessage(roomId: $roomId) {
+    message {
+      ...RegularMessage
+    }
+    media
+    file
+  }
+}
