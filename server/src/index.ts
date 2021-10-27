@@ -52,7 +52,8 @@ const main = async () => {
     })
   );
 
-  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 1 }));
+  app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 2 }));
+  app.use(express.json({limit: '100mb'}));
 
   const s3 = new S3({
     region: process.env.AWS_REGION,
@@ -92,7 +93,8 @@ const main = async () => {
   const subscriptionServer = SubscriptionServer.create({
     schema,
     execute,
-    subscribe
+    subscribe,
+    onConnect: ()=> ({s3})
   },{
     server: httpServer,
     path: apolloServer.graphqlPath,
