@@ -1,6 +1,7 @@
 query GetRoomMessages($roomId: String!, $limit: Int!, $skip: Int) {
     getRoomMessages(roomId: $roomId, limit: $limit, skip: $skip){
-        hasMore,
+        hasMore
+        isSubFeed
         messages {
             message {
             ...RegularMessage
