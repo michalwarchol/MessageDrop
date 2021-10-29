@@ -12,9 +12,10 @@ import FileDownloader from "../FileDownloader/FileDownloader";
 interface Props {
   message: MessageWithMedia;
   newUser: boolean;
+  myRef?: any
 }
 
-const MessageNode: React.FC<Props> = ({ message, newUser }) => {
+const MessageNode: React.FC<Props> = ({ message, newUser, myRef }) => {
   const [proportion, setProportion] = useState<number>(1);
 
   const { data: me } = useMeQuery();
@@ -39,6 +40,7 @@ const MessageNode: React.FC<Props> = ({ message, newUser }) => {
   return (
     <div
       className={styles.messageNode}
+      ref={myRef || undefined}
       style={{
         alignSelf: position,
         justifyContent: position,
