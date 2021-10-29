@@ -66,26 +66,18 @@
     }
   }
 
-  .chatMessages {
-    margin: 10px 0;
-    padding: 10px;
-    background-color: $secondaryColor;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    flex-wrap: nowrap;
-    overflow-y: scroll;
-    height: 400px;
-  }
-
   .chatForm {
     padding: 10px;
     background-color: $secondaryColor;
     border-radius: 0 0 8px 8px;
 
     .chatFormFields {
-      display: flex;
-      align-items: center;
+      position: relative;
+
+      .inputs {
+        display: flex;
+        align-items: center;
+      }
       .actionButton {
         font-size: 20px;
         width: 46px;
@@ -93,6 +85,14 @@
         border-radius: 50%;
         margin-left: 5px;
         background-color: lighten($color: $mainColor, $amount: 10);
+      }
+      .sendButton{
+        font-size: 20px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        margin-left: 5px;
+        color: $textColor !important;
       }
 
       .fileInput {

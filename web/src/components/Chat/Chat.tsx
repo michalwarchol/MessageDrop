@@ -2,7 +2,6 @@ import React, { useContext, useRef, useState } from "react";
 import {
   useCreateMessageMutation,
   useGetChatRoomByIdQuery,
-  useGetRoomMessagesQuery,
 } from "../../generated/graphql";
 import { RoomContext } from "../../utils/RoomContext";
 import styles from "./Chat.module.scss";
@@ -14,10 +13,11 @@ import {
   BsEmojiLaughingFill,
   BsFillChatDotsFill,
   BsFillFileEarmarkPlusFill,
+  BsFillCursorFill,
 } from "react-icons/bs";
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
-import MessageNode from "../MessageNode/MessageNode";
+import MessagesSection from "../MessagesSection/MessagesSection";
 
 const Chat: React.FC = () => {
   const roomId = useContext(RoomContext);
@@ -26,15 +26,13 @@ const Chat: React.FC = () => {
   const [media, setMedia] = useState<File | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
-  const { data: room } = useGetChatRoomByIdQuery({ variables: { roomId } });
-  const { data, fetchMore } = useGetRoomMessagesQuery({
-    variables: { limit: 2, roomId, skip: null },
-  });
-  const [createMessage] = useCreateMessageMutation();
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
 
+  const { data: room } = useGetChatRoomByIdQuery({ variables: { roomId } });
+
+  const [createMessage] = useCreateMessageMutation();
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   return (
     <div className={styles.chat}>
       <div className={styles.chatInfo}>
@@ -64,35 +62,10 @@ const Chat: React.FC = () => {
           </p>
         </div>
       </div>
-      <div className={styles.chatMessages}>
-        {data &&
-          data.getRoomMessages.messages.map((elem, index, arr) => {
-            let newUser;
-            if (index == 0) {
-              newUser = true;
-            } else {
-              newUser =
-                arr[index - 1].message.creatorId != elem.message.creatorId;
-            }
-            return <MessageNode message={elem} key={index} newUser={newUser} />;
-          })}
-        <button
-          onClick={() => {
-            fetchMore({
-              variables: {
-                roomId,
-                limit: 2,
-                skip: data?.getRoomMessages.messages.length,
-              },
-            });
-          }}
-        >
-          load more
-        </button>
-      </div>
+      <MessagesSection />
       <div className={styles.chatForm}>
         <Formik
-          initialValues={{}}
+          initialValues={{ text: "" }}
           onSubmit={async (_, { resetForm }) => {
             if (!text && !file && !media) {
               return;
@@ -107,62 +80,75 @@ const Chat: React.FC = () => {
               },
             });
             resetForm();
+            setText("");
+            setMedia(null);
+            setFile(null);
           }}
         >
           {() => (
             <Form className={styles.chatFormFields}>
-              <InputField
-                name="text"
-                value={text}
-                onChange={(e) => setText(e.currentTarget.value)}
-                placeholder="Write something..."
-              />
-              <label htmlFor="media">
+              <div className={styles.inputs}>
+                <InputField
+                  name="text"
+                  value={text}
+                  onChange={(e) => setText(e.currentTarget.value)}
+                  placeholder="Write something..."
+                />
+                <label htmlFor="media">
+                  <IconButton
+                    Icon={BsFileImageFill}
+                    variant="outline"
+                    className={styles.actionButton}
+                    type="button"
+                    onClick={() => {
+                      mediaInputRef.current?.click();
+                    }}
+                  />
+                  <input
+                    type="file"
+                    id="media"
+                    accept="image/png, image/jpeg"
+                    ref={mediaInputRef}
+                    className={styles.fileInput}
+                    onChange={(e) => {
+                      if (e.target.files != null) setMedia(e.target.files[0]);
+                    }}
+                  />
+                </label>
+                <label htmlFor="file">
+                  <IconButton
+                    Icon={BsFillFileEarmarkPlusFill}
+                    variant="outline"
+                    className={styles.actionButton}
+                    type="button"
+                    onClick={() => {
+                      fileInputRef.current?.click();
+                    }}
+                  />
+                  <input
+                    type="file"
+                    id="file"
+                    ref={fileInputRef}
+                    className={styles.fileInput}
+                    onChange={(e) => {
+                      if (e.target.files != null) setFile(e.target.files[0]);
+                    }}
+                  />
+                </label>
                 <IconButton
-                  Icon={BsFileImageFill}
+                  Icon={BsEmojiLaughingFill}
                   variant="outline"
-                  className={styles.actionButton}
                   type="button"
-                  onClick={() => {
-                    mediaInputRef.current?.click();
-                  }}
+                  className={styles.actionButton}
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 />
-                <input
-                  type="file"
-                  id="media"
-                  accept="image/png, image/jpeg"
-                  ref={mediaInputRef}
-                  className={styles.fileInput}
-                  onChange={(e) => {
-                    if (e.target.files != null) setMedia(e.target.files[0]);
-                  }}
-                />
-              </label>
-              <label htmlFor="file">
                 <IconButton
-                  Icon={BsFillFileEarmarkPlusFill}
-                  variant="outline"
-                  className={styles.actionButton}
-                  type="button"
-                  onClick={() => {
-                    fileInputRef.current?.click();
-                  }}
+                  Icon={BsFillCursorFill}
+                  variant="fill"
+                  type="submit"
+                  className={styles.sendButton}
                 />
-                <input
-                  type="file"
-                  id="file"
-                  ref={fileInputRef}
-                  className={styles.fileInput}
-                  onChange={(e) => {
-                    if (e.target.files != null) setFile(e.target.files[0]);
-                  }}
-                />
-              </label>
-              <IconButton
-                Icon={BsEmojiLaughingFill}
-                variant="outline"
-                className={styles.actionButton}
-              />
+              </div>
             </Form>
           )}
         </Formik>
