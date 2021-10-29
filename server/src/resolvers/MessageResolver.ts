@@ -2,15 +2,21 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { FileUpload, GraphQLUpload } from "graphql-upload";
 import {
   Arg,
+  Args,
+  ArgsType,
   Ctx,
   Field,
   Int,
   Mutation,
   ObjectType,
+  PubSub,
   Query,
   Resolver,
+  Root,
+  Subscription,
   UseMiddleware,
 } from "type-graphql";
+import {PubSubEngine} from "graphql-subscriptions";
 import { v4 } from "uuid";
 import { FileData, Message, MessageModel } from "../entities/Message";
 import { isAuth } from "../middleware/isAuth";
@@ -38,6 +44,15 @@ class PaginatedMessages {
 
   @Field(() => Boolean)
   hasMore: boolean;
+
+  @Field(()=>Boolean)
+  isSubFeed: boolean;
+}
+
+@ArgsType()
+class ChatRoomSubArgs {
+  @Field()
+  roomId: string;
 }
 
 @Resolver(Message)
@@ -73,8 +88,9 @@ export class MessageResolver {
     );
 
     return {
-      messages: messagesWithMedia.slice(0, realLimit).reverse(),
+      messages: messagesWithMedia.slice(0, limit),
       hasMore: messages.length === realLimit,
+      isSubFeed: false
     };
   }
 
@@ -82,6 +98,7 @@ export class MessageResolver {
   @UseMiddleware(isAuth, isRoomMember)
   async createMessage(
     @Ctx() { req, s3 }: Context,
+    @PubSub() pubSub: PubSubEngine,
     @Arg("roomId", () => String) roomId: string,
     @Arg("text", () => String, { nullable: true }) text: string,
     @Arg("media", () => GraphQLUpload, { nullable: true }) media?: FileUpload,
@@ -134,10 +151,34 @@ export class MessageResolver {
           })
         );
       }
+      await pubSub.publish("MESSAGE", newMessage);
     } catch (err) {
       console.log(err);
     }
-
+    
     return newMessage as Message;
+  }
+
+  @Subscription(()=>MessageWithMedia, {
+    topics: "MESSAGE",
+    filter: ({payload, args}) => payload.roomId == args.roomId
+  })
+  async newMessage(
+    @Root() message: any,
+    @Ctx(){s3}: Context,
+    @Args() _: ChatRoomSubArgs
+  ):Promise<MessageWithMedia>{
+    console.log(message)
+    let media = await getFile(s3, message.mediaId);
+    let file = null;
+    if (message.fileData) {
+      file = await getFile(s3, message.fileData.fileId);
+    }
+
+    return {
+      message: message._doc,
+      media,
+      file
+    }
   }
 }
