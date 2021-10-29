@@ -1,0 +1,47 @@
+@import "../../styles/config";
+
+.messagesSection {
+  margin: 10px 0;
+  background-color: $secondaryColor;
+  display: flex;
+  flex-grow: 1;
+  height: 400px;
+  position: relative;
+
+  .messagesChat{
+    padding: 10px;
+    display: flex;
+    flex-direction: column-reverse;
+    flex-grow: 1;
+    flex-wrap: nowrap;
+    overflow-y: scroll;
+  }
+
+  .loadingProgress {
+    display: flex;
+    justify-content: center;
+  }
+  .loading {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border-top: 2px solid white;
+    border-right: 2px solid white;
+    border-bottom: 2px solid $alternativeColor;
+    border-left: 2px solid $alternativeColor;
+    animation-name: roll;
+    animation-duration: 0.5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(0.25, 0.25, 0.75, 0.75);
+  }
+}
+
+@keyframes roll {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
