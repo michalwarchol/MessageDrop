@@ -48,11 +48,12 @@ const client = new ApolloClient({
               ): PaginatedMessages {
                 if(incoming.isSubFeed){
                   return {...incoming,
-                    messages: [...(existing?.messages || []), ...incoming.messages]
+                    messages: [ ...incoming.messages, ...(existing?.messages || [])],
+                    isSubFeed: true
                   }
                 }
                 return {...incoming,
-                  messages: [...incoming.messages, ...(existing?.messages || [])]
+                  messages: [...(existing?.messages || []), ...incoming.messages]
                 }
               }
             }
