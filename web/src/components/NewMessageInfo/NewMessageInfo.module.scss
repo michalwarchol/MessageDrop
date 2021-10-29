@@ -1,0 +1,47 @@
+@import "../../styles/config";
+
+@mixin regularStyles {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  bottom: 0;
+  background-color: $alternativeColor;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px $alternativeColor;
+  animation-duration: 0.3s;
+  animation-fill-mode: forwards;
+  cursor: pointer;
+}
+
+.newMessageInformer {
+  @include regularStyles();
+  animation-name: showNewMessageNotification;
+}
+
+.alternativeStyles {
+  @include regularStyles();
+  animation-name: hideNewMessageNotification;
+}
+
+@keyframes showNewMessageNotification {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes hideNewMessageNotification {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
