@@ -45,6 +45,7 @@ const MessageNode: React.FC<Props> = ({ message, newUser, myRef }) => {
         alignSelf: position,
         justifyContent: position,
         marginTop: newUser ? "10px" : "4px",
+        alignItems: position
       }}
     >
       {newUser && me?.me?._id != message.message.creatorId && (
