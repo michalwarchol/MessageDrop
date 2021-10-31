@@ -2,6 +2,7 @@ import React, { useContext, useRef, useState } from "react";
 import {
   useCreateMessageMutation,
   useGetChatRoomByIdQuery,
+  useMeQuery,
 } from "../../generated/graphql";
 import { RoomContext } from "../../utils/RoomContext";
 import styles from "./Chat.module.scss";
@@ -18,6 +19,7 @@ import {
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import MessagesSection from "../MessagesSection/MessagesSection";
+import RoomSettings from "../RoomSettings/RoomSettings";
 
 const Chat: React.FC = () => {
   const roomId = useContext(RoomContext);
@@ -29,8 +31,9 @@ const Chat: React.FC = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
 
   const { data: room } = useGetChatRoomByIdQuery({ variables: { roomId } });
-
+  const { data: me } = useMeQuery();
   const [createMessage] = useCreateMessageMutation();
+
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   return (
@@ -61,6 +64,12 @@ const Chat: React.FC = () => {
             {room?.getChatRoomById.chatRoom.description}
           </p>
         </div>
+        {((room && room?.getChatRoomById.chatRoom.adminId == me?.me?._id) ||
+          (room?.getChatRoomById.chatRoom.modIds.some((id) => id == me?.me?._id))) && (
+            <div className={styles.showSettings}>
+              <RoomSettings />
+            </div>
+          )}
       </div>
       <MessagesSection />
       <div className={styles.chatForm}>
