@@ -1,0 +1,43 @@
+@import "../../styles/config";
+
+.userNode {
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    &:hover {
+        background-color: lighten($color: $secondaryColor, $amount: 10);
+    }
+    .info {
+        display: flex;
+        align-items: center;
+        .image {
+            border-radius: 50%;
+            border: 2px solid $alternativeColor;
+            padding: 10px;
+        }
+        .imageFallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            font-size: 20px;
+        }
+        .username {
+            margin-left: 10px;
+            h1, h2, h3, h4, h5 {
+                margin: 0;
+                font-size: 16px;
+            }
+        }
+    }
+    .buttons {
+        display: flex;
+        .kickButton {
+            margin-left: 6px;
+        }
+    }
+}
