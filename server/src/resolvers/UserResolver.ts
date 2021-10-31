@@ -28,12 +28,12 @@ class UserResponse {
 }
 
 @ObjectType()
-class UserWithAvatar {
+export class UserWithAvatar {
   @Field(()=>User)
   user: User;
 
   @Field(()=>String, {nullable: true})
-  avatar?: string;
+  avatar: string | null;
 }
 
 @Resolver(() => User)
