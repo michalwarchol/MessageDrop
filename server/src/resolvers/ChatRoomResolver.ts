@@ -18,6 +18,9 @@ import { FieldError } from "./types/FieldError";
 import { isAuth } from "../middleware/isAuth";
 import { getFile } from "../utils/getFile";
 import { createFileBuffer } from "../utils/createFileBuffer";
+import { isRoomMember } from "../middleware/isRoomMember";
+import { UserWithAvatar } from "./UserResolver";
+import { User, UserModel } from "../entities/User";
 
 @ObjectType()
 class ChatRoomResponse {
@@ -37,6 +40,18 @@ class ChatRoomWithImage {
   image: string | null;
 }
 
+@ObjectType()
+class ChatRoomUsers {
+  @Field(() => UserWithAvatar)
+  admin: UserWithAvatar;
+
+  @Field(() => [UserWithAvatar])
+  mods: UserWithAvatar[];
+
+  @Field(() => [UserWithAvatar])
+  others: UserWithAvatar[];
+}
+
 @Resolver(ChatRoom)
 export class ChatRoomResolver {
   @Query(() => [ChatRoom])
@@ -44,27 +59,27 @@ export class ChatRoomResolver {
     return ChatRoomModel.find();
   }
 
-  @Query(()=> ChatRoomWithImage)
+  @Query(() => ChatRoomWithImage)
   async getChatRoomById(
-    @Ctx() {s3}: Context,
-    @Arg("roomId", ()=>String) roomId: string
-  ):Promise<ChatRoomWithImage|null>{
+    @Ctx() { s3 }: Context,
+    @Arg("roomId", () => String) roomId: string
+  ): Promise<ChatRoomWithImage | null> {
     const chatRoom = await ChatRoomModel.findById(roomId);
-    if(!chatRoom){
+    if (!chatRoom) {
       return null;
     }
 
     const image = await getFile(s3, chatRoom.imageId);
     return {
       chatRoom,
-      image
-    }
+      image,
+    };
   }
 
   @Query(() => [ChatRoomWithImage])
   @UseMiddleware(isAuth)
   async getCreatorChatRooms(
-    @Ctx() {s3, req}: Context
+    @Ctx() { s3, req }: Context
   ): Promise<ChatRoomWithImage[]> {
     const chatRooms = await ChatRoomModel.find({
       $or: [
@@ -87,11 +102,11 @@ export class ChatRoomResolver {
     return chatRoomsWithImages;
   }
 
-  @Query(()=>Boolean)
+  @Query(() => Boolean)
   async isChatMember(
-    @Ctx(){req}: Context,
-    @Arg("roomId", ()=>String) roomId: string
-  ){
+    @Ctx() { req }: Context,
+    @Arg("roomId", () => String) roomId: string
+  ) {
     const chatRoom = await ChatRoomModel.findById(roomId);
 
     if (!chatRoom) {
@@ -100,11 +115,11 @@ export class ChatRoomResolver {
     if (chatRoom.adminId == req.session.userId) {
       return true;
     }
-  
+
     if (chatRoom.modIds.indexOf(req.session.userId) != -1) {
       return true;
     }
-  
+
     if (chatRoom.userIds.indexOf(req.session.userId) != -1) {
       return true;
     }
@@ -113,7 +128,7 @@ export class ChatRoomResolver {
 
   @Query(() => [ChatRoomWithImage])
   async getSuggestedChatRooms(
-    @Ctx() {s3, req}: Context
+    @Ctx() { s3, req }: Context
   ): Promise<ChatRoomWithImage[]> {
     let userId = req.session.userId;
     const chatRooms = await ChatRoomModel.find({
@@ -136,6 +151,53 @@ export class ChatRoomResolver {
     );
 
     return chatRoomsWithImages;
+  }
+
+  @Query(() => ChatRoomUsers)
+  @UseMiddleware(isAuth, isRoomMember)
+  async getChatRoomUsers(
+    @Ctx() context: Context,
+    @Arg("roomId", () => String) roomId: string
+  ): Promise<ChatRoomUsers> {
+    const room = (await ChatRoomModel.findById(roomId)) as ChatRoom;
+    const admin = (await UserModel.findById(room.adminId)) as User;
+    const mods = (await UserModel.find({
+      _id: { $in: room.modIds },
+    })) as User[];
+    const others = (await UserModel.find({
+      _id: { $in: room.userIds },
+    })) as User[];
+
+    const adminAvatar = await getFile(context.s3, admin.avatarId);
+
+    const modsWithAvatars = await Promise.all(
+      mods.map(async (elem) => {
+        const avatar = await getFile(context.s3, elem.avatarId);
+        return {
+          user: elem,
+          avatar,
+        };
+      })
+    );
+
+    const othersWithAvatars = await Promise.all(
+      others.map(async (elem) => {
+        const avatar = await getFile(context.s3, elem.avatarId);
+        return {
+          user: elem,
+          avatar,
+        };
+      })
+    );
+
+    return {
+      admin: {
+        user: admin,
+        avatar: adminAvatar,
+      },
+      mods: modsWithAvatars,
+      others: othersWithAvatars,
+    };
   }
 
   @Mutation(() => ChatRoomResponse)
