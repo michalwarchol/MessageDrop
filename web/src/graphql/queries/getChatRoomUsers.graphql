@@ -1,0 +1,22 @@
+query GetChatRoomUsers($roomId: String!) {
+  getChatRoomUsers(roomId: $roomId){
+    admin{
+      user{
+        ...RegularUser
+      }
+      avatar
+    }
+    mods {
+      user{
+        ...RegularUser
+      }
+      avatar
+    }
+    others{
+      user{
+        ...RegularUser
+      }
+      avatar
+    }
+  }
+}
