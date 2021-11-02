@@ -91,6 +91,16 @@
         margin-left: 5px;
         background-color: lighten($color: $mainColor, $amount: 10);
       }
+
+      .actionButtonActive {
+        font-size: 20px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        margin-left: 5px;
+        background-color: rgb(5, 168, 27);
+      }
+
       .sendButton{
         font-size: 20px;
         width: 46px;
@@ -98,6 +108,38 @@
         border-radius: 50%;
         margin-left: 5px;
         color: $textColor !important;
+      }
+
+      .sendButtonDisabled {
+        font-size: 20px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        margin-left: 5px;
+        background-color: gray !important;
+        cursor: not-allowed !important;
+      }
+
+      .picker {
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+
+        aside {
+          background-color: $secondaryColor;
+          border: 2px solid $alternativeColor;
+          box-shadow: 0 0 20px $alternativeColor;
+          input {
+            background-color: $secondaryColor !important;
+            border: 2px solid $alternativeColor;
+            color: $textColor;
+          }
+          ul {
+            &::before {
+              background-color: $secondaryColor;
+            }
+          }
+        }
       }
 
       .fileInput {

@@ -16,6 +16,7 @@ import {
   BsFillFileEarmarkPlusFill,
   BsFillCursorFill,
   BsFillGearFill,
+  BsFillFileEarmarkCheckFill,
 } from "react-icons/bs";
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
@@ -23,6 +24,10 @@ import MessagesSection from "../MessagesSection/MessagesSection";
 import RoomSettings from "../RoomSettings/RoomSettings";
 import { useRouter } from "next/router";
 import { isServer } from "../../utils/isServer";
+import dynamic from "next/dynamic";
+const Picker = dynamic(() => import('emoji-picker-react'), {
+  ssr: false,
+});
 
 const Chat: React.FC = () => {
   const roomId = useContext(RoomContext);
@@ -41,19 +46,25 @@ const Chat: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
-  const [windowHeight, setWindowHeight] = useState<number>(isServer ? window.innerHeight : 0);
+  const [windowHeight, setWindowHeight] = useState<number>(
+    isServer ? window.innerHeight : 0
+  );
 
   const resize = () => {
-    setWindowHeight(window.innerHeight)
-  }
-  useEffect(()=>{
+    setWindowHeight(window.innerHeight);
+  };
+  useEffect(() => {
     window.addEventListener("resize", resize);
 
     return () => {
       window.removeEventListener("resize", resize);
-    }
-  }, [])
-  
+    };
+  }, []);
+
+  const onEmojiClick = (_: any, emojiObject: any) => {
+    setText(text+emojiObject.emoji)
+  };
+
   return (
     <div className={styles.chat}>
       <div className={styles.chatInfo}>
@@ -125,9 +136,20 @@ const Chat: React.FC = () => {
             setText("");
             setMedia(null);
             setFile(null);
+            if (mediaInputRef.current) {
+              mediaInputRef.current.value = "";
+            }
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
           }}
         >
-          {() => (
+          {() => {
+            let disabled = false;
+            if(!text && !media && !file){
+              disabled = true;
+            }
+            return(
             <Form className={styles.chatFormFields}>
               <div className={styles.inputs}>
                 <InputField
@@ -140,10 +162,19 @@ const Chat: React.FC = () => {
                   <IconButton
                     Icon={BsFileImageFill}
                     variant="outline"
-                    className={styles.actionButton}
+                    className={
+                      media ? styles.actionButtonActive : styles.actionButton
+                    }
                     type="button"
                     onClick={() => {
-                      mediaInputRef.current?.click();
+                      if (media) {
+                        setMedia(null);
+                        if (mediaInputRef.current) {
+                          mediaInputRef.current.value = "";
+                        }
+                      } else {
+                        mediaInputRef.current?.click();
+                      }
                     }}
                   />
                   <input
@@ -159,12 +190,25 @@ const Chat: React.FC = () => {
                 </label>
                 <label htmlFor="file">
                   <IconButton
-                    Icon={BsFillFileEarmarkPlusFill}
+                    Icon={
+                      file
+                        ? BsFillFileEarmarkCheckFill
+                        : BsFillFileEarmarkPlusFill
+                    }
                     variant="outline"
-                    className={styles.actionButton}
+                    className={
+                      file ? styles.actionButtonActive : styles.actionButton
+                    }
                     type="button"
                     onClick={() => {
-                      fileInputRef.current?.click();
+                      if (file) {
+                        setFile(null);
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = "";
+                        }
+                      } else {
+                        fileInputRef.current?.click();
+                      }
                     }}
                   />
                   <input
@@ -181,18 +225,21 @@ const Chat: React.FC = () => {
                   Icon={BsEmojiLaughingFill}
                   variant="outline"
                   type="button"
-                  className={styles.actionButton}
+                  className={showEmojiPicker ? styles.actionButtonActive : styles.actionButton}
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 />
+                {isServer &&  <div className={styles.picker} style={{visibility: showEmojiPicker ? "visible":"hidden"}}>
+                <Picker onEmojiClick={onEmojiClick} />
+                </div>}
                 <IconButton
                   Icon={BsFillCursorFill}
                   variant="fill"
                   type="submit"
-                  className={styles.sendButton}
+                  className={disabled ? styles.sendButtonDisabled : styles.sendButton}
                 />
               </div>
             </Form>
-          )}
+          )}}
         </Formik>
       </div>
     </div>
