@@ -9,6 +9,7 @@
   "dependencies": {
     "@apollo/client": "^3.4.16",
     "apollo-upload-client": "^16.0.0",
+    "emoji-picker-react": "^3.4.8",
     "formik": "^2.2.9",
     "graphql": "^15.6.1",
     "next": "latest",
