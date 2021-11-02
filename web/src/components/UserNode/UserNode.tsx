@@ -1,33 +1,59 @@
-import React from "react";
+import React, { useContext } from "react";
 import styles from "./UserNode.module.scss";
-import { UserWithAvatar } from "../../generated/graphql";
+import {
+  useChangeUserRoomPermissionsMutation,
+  useKickUserMutation,
+  UserWithAvatar,
+} from "../../generated/graphql";
 import Image from "next/image";
 import Button from "../Button/Button";
 import { Permissions } from "../../utils/UserPermissions";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import { FaUserAlt } from "react-icons/fa";
+import { RoomContext } from "../../utils/RoomContext";
+import { settingsKickUser } from "../../cacheModifications/settingsKickUser";
+import { settingsPromoteDemoteUser } from "../../cacheModifications/settingsPromoteDemoteUser";
 
 interface Props {
   userWithAvatar: UserWithAvatar;
-  permissions: Permissions;
+  myPermissions: Permissions;
+  userPermissions: Permissions;
 }
 
-const UserNode: React.FC<Props> = ({ userWithAvatar, permissions }) => {
-  let buttons = null;
+const UserNode: React.FC<Props> = ({
+  userWithAvatar,
+  myPermissions,
+  userPermissions,
+}) => {
+  const roomId = useContext(RoomContext);
+  const [kickUser] = useKickUserMutation();
+  const [changeUserRoomPermissions] = useChangeUserRoomPermissionsMutation();
 
-  if (permissions == Permissions.ADMIN) {
+  const changePermissions = async () => {
+    await changeUserRoomPermissions({
+      variables: { roomId, userId: userWithAvatar.user._id },
+      update: settingsPromoteDemoteUser(roomId, userWithAvatar)
+    });
+  };
+
+  const kick = async () => {
+    await kickUser({
+      variables: { roomId, userId: userWithAvatar.user._id },
+      update: settingsKickUser(roomId, userWithAvatar)
+    });
+  };
+
+  let buttons = null;
+  if (myPermissions == Permissions.ADMIN) {
     buttons = (
       <div className={styles.buttons}>
-        <Button text="Promote To Mod" />
-        <Button text="Kick" className={styles.kickButton} />
-      </div>
-    );
-  }
+        {userPermissions == Permissions.USER ? (
+          <Button text="Promote To Mod" onClick={changePermissions} />
+        ) : (
+          <Button text="Demote To User" onClick={changePermissions} />
+        )}
 
-  if (permissions == Permissions.MOD) {
-    buttons = (
-      <div>
-        <Button text="kick" className={styles.kickButton} />
+        <Button text="Kick" className={styles.kickButton} onClick={kick} />
       </div>
     );
   }
