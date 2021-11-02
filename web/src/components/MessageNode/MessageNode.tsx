@@ -12,7 +12,7 @@ import FileDownloader from "../FileDownloader/FileDownloader";
 interface Props {
   message: MessageWithMedia;
   newUser: boolean;
-  myRef?: any
+  myRef?: any;
 }
 
 const MessageNode: React.FC<Props> = ({ message, newUser, myRef }) => {
@@ -30,7 +30,7 @@ const MessageNode: React.FC<Props> = ({ message, newUser, myRef }) => {
     backgroundColor = "#0e5bcf";
   }
 
-  if(message.media){
+  if (message.media) {
     let img = new Image();
     img.src = base64ToObjectURL(message.media);
     img.onload = () => {
@@ -45,23 +45,32 @@ const MessageNode: React.FC<Props> = ({ message, newUser, myRef }) => {
         alignSelf: position,
         justifyContent: position,
         marginTop: newUser ? "10px" : "4px",
-        alignItems: position
+        alignItems: position,
       }}
     >
       {newUser && me?.me?._id != message.message.creatorId && (
         <div className={styles.creator}>{creator?.getUserById.user.name}</div>
       )}
-      <div className={styles.actualMessage} style={{ backgroundColor }}>
-        {message.message.text}
-      </div>
+      {message.message.text!.length > 0 && (
+        <div className={styles.actualMessage} style={{ backgroundColor }}>
+          {message.message.text}
+        </div>
+      )}
       {message.media && (
         <div className={styles.media}>
-          <NextImage width={180} height={180*proportion} src={base64ToObjectURL(message.media)} />
+          <NextImage
+            width={180}
+            height={180 * proportion}
+            src={base64ToObjectURL(message.media)}
+          />
         </div>
       )}
 
       {message.file && message.message.fileData && (
-          <FileDownloader href={message.file} fileData={message.message.fileData} />
+        <FileDownloader
+          href={message.file}
+          fileData={message.message.fileData}
+        />
       )}
     </div>
   );
