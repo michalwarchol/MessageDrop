@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   useCreateMessageMutation,
   useGetChatRoomByIdQuery,
@@ -15,11 +15,14 @@ import {
   BsFillChatDotsFill,
   BsFillFileEarmarkPlusFill,
   BsFillCursorFill,
+  BsFillGearFill,
 } from "react-icons/bs";
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import MessagesSection from "../MessagesSection/MessagesSection";
 import RoomSettings from "../RoomSettings/RoomSettings";
+import { useRouter } from "next/router";
+import { isServer } from "../../utils/isServer";
 
 const Chat: React.FC = () => {
   const roomId = useContext(RoomContext);
@@ -36,6 +39,21 @@ const Chat: React.FC = () => {
 
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const router = useRouter();
+  const [windowHeight, setWindowHeight] = useState<number>(isServer ? window.innerHeight : 0);
+
+  const resize = () => {
+    setWindowHeight(window.innerHeight)
+  }
+  useEffect(()=>{
+    window.addEventListener("resize", resize);
+
+    return () => {
+      window.removeEventListener("resize", resize);
+    }
+  }, [])
+  
   return (
     <div className={styles.chat}>
       <div className={styles.chatInfo}>
@@ -65,11 +83,26 @@ const Chat: React.FC = () => {
           </p>
         </div>
         {((room && room?.getChatRoomById.chatRoom.adminId == me?.me?._id) ||
-          (room?.getChatRoomById.chatRoom.modIds.some((id) => id == me?.me?._id))) && (
-            <div className={styles.showSettings}>
+          room?.getChatRoomById.chatRoom.modIds.some(
+            (id) => id == me?.me?._id
+          )) && (
+          <div className={styles.showSettings}>
+            {windowHeight > 900 ? (
               <RoomSettings />
-            </div>
-          )}
+            ) : (
+              <IconButton
+                Icon={BsFillGearFill}
+                variant="outline"
+                onClick={() => {
+                  router.push({
+                    pathname: "/chatroom/[id]/settings",
+                    query: { id: roomId },
+                  });
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
       <MessagesSection />
       <div className={styles.chatForm}>
