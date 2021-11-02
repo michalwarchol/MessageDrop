@@ -21,6 +21,7 @@ import { createFileBuffer } from "../utils/createFileBuffer";
 import { isRoomMember } from "../middleware/isRoomMember";
 import { UserWithAvatar } from "./UserResolver";
 import { User, UserModel } from "../entities/User";
+import { SettingsInput } from "./types/SettingsInput";
 
 @ObjectType()
 class ChatRoomResponse {
@@ -269,6 +270,78 @@ export class ChatRoomResolver {
       $push: { userIds: userId || req.session.userId },
     });
 
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth, isRoomMember)
+  async kickUser(
+    @Ctx() _: Context,
+    @Arg("roomId", () => String) roomId: string,
+    @Arg("userId", () => String) userId: string
+  ): Promise<boolean> {
+    const result = await ChatRoomModel.updateOne(
+      { _id: roomId },
+      { $pull: { modIds: userId, userIds: userId } }
+    );
+    return result.matchedCount > 0;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth, isRoomMember)
+  async changeUserRoomPermissions(
+    @Ctx() _: Context,
+    @Arg("roomId", () => String) roomId: string,
+    @Arg("userId", () => String) userId: string
+  ): Promise<boolean> {
+    const room = (await ChatRoomModel.findById(roomId)) as ChatRoom;
+
+    //if modIds includes userId, delete it from the array and add to userIds
+    if (room.modIds.includes(userId)) {
+      await ChatRoomModel.updateOne(
+        { _id: roomId },
+        { $pull: { modIds: userId }, $push: { userIds: userId } }
+      );
+      return true;
+    }
+
+    //if userIds includes userId, delete it from the array and add to modIds
+    if (room.userIds.includes(userId)) {
+      await ChatRoomModel.updateOne(
+        { _id: roomId },
+        { $pull: { userIds: userId }, $push: { modIds: userId } }
+      );
+      return true;
+    }
+
+    //if userIds and modIds don't include userId then do nothing and return false
+    return false;
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth, isRoomMember)
+  async updateChatRoomSettings(
+    @Ctx() context: Context,
+    @Arg("roomId", ()=>String) roomId: string,
+    @Arg("settings", () => SettingsInput) settings: SettingsInput,
+    @Arg("image", () => GraphQLUpload, { nullable: true }) image?: FileUpload
+  ): Promise<boolean> {
+    const result = await ChatRoomModel.findOneAndUpdate(
+      { _id: roomId },//filter
+      { ...settings } //updates
+    );
+
+    //update image
+    if (image) {
+      const buffer: Buffer = await createFileBuffer(image);
+      await context.s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: result.imageId,
+          Body: buffer,
+        })
+      );
+    }
     return true;
   }
 }
