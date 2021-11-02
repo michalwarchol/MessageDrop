@@ -2,7 +2,6 @@
 
 .roomSettings {
     padding: 10px;
-
     .regularField {
         @include RegularField();
     }
@@ -15,6 +14,14 @@
 
     .photo {
         @include RegularBrowsedImage();
+    }
+
+    .disabledButton {
+        background-color: gray;
+        &:hover {
+            background-color: gray;
+            cursor: not-allowed;
+        }
     }
 
     .users {

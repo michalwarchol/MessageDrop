@@ -9,6 +9,7 @@ import {
   useGetChatRoomByIdQuery,
   useGetChatRoomUsersQuery,
   useMeQuery,
+  useUpdateChatRoomSettingsMutation,
 } from "../../generated/graphql";
 import { RoomContext } from "../../utils/RoomContext";
 import InputField from "../InputField/InputField";
@@ -19,6 +20,7 @@ import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import Button from "../Button/Button";
 import UserNode from "../UserNode/UserNode";
 import { Permissions } from "../../utils/UserPermissions";
+import { settingsUpdateChatRoom } from "../../cacheModifications/settingsUpdateChatRoom";
 
 const RoomSettings: React.FC = () => {
   const roomId = useContext(RoomContext);
@@ -26,6 +28,7 @@ const RoomSettings: React.FC = () => {
   const { data } = useGetChatRoomByIdQuery({ variables: { roomId } });
   const { data: users } = useGetChatRoomUsersQuery({ variables: { roomId } });
   const { data: me } = useMeQuery();
+  const [updateChatRoomSettings] = useUpdateChatRoomSettingsMutation();
 
   const [uploadedPhoto, setUploadedPhoto] = useState<File | null>(
     null
@@ -73,9 +76,39 @@ const RoomSettings: React.FC = () => {
             description: data?.getChatRoomById.chatRoom.description,
             access: data?.getChatRoomById.chatRoom.access,
           }}
-          onSubmit={() => {}}
+          onSubmit={async (values) => {
+            let disabled = false;
+            //check if any value has changed, so the apply button can be enabled
+            if(values.description == data?.getChatRoomById.chatRoom.description && 
+              values.access == data?.getChatRoomById.chatRoom.access &&
+              uploadedPhoto==null){
+                disabled = true;
+              }
+
+              if(disabled){
+                return;
+              }
+              
+              await updateChatRoomSettings({variables: {
+                roomId,
+                settings: {
+                  access: values.access || RoomAccess.Private,
+                  description: values.description || ""
+                },
+                image: uploadedPhoto
+              },
+            update: settingsUpdateChatRoom(roomId)})
+          }}
         >
-          {({ values }) => (
+          {({ values }) => {
+            let disabled = true;
+            //check if any value has changed, so the apply button can be enabled
+            if(values.description != data?.getChatRoomById.chatRoom.description || 
+              values.access != data?.getChatRoomById.chatRoom.access ||
+              uploadedPhoto!=null){
+                disabled = false;
+              }
+            return(
             <Form>
               <div className={styles.regularField}>
                 <label className={styles.nameLabel} htmlFor="description">
@@ -129,17 +162,18 @@ const RoomSettings: React.FC = () => {
               </div>
               <div className={styles.photo}>{photoContent}</div>
               <div className={styles.applyButton}>
-                <Button text="Apply" />
+                <Button text="Apply" type="submit" className={disabled ? styles.disabledButton : undefined} />
               </div>
             </Form>
-          )}
+          )}}
         </Formik>
         {users && (
           <div className={styles.users}>
             <div>
               <h4>Admin:</h4>
               <UserNode
-                permissions={Permissions.USER}
+                myPermissions={Permissions.USER}
+                userPermissions={Permissions.ADMIN}
                 userWithAvatar={users?.getChatRoomUsers.admin}
               />
             </div>
@@ -153,7 +187,8 @@ const RoomSettings: React.FC = () => {
                         <UserNode
                           userWithAvatar={elem}
                           key={index}
-                          permissions={Permissions.USER}
+                          myPermissions={Permissions.USER}
+                          userPermissions={Permissions.MOD}
                         />
                       );
                     }
@@ -161,11 +196,12 @@ const RoomSettings: React.FC = () => {
                       <UserNode
                         userWithAvatar={elem}
                         key={index}
-                        permissions={
+                        myPermissions={
                           users.getChatRoomUsers.admin.user._id == me?.me?._id
-                            ? Permissions.MOD
-                            : Permissions.ADMIN
+                            ? Permissions.ADMIN
+                            : Permissions.MOD
                         }
+                        userPermissions={Permissions.MOD}
                       />
                     );
                   })}
@@ -180,7 +216,8 @@ const RoomSettings: React.FC = () => {
                     <UserNode
                       userWithAvatar={elem}
                       key={index}
-                      permissions={Permissions.ADMIN}
+                      myPermissions={Permissions.ADMIN}
+                      userPermissions={Permissions.USER}
                     />
                   ))}
                 </div>
