@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, split } from "@apollo/client";
+import { ApolloClient, defaultDataIdFromObject, InMemoryCache, split } from "@apollo/client";
 import {WebSocketLink} from "@apollo/client/link/ws";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { createUploadLink } from "apollo-upload-client";
@@ -37,6 +37,13 @@ const splitLink = isServer ? split(
 const client = new ApolloClient({
     uri: 'http://localhost:4000/graphql',
     cache: new InMemoryCache({
+      dataIdFromObject(responseObject) {
+        switch(responseObject.__typename){
+          case 'UserWithAvatar':return `UserWithAvatar:${(responseObject.user as any)._id}`;
+          case 'ChatRoomWithImage': return `ChatRoomWithImage:${(responseObject.chatRoom as any)._id}`
+          default: return defaultDataIdFromObject(responseObject);
+        }
+      },
       typePolicies: {
         Query: {
           fields: {
