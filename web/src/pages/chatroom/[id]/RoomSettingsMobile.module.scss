@@ -1,0 +1,22 @@
+@import "../../../styles/config";
+
+.roomSettingsMobile {
+    background-color: $secondaryColor;
+    min-height: 100vh;
+    h3{
+        text-align: center;
+        margin: 0;
+        font-size: 24px;
+    }
+    .roomSettingsInner {
+        padding-top: 20px;
+        position: relative;
+    }
+    .closeButton {
+        width: 40px;
+        height: 40px;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+}
