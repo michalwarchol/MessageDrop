@@ -1,0 +1,3 @@
+mutation UpdateChatRoomSettings($roomId: String!, $settings: SettingsInput!, $image: Upload) {
+    updateChatRoomSettings(roomId: $roomId, settings: $settings, image: $image)
+}

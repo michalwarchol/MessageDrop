@@ -98,11 +98,20 @@ export type MessageWithMedia = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  changeUserRoomPermissions: Scalars['Boolean'];
   createChatRoom: ChatRoomResponse;
   createMessage: Message;
   joinRoom: Scalars['Boolean'];
+  kickUser: Scalars['Boolean'];
   login?: Maybe<UserResponse>;
   register: UserResponse;
+  updateChatRoomSettings: Scalars['Boolean'];
+};
+
+
+export type MutationChangeUserRoomPermissionsArgs = {
+  roomId: Scalars['String'];
+  userId: Scalars['String'];
 };
 
 
@@ -126,6 +135,12 @@ export type MutationJoinRoomArgs = {
 };
 
 
+export type MutationKickUserArgs = {
+  roomId: Scalars['String'];
+  userId: Scalars['String'];
+};
+
+
 export type MutationLoginArgs = {
   email: Scalars['String'];
   password: Scalars['String'];
@@ -134,6 +149,13 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   registerInput: RegisterInput;
+};
+
+
+export type MutationUpdateChatRoomSettingsArgs = {
+  image?: Maybe<Scalars['Upload']>;
+  roomId: Scalars['String'];
+  settings: SettingsInput;
 };
 
 export type PaginatedMessages = {
@@ -198,6 +220,11 @@ export enum RoomAccess {
   Restricted = 'restricted'
 }
 
+export type SettingsInput = {
+  access: RoomAccess;
+  description: Scalars['String'];
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   newMessage: MessageWithMedia;
@@ -238,6 +265,14 @@ export type RegularMessageFragment = { __typename?: 'Message', _id: string, text
 
 export type RegularUserFragment = { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any };
 
+export type ChangeUserRoomPermissionsMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  userId: Scalars['String'];
+}>;
+
+
+export type ChangeUserRoomPermissionsMutation = { __typename?: 'Mutation', changeUserRoomPermissions: boolean };
+
 export type CreateChatRoomMutationVariables = Exact<{
   input: ChatRoomInput;
   image?: Maybe<Scalars['Upload']>;
@@ -264,6 +299,14 @@ export type JoinRoomMutationVariables = Exact<{
 
 export type JoinRoomMutation = { __typename?: 'Mutation', joinRoom: boolean };
 
+export type KickUserMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  userId: Scalars['String'];
+}>;
+
+
+export type KickUserMutation = { __typename?: 'Mutation', kickUser: boolean };
+
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -281,6 +324,15 @@ export type RegisterMutationVariables = Exact<{
 
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
+
+export type UpdateChatRoomSettingsMutationVariables = Exact<{
+  roomId: Scalars['String'];
+  settings: SettingsInput;
+  image?: Maybe<Scalars['Upload']>;
+}>;
+
+
+export type UpdateChatRoomSettingsMutation = { __typename?: 'Mutation', updateChatRoomSettings: boolean };
 
 export type GetCreatorChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -387,6 +439,38 @@ export const RegularUserFragmentDoc = gql`
   updatedAt
 }
     `;
+export const ChangeUserRoomPermissionsDocument = gql`
+    mutation ChangeUserRoomPermissions($roomId: String!, $userId: String!) {
+  changeUserRoomPermissions(roomId: $roomId, userId: $userId)
+}
+    `;
+export type ChangeUserRoomPermissionsMutationFn = Apollo.MutationFunction<ChangeUserRoomPermissionsMutation, ChangeUserRoomPermissionsMutationVariables>;
+
+/**
+ * __useChangeUserRoomPermissionsMutation__
+ *
+ * To run a mutation, you first call `useChangeUserRoomPermissionsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangeUserRoomPermissionsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changeUserRoomPermissionsMutation, { data, loading, error }] = useChangeUserRoomPermissionsMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useChangeUserRoomPermissionsMutation(baseOptions?: Apollo.MutationHookOptions<ChangeUserRoomPermissionsMutation, ChangeUserRoomPermissionsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangeUserRoomPermissionsMutation, ChangeUserRoomPermissionsMutationVariables>(ChangeUserRoomPermissionsDocument, options);
+      }
+export type ChangeUserRoomPermissionsMutationHookResult = ReturnType<typeof useChangeUserRoomPermissionsMutation>;
+export type ChangeUserRoomPermissionsMutationResult = Apollo.MutationResult<ChangeUserRoomPermissionsMutation>;
+export type ChangeUserRoomPermissionsMutationOptions = Apollo.BaseMutationOptions<ChangeUserRoomPermissionsMutation, ChangeUserRoomPermissionsMutationVariables>;
 export const CreateChatRoomDocument = gql`
     mutation CreateChatRoom($input: ChatRoomInput!, $image: Upload) {
   createChatRoom(input: $input, image: $image) {
@@ -495,6 +579,38 @@ export function useJoinRoomMutation(baseOptions?: Apollo.MutationHookOptions<Joi
 export type JoinRoomMutationHookResult = ReturnType<typeof useJoinRoomMutation>;
 export type JoinRoomMutationResult = Apollo.MutationResult<JoinRoomMutation>;
 export type JoinRoomMutationOptions = Apollo.BaseMutationOptions<JoinRoomMutation, JoinRoomMutationVariables>;
+export const KickUserDocument = gql`
+    mutation KickUser($roomId: String!, $userId: String!) {
+  kickUser(roomId: $roomId, userId: $userId)
+}
+    `;
+export type KickUserMutationFn = Apollo.MutationFunction<KickUserMutation, KickUserMutationVariables>;
+
+/**
+ * __useKickUserMutation__
+ *
+ * To run a mutation, you first call `useKickUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useKickUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [kickUserMutation, { data, loading, error }] = useKickUserMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useKickUserMutation(baseOptions?: Apollo.MutationHookOptions<KickUserMutation, KickUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<KickUserMutation, KickUserMutationVariables>(KickUserDocument, options);
+      }
+export type KickUserMutationHookResult = ReturnType<typeof useKickUserMutation>;
+export type KickUserMutationResult = Apollo.MutationResult<KickUserMutation>;
+export type KickUserMutationOptions = Apollo.BaseMutationOptions<KickUserMutation, KickUserMutationVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
@@ -579,6 +695,39 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const UpdateChatRoomSettingsDocument = gql`
+    mutation UpdateChatRoomSettings($roomId: String!, $settings: SettingsInput!, $image: Upload) {
+  updateChatRoomSettings(roomId: $roomId, settings: $settings, image: $image)
+}
+    `;
+export type UpdateChatRoomSettingsMutationFn = Apollo.MutationFunction<UpdateChatRoomSettingsMutation, UpdateChatRoomSettingsMutationVariables>;
+
+/**
+ * __useUpdateChatRoomSettingsMutation__
+ *
+ * To run a mutation, you first call `useUpdateChatRoomSettingsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateChatRoomSettingsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateChatRoomSettingsMutation, { data, loading, error }] = useUpdateChatRoomSettingsMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *      settings: // value for 'settings'
+ *      image: // value for 'image'
+ *   },
+ * });
+ */
+export function useUpdateChatRoomSettingsMutation(baseOptions?: Apollo.MutationHookOptions<UpdateChatRoomSettingsMutation, UpdateChatRoomSettingsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateChatRoomSettingsMutation, UpdateChatRoomSettingsMutationVariables>(UpdateChatRoomSettingsDocument, options);
+      }
+export type UpdateChatRoomSettingsMutationHookResult = ReturnType<typeof useUpdateChatRoomSettingsMutation>;
+export type UpdateChatRoomSettingsMutationResult = Apollo.MutationResult<UpdateChatRoomSettingsMutation>;
+export type UpdateChatRoomSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateChatRoomSettingsMutation, UpdateChatRoomSettingsMutationVariables>;
 export const GetCreatorChatRoomsDocument = gql`
     query GetCreatorChatRooms {
   getCreatorChatRooms {

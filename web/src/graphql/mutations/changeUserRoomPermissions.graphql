@@ -1,0 +1,3 @@
+mutation ChangeUserRoomPermissions($roomId: String!, $userId: String!) {
+    changeUserRoomPermissions(roomId: $roomId, userId: $userId)
+}

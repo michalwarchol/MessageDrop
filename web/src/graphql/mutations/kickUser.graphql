@@ -1,0 +1,3 @@
+mutation KickUser($roomId: String!, $userId: String!) {
+    kickUser(roomId: $roomId, userId: $userId)
+}
