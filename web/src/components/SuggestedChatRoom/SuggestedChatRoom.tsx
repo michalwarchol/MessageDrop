@@ -3,13 +3,14 @@ import styles from "./SuggestedChatRoom.module.scss";
 import {
   ChatRoomWithImage,
   RoomAccess,
-  useJoinRoomMutation,
+  useJoinRoomMutation
 } from "../../generated/graphql";
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import { BsFillChatDotsFill } from "react-icons/bs";
 import { FiUserPlus, FiMail } from "react-icons/fi";
 import Button from "../Button/Button";
+import { joinRoomUpdate } from "../../cacheModifications/joinRoomUpdate";
 
 interface Props {
   chatRoomWithImage: ChatRoomWithImage;
@@ -23,6 +24,7 @@ const SuggestedChatRoom: React.FC<Props> = ({ chatRoomWithImage }) => {
       variables: {
         roomId: chatRoomWithImage.chatRoom._id,
       },
+      update: joinRoomUpdate(chatRoomWithImage),
     });
   };
 
