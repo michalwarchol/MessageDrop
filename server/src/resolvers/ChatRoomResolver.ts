@@ -22,6 +22,7 @@ import { isRoomMember } from "../middleware/isRoomMember";
 import { UserWithAvatar } from "./UserResolver";
 import { User, UserModel } from "../entities/User";
 import { SettingsInput } from "./types/SettingsInput";
+import { hasPermissions } from "../middleware/hasPermissions";
 
 @ObjectType()
 class ChatRoomResponse {
@@ -155,7 +156,7 @@ export class ChatRoomResolver {
   }
 
   @Query(() => ChatRoomUsers)
-  @UseMiddleware(isAuth, isRoomMember)
+  @UseMiddleware(isAuth)
   async getChatRoomUsers(
     @Ctx() context: Context,
     @Arg("roomId", () => String) roomId: string
@@ -274,7 +275,7 @@ export class ChatRoomResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseMiddleware(isAuth, isRoomMember)
+  @UseMiddleware(isAuth, isRoomMember, hasPermissions)
   async kickUser(
     @Ctx() _: Context,
     @Arg("roomId", () => String) roomId: string,
@@ -288,7 +289,7 @@ export class ChatRoomResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseMiddleware(isAuth, isRoomMember)
+  @UseMiddleware(isAuth, isRoomMember, hasPermissions)
   async changeUserRoomPermissions(
     @Ctx() _: Context,
     @Arg("roomId", () => String) roomId: string,
@@ -319,7 +320,7 @@ export class ChatRoomResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseMiddleware(isAuth, isRoomMember)
+  @UseMiddleware(isAuth, isRoomMember, hasPermissions)
   async updateChatRoomSettings(
     @Ctx() context: Context,
     @Arg("roomId", ()=>String) roomId: string,
