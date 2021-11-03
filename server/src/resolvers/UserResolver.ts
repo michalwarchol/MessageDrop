@@ -14,7 +14,7 @@ import { RegisterInput } from "./types/RegisterInput";
 import {FieldError } from "./types/FieldError";
 import bcrypt from "bcrypt";
 import { generateVerificationCode } from "../utils/generateVerificationCode";
-import { VERIFICATION_PREFIX } from "../constants";
+import { COOKIE_NAME, VERIFICATION_PREFIX } from "../constants";
 import { getFile } from "../utils/getFile";
 
 
@@ -180,5 +180,20 @@ export class UserResolver {
     return {
       user,
     };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: Context) {
+    return new Promise((resolve) =>
+      req.session.destroy((err) => {
+        res.clearCookie(COOKIE_NAME);
+        if (err) {
+          resolve(false);
+          return;
+        }
+
+        resolve(true);
+      })
+    );
   }
 }
