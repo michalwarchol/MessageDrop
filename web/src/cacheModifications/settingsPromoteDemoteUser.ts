@@ -10,7 +10,11 @@ export const settingsPromoteDemoteUser = (
   roomId: string,
   userWithAvatar: UserWithAvatar
 ) => {
-  return (cache: ApolloCache<any>) => {
+  return (cache: ApolloCache<any>, {data}: any) => {
+
+    if(!data.changeUserRoomPermissions){
+      return;
+    }
     const chatRoom: any = cache.readFragment({
       id: "ChatRoom:" + roomId,
       fragment: gql`

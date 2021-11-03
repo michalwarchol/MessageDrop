@@ -10,7 +10,12 @@ export const settingsKickUser = (
   roomId: string,
   userWithAvatar: UserWithAvatar
 ) => {
-  return (cache: ApolloCache<any>) => {
+  return (cache: ApolloCache<any>, {data}: any) => {
+
+    if(!data.kickUser){
+      return;
+    }
+
     //getChatRoomById with _id: roomId
     const chatRoom: any = cache.readFragment({
       id: "ChatRoom:" + roomId,
