@@ -80,7 +80,7 @@ export class ChatRoomResolver {
 
   @Query(() => [ChatRoomWithImage])
   @UseMiddleware(isAuth)
-  async getCreatorChatRooms(
+  async getUserChatRooms(
     @Ctx() { s3, req }: Context
   ): Promise<ChatRoomWithImage[]> {
     const chatRooms = await ChatRoomModel.find({

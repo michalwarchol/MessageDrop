@@ -2,12 +2,12 @@ import React from "react";
 import styles from "./ChatSidebar.module.scss";
 import Divider from "../Divider/Divider";
 import CreateChatButton from "../CreateChatButton/CreateChatButton";
-import { useGetCreatorChatRoomsQuery } from "../../generated/graphql";
+import { useGetUserChatRoomsQuery } from "../../generated/graphql";
 import ChatRoomShortCut from "../ChatRoomShortcut/ChatRoomShortcut";
 
 const ChatSidebar: React.FC = () => {
 
-  const {data} = useGetCreatorChatRoomsQuery();
+  const {data} = useGetUserChatRoomsQuery();
 
   return (
     <div className={styles.chatSidebar}>
@@ -16,7 +16,7 @@ const ChatSidebar: React.FC = () => {
       </div>
       <Divider />
       <div className={styles.userRooms}>
-        {data?.getCreatorChatRooms.map((elem, index) => (<ChatRoomShortCut chatRoomWithImage={elem} key={index} />))}
+        {data?.getUserChatRooms.map((elem, index) => (<ChatRoomShortCut chatRoomWithImage={elem} key={index} />))}
       </div>
     </div>
   );

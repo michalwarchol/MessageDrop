@@ -1,5 +1,5 @@
-query GetCreatorChatRooms {
-  getCreatorChatRooms{
+query GetUserChatRooms {
+  getUserChatRooms{
     chatRoom {
       ...RegularChatRoom
     }

@@ -171,10 +171,10 @@ export type Query = {
   getChatRoomById: ChatRoomWithImage;
   getChatRoomUsers: ChatRoomUsers;
   getChatRooms: Array<ChatRoom>;
-  getCreatorChatRooms: Array<ChatRoomWithImage>;
   getRoomMessages: PaginatedMessages;
   getSuggestedChatRooms: Array<ChatRoomWithImage>;
   getUserById: UserWithAvatar;
+  getUserChatRooms: Array<ChatRoomWithImage>;
   getUsers: Array<User>;
   isChatMember: Scalars['Boolean'];
   me?: Maybe<User>;
@@ -340,10 +340,10 @@ export type UpdateChatRoomSettingsMutationVariables = Exact<{
 
 export type UpdateChatRoomSettingsMutation = { __typename?: 'Mutation', updateChatRoomSettings: boolean };
 
-export type GetCreatorChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetUserChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetCreatorChatRoomsQuery = { __typename?: 'Query', getCreatorChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
+export type GetUserChatRoomsQuery = { __typename?: 'Query', getUserChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
 
 export type GetChatRoomByIdQueryVariables = Exact<{
   roomId: Scalars['String'];
@@ -764,9 +764,9 @@ export function useUpdateChatRoomSettingsMutation(baseOptions?: Apollo.MutationH
 export type UpdateChatRoomSettingsMutationHookResult = ReturnType<typeof useUpdateChatRoomSettingsMutation>;
 export type UpdateChatRoomSettingsMutationResult = Apollo.MutationResult<UpdateChatRoomSettingsMutation>;
 export type UpdateChatRoomSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateChatRoomSettingsMutation, UpdateChatRoomSettingsMutationVariables>;
-export const GetCreatorChatRoomsDocument = gql`
-    query GetCreatorChatRooms {
-  getCreatorChatRooms {
+export const GetUserChatRoomsDocument = gql`
+    query GetUserChatRooms {
+  getUserChatRooms {
     chatRoom {
       ...RegularChatRoom
     }
@@ -776,31 +776,31 @@ export const GetCreatorChatRoomsDocument = gql`
     ${RegularChatRoomFragmentDoc}`;
 
 /**
- * __useGetCreatorChatRoomsQuery__
+ * __useGetUserChatRoomsQuery__
  *
- * To run a query within a React component, call `useGetCreatorChatRoomsQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetCreatorChatRoomsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetUserChatRoomsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserChatRoomsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetCreatorChatRoomsQuery({
+ * const { data, loading, error } = useGetUserChatRoomsQuery({
  *   variables: {
  *   },
  * });
  */
-export function useGetCreatorChatRoomsQuery(baseOptions?: Apollo.QueryHookOptions<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>) {
+export function useGetUserChatRoomsQuery(baseOptions?: Apollo.QueryHookOptions<GetUserChatRoomsQuery, GetUserChatRoomsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>(GetCreatorChatRoomsDocument, options);
+        return Apollo.useQuery<GetUserChatRoomsQuery, GetUserChatRoomsQueryVariables>(GetUserChatRoomsDocument, options);
       }
-export function useGetCreatorChatRoomsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>) {
+export function useGetUserChatRoomsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserChatRoomsQuery, GetUserChatRoomsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>(GetCreatorChatRoomsDocument, options);
+          return Apollo.useLazyQuery<GetUserChatRoomsQuery, GetUserChatRoomsQueryVariables>(GetUserChatRoomsDocument, options);
         }
-export type GetCreatorChatRoomsQueryHookResult = ReturnType<typeof useGetCreatorChatRoomsQuery>;
-export type GetCreatorChatRoomsLazyQueryHookResult = ReturnType<typeof useGetCreatorChatRoomsLazyQuery>;
-export type GetCreatorChatRoomsQueryResult = Apollo.QueryResult<GetCreatorChatRoomsQuery, GetCreatorChatRoomsQueryVariables>;
+export type GetUserChatRoomsQueryHookResult = ReturnType<typeof useGetUserChatRoomsQuery>;
+export type GetUserChatRoomsLazyQueryHookResult = ReturnType<typeof useGetUserChatRoomsLazyQuery>;
+export type GetUserChatRoomsQueryResult = Apollo.QueryResult<GetUserChatRoomsQuery, GetUserChatRoomsQueryVariables>;
 export const GetChatRoomByIdDocument = gql`
     query GetChatRoomById($roomId: String!) {
   getChatRoomById(roomId: $roomId) {
