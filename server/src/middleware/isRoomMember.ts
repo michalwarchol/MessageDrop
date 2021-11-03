@@ -8,7 +8,7 @@ export const isRoomMember: MiddlewareFn<Context> = async (
 ) => {
   const chatRoom = await ChatRoomModel.findById(args.roomId);
   if (!chatRoom) {
-    throw new Error("No room found!");
+    return false;
   }
   if (chatRoom.adminId == context.req.session.userId) {
     return next();
@@ -22,5 +22,5 @@ export const isRoomMember: MiddlewareFn<Context> = async (
     return next();
   }
 
-  throw new Error("You have no access to this room!");
+  return false;
 };
