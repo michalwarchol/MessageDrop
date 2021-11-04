@@ -18,6 +18,7 @@ import { execute, subscribe } from 'graphql';
 import { createServer } from 'http';
 import { ChatRoomResolver } from "./resolvers/ChatRoomResolver";
 import { MessageResolver } from "./resolvers/MessageResolver";
+import { ChatRequestResolver } from "./resolvers/ChatRequestResolver";
 
 const main = async () => {
   await mongoose.connect(process.env.DB_URL, {
@@ -64,7 +65,7 @@ const main = async () => {
   });
 
   const schema = await buildSchema({
-    resolvers: [UserResolver, ChatRoomResolver, MessageResolver],
+    resolvers: [UserResolver, ChatRoomResolver, MessageResolver, ChatRequestResolver],
     validate: false,
   })
 
