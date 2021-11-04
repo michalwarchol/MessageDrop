@@ -1,0 +1,18 @@
+@import "../../styles/config";
+
+.roomRequests {
+    margin-right: 10px;
+
+    .requestsContainer {
+        position: absolute;
+        padding: 10px;
+        background-color: $secondaryColor;
+        border: 2px solid $alternativeColor;
+        border-radius: 8px;
+        box-shadow: 0 0 10px $alternativeColor;
+    }
+    .empty {
+        width: 300px;
+        text-align: center;
+    }
+}
