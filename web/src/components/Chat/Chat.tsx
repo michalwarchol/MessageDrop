@@ -25,7 +25,8 @@ import RoomSettings from "../RoomSettings/RoomSettings";
 import { useRouter } from "next/router";
 import { isServer } from "../../utils/isServer";
 import dynamic from "next/dynamic";
-const Picker = dynamic(() => import('emoji-picker-react'), {
+import RoomRequests from "../RoomRequests/RoomRequests";
+const Picker = dynamic(() => import("emoji-picker-react"), {
   ssr: false,
 });
 
@@ -62,7 +63,7 @@ const Chat: React.FC = () => {
   }, []);
 
   const onEmojiClick = (_: any, emojiObject: any) => {
-    setText(text+emojiObject.emoji)
+    setText(text + emojiObject.emoji);
   };
 
   return (
@@ -99,18 +100,24 @@ const Chat: React.FC = () => {
           )) && (
           <div className={styles.showSettings}>
             {windowHeight > 900 ? (
-              <RoomSettings />
+              <>
+                <RoomRequests />
+                <RoomSettings />
+              </>
             ) : (
-              <IconButton
-                Icon={BsFillGearFill}
-                variant="outline"
-                onClick={() => {
-                  router.push({
-                    pathname: "/chatroom/[id]/settings",
-                    query: { id: roomId },
-                  });
-                }}
-              />
+              <>
+              <RoomRequests />
+                <IconButton
+                  Icon={BsFillGearFill}
+                  variant="outline"
+                  onClick={() => {
+                    router.push({
+                      pathname: "/chatroom/[id]/settings",
+                      query: { id: roomId },
+                    });
+                  }}
+                />
+              </>
             )}
           </div>
         )}
@@ -146,100 +153,114 @@ const Chat: React.FC = () => {
         >
           {() => {
             let disabled = false;
-            if(!text && !media && !file){
+            if (!text && !media && !file) {
               disabled = true;
             }
-            return(
-            <Form className={styles.chatFormFields}>
-              <div className={styles.inputs}>
-                <InputField
-                  name="text"
-                  value={text}
-                  onChange={(e) => setText(e.currentTarget.value)}
-                  placeholder="Write something..."
-                />
-                <label htmlFor="media">
-                  <IconButton
-                    Icon={BsFileImageFill}
-                    variant="outline"
-                    className={
-                      media ? styles.actionButtonActive : styles.actionButton
-                    }
-                    type="button"
-                    onClick={() => {
-                      if (media) {
-                        setMedia(null);
-                        if (mediaInputRef.current) {
-                          mediaInputRef.current.value = "";
-                        }
-                      } else {
-                        mediaInputRef.current?.click();
+            return (
+              <Form className={styles.chatFormFields}>
+                <div className={styles.inputs}>
+                  <InputField
+                    name="text"
+                    value={text}
+                    onChange={(e) => setText(e.currentTarget.value)}
+                    placeholder="Write something..."
+                  />
+                  <label htmlFor="media">
+                    <IconButton
+                      Icon={BsFileImageFill}
+                      variant="outline"
+                      className={
+                        media ? styles.actionButtonActive : styles.actionButton
                       }
-                    }}
-                  />
-                  <input
-                    type="file"
-                    id="media"
-                    accept="image/png, image/jpeg"
-                    ref={mediaInputRef}
-                    className={styles.fileInput}
-                    onChange={(e) => {
-                      if (e.target.files != null) setMedia(e.target.files[0]);
-                    }}
-                  />
-                </label>
-                <label htmlFor="file">
-                  <IconButton
-                    Icon={
-                      file
-                        ? BsFillFileEarmarkCheckFill
-                        : BsFillFileEarmarkPlusFill
-                    }
-                    variant="outline"
-                    className={
-                      file ? styles.actionButtonActive : styles.actionButton
-                    }
-                    type="button"
-                    onClick={() => {
-                      if (file) {
-                        setFile(null);
-                        if (fileInputRef.current) {
-                          fileInputRef.current.value = "";
+                      type="button"
+                      onClick={() => {
+                        if (media) {
+                          setMedia(null);
+                          if (mediaInputRef.current) {
+                            mediaInputRef.current.value = "";
+                          }
+                        } else {
+                          mediaInputRef.current?.click();
                         }
-                      } else {
-                        fileInputRef.current?.click();
+                      }}
+                    />
+                    <input
+                      type="file"
+                      id="media"
+                      accept="image/png, image/jpeg"
+                      ref={mediaInputRef}
+                      className={styles.fileInput}
+                      onChange={(e) => {
+                        if (e.target.files != null) setMedia(e.target.files[0]);
+                      }}
+                    />
+                  </label>
+                  <label htmlFor="file">
+                    <IconButton
+                      Icon={
+                        file
+                          ? BsFillFileEarmarkCheckFill
+                          : BsFillFileEarmarkPlusFill
                       }
-                    }}
+                      variant="outline"
+                      className={
+                        file ? styles.actionButtonActive : styles.actionButton
+                      }
+                      type="button"
+                      onClick={() => {
+                        if (file) {
+                          setFile(null);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                          }
+                        } else {
+                          fileInputRef.current?.click();
+                        }
+                      }}
+                    />
+                    <input
+                      type="file"
+                      id="file"
+                      ref={fileInputRef}
+                      className={styles.fileInput}
+                      onChange={(e) => {
+                        if (e.target.files != null) setFile(e.target.files[0]);
+                      }}
+                    />
+                  </label>
+                  <IconButton
+                    Icon={BsEmojiLaughingFill}
+                    variant="outline"
+                    type="button"
+                    className={
+                      showEmojiPicker
+                        ? styles.actionButtonActive
+                        : styles.actionButton
+                    }
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   />
-                  <input
-                    type="file"
-                    id="file"
-                    ref={fileInputRef}
-                    className={styles.fileInput}
-                    onChange={(e) => {
-                      if (e.target.files != null) setFile(e.target.files[0]);
-                    }}
+                  {isServer && (
+                    <div
+                      className={styles.picker}
+                      style={{
+                        visibility: showEmojiPicker ? "visible" : "hidden",
+                      }}
+                    >
+                      <Picker onEmojiClick={onEmojiClick} />
+                    </div>
+                  )}
+                  <IconButton
+                    Icon={BsFillCursorFill}
+                    variant="fill"
+                    type="submit"
+                    className={
+                      disabled ? styles.sendButtonDisabled : styles.sendButton
+                    }
                   />
-                </label>
-                <IconButton
-                  Icon={BsEmojiLaughingFill}
-                  variant="outline"
-                  type="button"
-                  className={showEmojiPicker ? styles.actionButtonActive : styles.actionButton}
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                />
-                {isServer &&  <div className={styles.picker} style={{visibility: showEmojiPicker ? "visible":"hidden"}}>
-                <Picker onEmojiClick={onEmojiClick} />
-                </div>}
-                <IconButton
-                  Icon={BsFillCursorFill}
-                  variant="fill"
-                  type="submit"
-                  className={disabled ? styles.sendButtonDisabled : styles.sendButton}
-                />
-              </div>
-            </Form>
-          )}}
+                </div>
+              </Form>
+            );
+          }}
         </Formik>
       </div>
     </div>
