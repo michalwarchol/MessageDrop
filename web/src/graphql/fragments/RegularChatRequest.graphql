@@ -1,0 +1,8 @@
+fragment RegularChatRequest on ChatRequest {
+    _id
+    roomId
+    userId
+    status
+    createdAt
+    updatedAt
+}

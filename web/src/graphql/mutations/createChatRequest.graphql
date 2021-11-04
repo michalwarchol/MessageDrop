@@ -1,0 +1,3 @@
+mutation CreateChatRequest($roomId: String!) {
+    createChatRequest(roomId: $roomId)
+}

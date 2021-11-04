@@ -18,6 +18,22 @@ export type Scalars = {
   Upload: any;
 };
 
+export type ChatRequest = {
+  __typename?: 'ChatRequest';
+  _id: Scalars['ID'];
+  createdAt: Scalars['DateTime'];
+  roomId: Scalars['String'];
+  status: ChatRequestStatus;
+  updatedAt: Scalars['DateTime'];
+  userId: Scalars['String'];
+};
+
+/** Provides information about request's process */
+export enum ChatRequestStatus {
+  Accepted = 'accepted',
+  Progress = 'progress'
+}
+
 export type ChatRoom = {
   __typename?: 'ChatRoom';
   _id: Scalars['ID'];
@@ -98,7 +114,9 @@ export type MessageWithMedia = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  acceptChatRequest: Scalars['Boolean'];
   changeUserRoomPermissions: Scalars['Boolean'];
+  createChatRequest: Scalars['Boolean'];
   createChatRoom: ChatRoomResponse;
   createMessage: Message;
   joinRoom: Scalars['Boolean'];
@@ -106,13 +124,25 @@ export type Mutation = {
   login?: Maybe<UserResponse>;
   logout: Scalars['Boolean'];
   register: UserResponse;
+  rejectChatRequest: Scalars['Boolean'];
   updateChatRoomSettings: Scalars['Boolean'];
+};
+
+
+export type MutationAcceptChatRequestArgs = {
+  requestId: Scalars['String'];
+  roomId: Scalars['String'];
 };
 
 
 export type MutationChangeUserRoomPermissionsArgs = {
   roomId: Scalars['String'];
   userId: Scalars['String'];
+};
+
+
+export type MutationCreateChatRequestArgs = {
+  roomId: Scalars['String'];
 };
 
 
@@ -153,6 +183,12 @@ export type MutationRegisterArgs = {
 };
 
 
+export type MutationRejectChatRequestArgs = {
+  requestId: Scalars['String'];
+  roomId: Scalars['String'];
+};
+
+
 export type MutationUpdateChatRoomSettingsArgs = {
   image?: Maybe<Scalars['Upload']>;
   roomId: Scalars['String'];
@@ -169,6 +205,7 @@ export type PaginatedMessages = {
 export type Query = {
   __typename?: 'Query';
   getChatRoomById: ChatRoomWithImage;
+  getChatRoomRequests: Array<RequestWithUser>;
   getChatRoomUsers: ChatRoomUsers;
   getChatRooms: Array<ChatRoom>;
   getRoomMessages: PaginatedMessages;
@@ -182,6 +219,11 @@ export type Query = {
 
 
 export type QueryGetChatRoomByIdArgs = {
+  roomId: Scalars['String'];
+};
+
+
+export type QueryGetChatRoomRequestsArgs = {
   roomId: Scalars['String'];
 };
 
@@ -212,6 +254,12 @@ export type RegisterInput = {
   name: Scalars['String'];
   password: Scalars['String'];
   phone: Scalars['String'];
+};
+
+export type RequestWithUser = {
+  __typename?: 'RequestWithUser';
+  request: ChatRequest;
+  userWithAvatar: UserWithAvatar;
 };
 
 /** Defines user access to a chat room */
@@ -260,11 +308,21 @@ export type UserWithAvatar = {
   user: User;
 };
 
+export type RegularChatRequestFragment = { __typename?: 'ChatRequest', _id: string, roomId: string, userId: string, status: ChatRequestStatus, createdAt: any, updatedAt: any };
+
 export type RegularChatRoomFragment = { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any };
 
 export type RegularMessageFragment = { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> };
 
 export type RegularUserFragment = { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any };
+
+export type AcceptChatRequestMutationVariables = Exact<{
+  requestId: Scalars['String'];
+  roomId: Scalars['String'];
+}>;
+
+
+export type AcceptChatRequestMutation = { __typename?: 'Mutation', acceptChatRequest: boolean };
 
 export type ChangeUserRoomPermissionsMutationVariables = Exact<{
   roomId: Scalars['String'];
@@ -273,6 +331,13 @@ export type ChangeUserRoomPermissionsMutationVariables = Exact<{
 
 
 export type ChangeUserRoomPermissionsMutation = { __typename?: 'Mutation', changeUserRoomPermissions: boolean };
+
+export type CreateChatRequestMutationVariables = Exact<{
+  roomId: Scalars['String'];
+}>;
+
+
+export type CreateChatRequestMutation = { __typename?: 'Mutation', createChatRequest: boolean };
 
 export type CreateChatRoomMutationVariables = Exact<{
   input: ChatRoomInput;
@@ -331,6 +396,14 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'UserResponse', user?: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
 
+export type RejectChatRequstMutationVariables = Exact<{
+  requestId: Scalars['String'];
+  roomId: Scalars['String'];
+}>;
+
+
+export type RejectChatRequstMutation = { __typename?: 'Mutation', rejectChatRequest: boolean };
+
 export type UpdateChatRoomSettingsMutationVariables = Exact<{
   roomId: Scalars['String'];
   settings: SettingsInput;
@@ -351,6 +424,13 @@ export type GetChatRoomByIdQueryVariables = Exact<{
 
 
 export type GetChatRoomByIdQuery = { __typename?: 'Query', getChatRoomById: { __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } } };
+
+export type GetChatRoomRequestsQueryVariables = Exact<{
+  roomId: Scalars['String'];
+}>;
+
+
+export type GetChatRoomRequestsQuery = { __typename?: 'Query', getChatRoomRequests: Array<{ __typename?: 'RequestWithUser', request: { __typename?: 'ChatRequest', _id: string, roomId: string, userId: string, status: ChatRequestStatus, createdAt: any, updatedAt: any }, userWithAvatar: { __typename?: 'UserWithAvatar', avatar?: string | null | undefined, user: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } } }> };
 
 export type GetChatRoomUsersQueryVariables = Exact<{
   roomId: Scalars['String'];
@@ -399,6 +479,16 @@ export type NewMessageSubscriptionVariables = Exact<{
 
 export type NewMessageSubscription = { __typename?: 'Subscription', newMessage: { __typename?: 'MessageWithMedia', media?: string | null | undefined, file?: string | null | undefined, message: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } } };
 
+export const RegularChatRequestFragmentDoc = gql`
+    fragment RegularChatRequest on ChatRequest {
+  _id
+  roomId
+  userId
+  status
+  createdAt
+  updatedAt
+}
+    `;
 export const RegularChatRoomFragmentDoc = gql`
     fragment RegularChatRoom on ChatRoom {
   _id
@@ -445,6 +535,38 @@ export const RegularUserFragmentDoc = gql`
   updatedAt
 }
     `;
+export const AcceptChatRequestDocument = gql`
+    mutation AcceptChatRequest($requestId: String!, $roomId: String!) {
+  acceptChatRequest(requestId: $requestId, roomId: $roomId)
+}
+    `;
+export type AcceptChatRequestMutationFn = Apollo.MutationFunction<AcceptChatRequestMutation, AcceptChatRequestMutationVariables>;
+
+/**
+ * __useAcceptChatRequestMutation__
+ *
+ * To run a mutation, you first call `useAcceptChatRequestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAcceptChatRequestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [acceptChatRequestMutation, { data, loading, error }] = useAcceptChatRequestMutation({
+ *   variables: {
+ *      requestId: // value for 'requestId'
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useAcceptChatRequestMutation(baseOptions?: Apollo.MutationHookOptions<AcceptChatRequestMutation, AcceptChatRequestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AcceptChatRequestMutation, AcceptChatRequestMutationVariables>(AcceptChatRequestDocument, options);
+      }
+export type AcceptChatRequestMutationHookResult = ReturnType<typeof useAcceptChatRequestMutation>;
+export type AcceptChatRequestMutationResult = Apollo.MutationResult<AcceptChatRequestMutation>;
+export type AcceptChatRequestMutationOptions = Apollo.BaseMutationOptions<AcceptChatRequestMutation, AcceptChatRequestMutationVariables>;
 export const ChangeUserRoomPermissionsDocument = gql`
     mutation ChangeUserRoomPermissions($roomId: String!, $userId: String!) {
   changeUserRoomPermissions(roomId: $roomId, userId: $userId)
@@ -477,6 +599,37 @@ export function useChangeUserRoomPermissionsMutation(baseOptions?: Apollo.Mutati
 export type ChangeUserRoomPermissionsMutationHookResult = ReturnType<typeof useChangeUserRoomPermissionsMutation>;
 export type ChangeUserRoomPermissionsMutationResult = Apollo.MutationResult<ChangeUserRoomPermissionsMutation>;
 export type ChangeUserRoomPermissionsMutationOptions = Apollo.BaseMutationOptions<ChangeUserRoomPermissionsMutation, ChangeUserRoomPermissionsMutationVariables>;
+export const CreateChatRequestDocument = gql`
+    mutation CreateChatRequest($roomId: String!) {
+  createChatRequest(roomId: $roomId)
+}
+    `;
+export type CreateChatRequestMutationFn = Apollo.MutationFunction<CreateChatRequestMutation, CreateChatRequestMutationVariables>;
+
+/**
+ * __useCreateChatRequestMutation__
+ *
+ * To run a mutation, you first call `useCreateChatRequestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateChatRequestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createChatRequestMutation, { data, loading, error }] = useCreateChatRequestMutation({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useCreateChatRequestMutation(baseOptions?: Apollo.MutationHookOptions<CreateChatRequestMutation, CreateChatRequestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateChatRequestMutation, CreateChatRequestMutationVariables>(CreateChatRequestDocument, options);
+      }
+export type CreateChatRequestMutationHookResult = ReturnType<typeof useCreateChatRequestMutation>;
+export type CreateChatRequestMutationResult = Apollo.MutationResult<CreateChatRequestMutation>;
+export type CreateChatRequestMutationOptions = Apollo.BaseMutationOptions<CreateChatRequestMutation, CreateChatRequestMutationVariables>;
 export const CreateChatRoomDocument = gql`
     mutation CreateChatRoom($input: ChatRoomInput!, $image: Upload) {
   createChatRoom(input: $input, image: $image) {
@@ -731,6 +884,38 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const RejectChatRequstDocument = gql`
+    mutation RejectChatRequst($requestId: String!, $roomId: String!) {
+  rejectChatRequest(requestId: $requestId, roomId: $roomId)
+}
+    `;
+export type RejectChatRequstMutationFn = Apollo.MutationFunction<RejectChatRequstMutation, RejectChatRequstMutationVariables>;
+
+/**
+ * __useRejectChatRequstMutation__
+ *
+ * To run a mutation, you first call `useRejectChatRequstMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRejectChatRequstMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [rejectChatRequstMutation, { data, loading, error }] = useRejectChatRequstMutation({
+ *   variables: {
+ *      requestId: // value for 'requestId'
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useRejectChatRequstMutation(baseOptions?: Apollo.MutationHookOptions<RejectChatRequstMutation, RejectChatRequstMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RejectChatRequstMutation, RejectChatRequstMutationVariables>(RejectChatRequstDocument, options);
+      }
+export type RejectChatRequstMutationHookResult = ReturnType<typeof useRejectChatRequstMutation>;
+export type RejectChatRequstMutationResult = Apollo.MutationResult<RejectChatRequstMutation>;
+export type RejectChatRequstMutationOptions = Apollo.BaseMutationOptions<RejectChatRequstMutation, RejectChatRequstMutationVariables>;
 export const UpdateChatRoomSettingsDocument = gql`
     mutation UpdateChatRoomSettings($roomId: String!, $settings: SettingsInput!, $image: Upload) {
   updateChatRoomSettings(roomId: $roomId, settings: $settings, image: $image)
@@ -839,6 +1024,50 @@ export function useGetChatRoomByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOp
 export type GetChatRoomByIdQueryHookResult = ReturnType<typeof useGetChatRoomByIdQuery>;
 export type GetChatRoomByIdLazyQueryHookResult = ReturnType<typeof useGetChatRoomByIdLazyQuery>;
 export type GetChatRoomByIdQueryResult = Apollo.QueryResult<GetChatRoomByIdQuery, GetChatRoomByIdQueryVariables>;
+export const GetChatRoomRequestsDocument = gql`
+    query GetChatRoomRequests($roomId: String!) {
+  getChatRoomRequests(roomId: $roomId) {
+    request {
+      ...RegularChatRequest
+    }
+    userWithAvatar {
+      user {
+        ...RegularUser
+      }
+      avatar
+    }
+  }
+}
+    ${RegularChatRequestFragmentDoc}
+${RegularUserFragmentDoc}`;
+
+/**
+ * __useGetChatRoomRequestsQuery__
+ *
+ * To run a query within a React component, call `useGetChatRoomRequestsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetChatRoomRequestsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetChatRoomRequestsQuery({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useGetChatRoomRequestsQuery(baseOptions: Apollo.QueryHookOptions<GetChatRoomRequestsQuery, GetChatRoomRequestsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetChatRoomRequestsQuery, GetChatRoomRequestsQueryVariables>(GetChatRoomRequestsDocument, options);
+      }
+export function useGetChatRoomRequestsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetChatRoomRequestsQuery, GetChatRoomRequestsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetChatRoomRequestsQuery, GetChatRoomRequestsQueryVariables>(GetChatRoomRequestsDocument, options);
+        }
+export type GetChatRoomRequestsQueryHookResult = ReturnType<typeof useGetChatRoomRequestsQuery>;
+export type GetChatRoomRequestsLazyQueryHookResult = ReturnType<typeof useGetChatRoomRequestsLazyQuery>;
+export type GetChatRoomRequestsQueryResult = Apollo.QueryResult<GetChatRoomRequestsQuery, GetChatRoomRequestsQueryVariables>;
 export const GetChatRoomUsersDocument = gql`
     query GetChatRoomUsers($roomId: String!) {
   getChatRoomUsers(roomId: $roomId) {

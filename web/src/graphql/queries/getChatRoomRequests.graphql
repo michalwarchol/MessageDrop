@@ -1,0 +1,13 @@
+query GetChatRoomRequests($roomId: String!) {
+  getChatRoomRequests(roomId: $roomId) {
+    request {
+      ...RegularChatRequest
+    }
+    userWithAvatar {
+      user {
+        ...RegularUser
+      }
+      avatar
+    }
+  }
+}
