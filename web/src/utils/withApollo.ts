@@ -41,6 +41,7 @@ const client = new ApolloClient({
         switch(responseObject.__typename){
           case 'UserWithAvatar':return `UserWithAvatar:${(responseObject.user as any)._id}`;
           case 'ChatRoomWithImage': return `ChatRoomWithImage:${(responseObject.chatRoom as any)._id}`
+          case 'RequestWithUser': return `RequestWithUser:${(responseObject.request as any)._id}`
           default: return defaultDataIdFromObject(responseObject);
         }
       },
