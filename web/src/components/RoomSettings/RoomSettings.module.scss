@@ -2,6 +2,8 @@
 
 .roomSettings {
     padding: 10px;
+    position: relative;
+    z-index: 90;
     .regularField {
         @include RegularField();
     }
