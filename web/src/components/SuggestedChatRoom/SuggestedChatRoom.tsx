@@ -3,7 +3,8 @@ import styles from "./SuggestedChatRoom.module.scss";
 import {
   ChatRoomWithImage,
   RoomAccess,
-  useJoinRoomMutation
+  useCreateChatRequestMutation,
+  useJoinRoomMutation,
 } from "../../generated/graphql";
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
@@ -11,13 +12,16 @@ import { BsFillChatDotsFill } from "react-icons/bs";
 import { FiUserPlus, FiMail } from "react-icons/fi";
 import Button from "../Button/Button";
 import { joinRoomUpdate } from "../../cacheModifications/joinRoomUpdate";
+import { sendRequestUpdate } from "../../cacheModifications/sendRequestUpdate";
 
 interface Props {
   chatRoomWithImage: ChatRoomWithImage;
 }
 
 const SuggestedChatRoom: React.FC<Props> = ({ chatRoomWithImage }) => {
-  const [joinRoom, { loading }] = useJoinRoomMutation();
+  const [joinRoom, { loading: joinLoading }] = useJoinRoomMutation();
+  const [createChatRequest, { loading: sendLoading }] =
+    useCreateChatRequestMutation();
 
   const handleJoinRoom = async () => {
     await joinRoom({
@@ -25,6 +29,13 @@ const SuggestedChatRoom: React.FC<Props> = ({ chatRoomWithImage }) => {
         roomId: chatRoomWithImage.chatRoom._id,
       },
       update: joinRoomUpdate(chatRoomWithImage),
+    });
+  };
+
+  const handleSendRequest = async () => {
+    await createChatRequest({
+      variables: { roomId: chatRoomWithImage.chatRoom._id },
+      update: sendRequestUpdate(chatRoomWithImage),
     });
   };
 
@@ -64,11 +75,11 @@ const SuggestedChatRoom: React.FC<Props> = ({ chatRoomWithImage }) => {
               ? FiUserPlus
               : FiMail
           }
-          loading={loading}
+          loading={joinLoading || sendLoading}
           onClick={
             chatRoomWithImage.chatRoom.access == RoomAccess.Public
               ? handleJoinRoom
-              : () => console.log("send request")
+              : handleSendRequest
           }
         />
       </div>
