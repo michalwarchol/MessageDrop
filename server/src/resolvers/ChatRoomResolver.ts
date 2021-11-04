@@ -23,6 +23,7 @@ import { UserWithAvatar } from "./UserResolver";
 import { User, UserModel } from "../entities/User";
 import { SettingsInput } from "./types/SettingsInput";
 import { hasPermissions } from "../middleware/hasPermissions";
+import { ChatRequestModel } from "../entities/ChatRequest";
 
 @ObjectType()
 class ChatRoomResponse {
@@ -142,8 +143,16 @@ export class ChatRoomResolver {
       ],
     });
 
+    //get user chat requests to filter suggested chat rooms
+    const userRequests = await ChatRequestModel.find({userId}).select({"roomId": 1, "_id": 0});
+    const badRoomIds = userRequests.map((elem)=>elem.roomId);
+
+    //filter chat rooms - if a user sent a request to join a room, don't include the room to suggested rooms
+    const filteredRooms = chatRooms.filter((elem)=>!badRoomIds.includes(elem._id.toString()));
+
+    //get chat room images
     let chatRoomsWithImages: ChatRoomWithImage[] = await Promise.all(
-      chatRooms.map(async (elem) => {
+      filteredRooms.map(async (elem) => {
         const image = await getFile(s3, elem.imageId);
         return {
           chatRoom: elem as ChatRoom,
@@ -285,6 +294,9 @@ export class ChatRoomResolver {
       { _id: roomId },
       { $pull: { modIds: userId, userIds: userId } }
     );
+
+    await ChatRequestModel.deleteOne({userId});
+
     return result.matchedCount > 0;
   }
 
