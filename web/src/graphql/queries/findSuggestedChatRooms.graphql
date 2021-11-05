@@ -1,0 +1,8 @@
+query FindSuggestedChatRooms($search: String!) {
+  findSuggestedChatRooms(search: $search){
+    chatRoom {
+      ...RegularChatRoom
+    }
+    image
+  }
+}

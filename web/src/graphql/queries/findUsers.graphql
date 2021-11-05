@@ -1,0 +1,8 @@
+query FindUsers($search: String!) {
+	findUsers(search: $search) {
+    user {
+      ...RegularUser
+    }
+    avatar
+  }
+}

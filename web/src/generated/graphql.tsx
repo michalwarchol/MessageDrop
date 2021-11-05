@@ -204,6 +204,8 @@ export type PaginatedMessages = {
 
 export type Query = {
   __typename?: 'Query';
+  findSuggestedChatRooms: Array<ChatRoomWithImage>;
+  findUsers: Array<UserWithAvatar>;
   getChatRoomById: ChatRoomWithImage;
   getChatRoomRequests: Array<RequestWithUser>;
   getChatRoomUsers: ChatRoomUsers;
@@ -215,6 +217,16 @@ export type Query = {
   getUsers: Array<User>;
   isChatMember: Scalars['Boolean'];
   me?: Maybe<User>;
+};
+
+
+export type QueryFindSuggestedChatRoomsArgs = {
+  search: Scalars['String'];
+};
+
+
+export type QueryFindUsersArgs = {
+  search: Scalars['String'];
 };
 
 
@@ -417,6 +429,20 @@ export type GetUserChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetUserChatRoomsQuery = { __typename?: 'Query', getUserChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
+
+export type FindSuggestedChatRoomsQueryVariables = Exact<{
+  search: Scalars['String'];
+}>;
+
+
+export type FindSuggestedChatRoomsQuery = { __typename?: 'Query', findSuggestedChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
+
+export type FindUsersQueryVariables = Exact<{
+  search: Scalars['String'];
+}>;
+
+
+export type FindUsersQuery = { __typename?: 'Query', findUsers: Array<{ __typename?: 'UserWithAvatar', avatar?: string | null | undefined, user: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } }> };
 
 export type GetChatRoomByIdQueryVariables = Exact<{
   roomId: Scalars['String'];
@@ -986,6 +1012,82 @@ export function useGetUserChatRoomsLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type GetUserChatRoomsQueryHookResult = ReturnType<typeof useGetUserChatRoomsQuery>;
 export type GetUserChatRoomsLazyQueryHookResult = ReturnType<typeof useGetUserChatRoomsLazyQuery>;
 export type GetUserChatRoomsQueryResult = Apollo.QueryResult<GetUserChatRoomsQuery, GetUserChatRoomsQueryVariables>;
+export const FindSuggestedChatRoomsDocument = gql`
+    query FindSuggestedChatRooms($search: String!) {
+  findSuggestedChatRooms(search: $search) {
+    chatRoom {
+      ...RegularChatRoom
+    }
+    image
+  }
+}
+    ${RegularChatRoomFragmentDoc}`;
+
+/**
+ * __useFindSuggestedChatRoomsQuery__
+ *
+ * To run a query within a React component, call `useFindSuggestedChatRoomsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindSuggestedChatRoomsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindSuggestedChatRoomsQuery({
+ *   variables: {
+ *      search: // value for 'search'
+ *   },
+ * });
+ */
+export function useFindSuggestedChatRoomsQuery(baseOptions: Apollo.QueryHookOptions<FindSuggestedChatRoomsQuery, FindSuggestedChatRoomsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindSuggestedChatRoomsQuery, FindSuggestedChatRoomsQueryVariables>(FindSuggestedChatRoomsDocument, options);
+      }
+export function useFindSuggestedChatRoomsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindSuggestedChatRoomsQuery, FindSuggestedChatRoomsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindSuggestedChatRoomsQuery, FindSuggestedChatRoomsQueryVariables>(FindSuggestedChatRoomsDocument, options);
+        }
+export type FindSuggestedChatRoomsQueryHookResult = ReturnType<typeof useFindSuggestedChatRoomsQuery>;
+export type FindSuggestedChatRoomsLazyQueryHookResult = ReturnType<typeof useFindSuggestedChatRoomsLazyQuery>;
+export type FindSuggestedChatRoomsQueryResult = Apollo.QueryResult<FindSuggestedChatRoomsQuery, FindSuggestedChatRoomsQueryVariables>;
+export const FindUsersDocument = gql`
+    query FindUsers($search: String!) {
+  findUsers(search: $search) {
+    user {
+      ...RegularUser
+    }
+    avatar
+  }
+}
+    ${RegularUserFragmentDoc}`;
+
+/**
+ * __useFindUsersQuery__
+ *
+ * To run a query within a React component, call `useFindUsersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFindUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFindUsersQuery({
+ *   variables: {
+ *      search: // value for 'search'
+ *   },
+ * });
+ */
+export function useFindUsersQuery(baseOptions: Apollo.QueryHookOptions<FindUsersQuery, FindUsersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FindUsersQuery, FindUsersQueryVariables>(FindUsersDocument, options);
+      }
+export function useFindUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FindUsersQuery, FindUsersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FindUsersQuery, FindUsersQueryVariables>(FindUsersDocument, options);
+        }
+export type FindUsersQueryHookResult = ReturnType<typeof useFindUsersQuery>;
+export type FindUsersLazyQueryHookResult = ReturnType<typeof useFindUsersLazyQuery>;
+export type FindUsersQueryResult = Apollo.QueryResult<FindUsersQuery, FindUsersQueryVariables>;
 export const GetChatRoomByIdDocument = gql`
     query GetChatRoomById($roomId: String!) {
   getChatRoomById(roomId: $roomId) {
