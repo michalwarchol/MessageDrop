@@ -144,11 +144,64 @@ export class ChatRoomResolver {
     });
 
     //get user chat requests to filter suggested chat rooms
-    const userRequests = await ChatRequestModel.find({userId}).select({"roomId": 1, "_id": 0});
-    const badRoomIds = userRequests.map((elem)=>elem.roomId);
+    const userRequests = await ChatRequestModel.find({ userId }).select({
+      roomId: 1,
+      _id: 0,
+    });
+    const badRoomIds = userRequests.map((elem) => elem.roomId);
 
     //filter chat rooms - if a user sent a request to join a room, don't include the room to suggested rooms
-    const filteredRooms = chatRooms.filter((elem)=>!badRoomIds.includes(elem._id.toString()));
+    const filteredRooms = chatRooms.filter(
+      (elem) => !badRoomIds.includes(elem._id.toString())
+    );
+
+    //get chat room images
+    let chatRoomsWithImages: ChatRoomWithImage[] = await Promise.all(
+      filteredRooms.map(async (elem) => {
+        const image = await getFile(s3, elem.imageId);
+        return {
+          chatRoom: elem as ChatRoom,
+          image,
+        };
+      })
+    );
+
+    return chatRoomsWithImages;
+  }
+
+  @Query(() => [ChatRoomWithImage])
+  async findSuggestedChatRooms(
+    @Ctx() { s3, req }: Context,
+    @Arg("search", () => String) search: string
+  ): Promise<ChatRoomWithImage[]> {
+    const userId = req.session.userId;
+    const regex = new RegExp(".*(" + search + ").*", "i");
+
+    const rooms = await ChatRoomModel.find(
+      {
+        name: { $regex: regex },
+        $and: [
+          { adminId: { $ne: userId } },
+          { userIds: { $ne: userId } },
+          { modIds: { $ne: userId } },
+          { access: { $ne: RoomAccess.private } },
+        ],
+      },
+      {},
+      { limit: 5 }
+    );
+
+    //get user chat requests to filter suggested chat rooms
+    const userRequests = await ChatRequestModel.find({ userId }).select({
+      roomId: 1,
+      _id: 0,
+    });
+    const badRoomIds = userRequests.map((elem) => elem.roomId);
+
+    //filter chat rooms - if a user sent a request to join a room, don't include the room to suggested rooms
+    const filteredRooms = rooms.filter(
+      (elem) => !badRoomIds.includes(elem._id.toString())
+    );
 
     //get chat room images
     let chatRoomsWithImages: ChatRoomWithImage[] = await Promise.all(
@@ -295,7 +348,7 @@ export class ChatRoomResolver {
       { $pull: { modIds: userId, userIds: userId } }
     );
 
-    await ChatRequestModel.deleteOne({userId});
+    await ChatRequestModel.deleteOne({ userId });
 
     return result.matchedCount > 0;
   }
@@ -335,12 +388,12 @@ export class ChatRoomResolver {
   @UseMiddleware(isAuth, isRoomMember, hasPermissions)
   async updateChatRoomSettings(
     @Ctx() context: Context,
-    @Arg("roomId", ()=>String) roomId: string,
+    @Arg("roomId", () => String) roomId: string,
     @Arg("settings", () => SettingsInput) settings: SettingsInput,
     @Arg("image", () => GraphQLUpload, { nullable: true }) image?: FileUpload
   ): Promise<boolean> {
     const result = await ChatRoomModel.findOneAndUpdate(
-      { _id: roomId },//filter
+      { _id: roomId }, //filter
       { ...settings } //updates
     );
 
