@@ -11,12 +11,11 @@ import { User, UserModel } from "../entities/User";
 import { Context } from "../types";
 import { validateCredentials } from "../utils/validateCredentials";
 import { RegisterInput } from "./types/RegisterInput";
-import {FieldError } from "./types/FieldError";
+import { FieldError } from "./types/FieldError";
 import bcrypt from "bcrypt";
 import { generateVerificationCode } from "../utils/generateVerificationCode";
 import { COOKIE_NAME, VERIFICATION_PREFIX } from "../constants";
 import { getFile } from "../utils/getFile";
-
 
 @ObjectType()
 class UserResponse {
@@ -29,10 +28,10 @@ class UserResponse {
 
 @ObjectType()
 export class UserWithAvatar {
-  @Field(()=>User)
+  @Field(() => User)
   user: User;
 
-  @Field(()=>String, {nullable: true})
+  @Field(() => String, { nullable: true })
   avatar: string | null;
 }
 
@@ -52,20 +51,48 @@ export class UserResolver {
     return user;
   }
 
-  @Query(()=>UserWithAvatar)
+  @Query(() => UserWithAvatar)
   async getUserById(
-    @Ctx() {s3}: Context,
-    @Arg("userId", ()=>String) userId: string
-  ){
-    const user = await UserModel.findOne({_id: userId});
+    @Ctx() { s3 }: Context,
+    @Arg("userId", () => String) userId: string
+  ) {
+    const user = await UserModel.findOne({ _id: userId });
     let avatar = null;
-    if(user?.avatarId){
+    if (user?.avatarId) {
       avatar = getFile(s3, user.avatarId);
     }
     return {
       user,
-      avatar
-    }
+      avatar,
+    };
+  }
+
+  @Query(() => [UserWithAvatar])
+  async findUsers(
+    @Ctx() { s3, req }: Context,
+    @Arg("search", () => String) search: string
+  ): Promise<UserWithAvatar[]> {
+    const regex = new RegExp(".*(" + search + ").*", "i");
+    const users = await UserModel.find(
+      {
+        name: { $regex: regex },
+        _id: { $ne: req.session.userId },
+      },
+      {},
+      { limit: 5 }
+    );
+    //get avatars
+    let usersWithAvatars: UserWithAvatar[] = await Promise.all(
+      users.map(async (elem) => {
+        const avatar = await getFile(s3, elem.avatarId);
+        return {
+          user: elem as User,
+          avatar,
+        };
+      })
+    );
+
+    return usersWithAvatars;
   }
 
   @Mutation(() => UserResponse)
