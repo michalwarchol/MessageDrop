@@ -1,0 +1,25 @@
+@import "../../styles/config";
+
+.loadingIndicator {
+    width: 60px;
+    height: 60px;
+    border-left: 2px solid $alternativeColor;
+    border-top: 2px solid $alternativeColor;
+    border-right: 2px solid $secondaryColor;
+    border-bottom: 2px solid $secondaryColor;
+    border-radius: 50%;
+    animation-name: spin;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0);
+    }
+
+    to{
+        transform: rotate(720deg);
+    }
+}
