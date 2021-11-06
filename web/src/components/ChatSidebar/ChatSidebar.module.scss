@@ -6,7 +6,6 @@
     padding-top: 10px;
     padding-bottom: 10px;
     border-radius: 8px;
-    z-index: 99;
 
     @media screen and (min-width: $md) {
         width: 100px;
@@ -19,5 +18,11 @@
         display: flex;
         justify-content: center;
         padding: 0 10px;
+        position: relative;
+        z-index: 99;
+    }
+    .userRooms {
+        position:relative;
+        z-index: 1;
     }
 }

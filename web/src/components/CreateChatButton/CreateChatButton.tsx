@@ -18,10 +18,14 @@ const accessInfo: Record<string, string> = {
   private: "room hidden, admin sends invitations",
 };
 
-const CreateChatButton: React.FC = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [uploadedPhoto, setUploadedPhoto] = useState<File | null>(null);
+interface Props {
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
+}
 
+const CreateChatButton: React.FC<Props> = ({isOpen, setIsOpen}) => {
+  
+  const [uploadedPhoto, setUploadedPhoto] = useState<File | null>(null);
   const [createChatRoom] = useCreateChatRoomMutation();
 
   return (
