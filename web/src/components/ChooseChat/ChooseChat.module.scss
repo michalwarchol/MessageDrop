@@ -1,0 +1,38 @@
+@import "../../styles/config";
+
+.joinButton {
+    font-size: 18px;
+    span {
+        margin-right: 10px;
+    }
+}
+
+.chats {
+    height: 500px;
+    margin: 10px;
+    h3{
+        text-align: center;
+    }
+}
+
+.buttons {
+    display: flex;
+    margin: 10px;
+}
+
+.buttonStyles {
+    font-size: 20px;
+    &:first-child {
+        margin-right: 10px;
+    }
+}
+
+.notSelected{
+    font-size: 20px;
+    cursor: not-allowed;
+    background-color: gray;
+
+    &:hover{
+        background-color: gray;
+    }
+}
