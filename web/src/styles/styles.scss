@@ -1,5 +1,21 @@
+@import "./config";
+
 html, body {
   margin: 0;
   padding: 0;
   font-family: 'Poppins', sans-serif;
+}
+
+* {
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+   
+  ::-webkit-scrollbar-thumb {
+    background-color: lighten($color: $secondaryColor, $amount: 2);
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: lighten($color: $secondaryColor, $amount: 10); 
+  }
 }
