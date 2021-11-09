@@ -16,6 +16,7 @@ import {
 import { RoomContext } from "../../utils/RoomContext";
 import MessageNode from "../MessageNode/MessageNode";
 import NewMessageInfo from "../NewMessageInfo/NewMessageInfo";
+import {isNewDay} from "../../utils/isNewDay";
 
 const MessagesSection: React.FC = () => {
   const roomId = useContext(RoomContext);
@@ -119,6 +120,12 @@ const MessagesSection: React.FC = () => {
       <div className={styles.messagesChat} ref={chatRef}>
         {data &&
           data.getRoomMessages.messages.map((elem, index, arr) => {
+            let isDifferentDay = true;
+            if(index+1<arr.length){
+              let date = new Date(elem.message.createdAt);
+              let previousDate = new Date(arr[index+1].message.createdAt);  
+              isDifferentDay = isNewDay(date, previousDate);
+            }
             let newUser;
             if (index == 0) {
               newUser =
@@ -129,6 +136,7 @@ const MessagesSection: React.FC = () => {
                   key={index}
                   newUser={newUser}
                   myRef={lastMessage}
+                  showTime={isDifferentDay}
                 />
               );
             } else if (index == arr.length - 1) {
@@ -139,13 +147,14 @@ const MessagesSection: React.FC = () => {
                   key={index}
                   newUser={newUser}
                   myRef={lastMessageRef}
+                  showTime={isDifferentDay}
                 />
               );
             } else {
               newUser =
                 arr[index + 1].message.creatorId != elem.message.creatorId;
               return (
-                <MessageNode message={elem} key={index} newUser={newUser} />
+                <MessageNode message={elem} key={index} newUser={newUser} showTime={isDifferentDay} />
               );
             }
           })}
