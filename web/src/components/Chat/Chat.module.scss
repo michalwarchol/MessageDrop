@@ -19,56 +19,81 @@
     border-radius: 8px 8px 0 0;
     padding: 10px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     position: relative;
     z-index: 99;
-    .imageOrIcon {
-      width: 60px;
-      height: 60px;
-      @media screen and (max-width: $xl) {
-        width: 56px;
-        height: 56px;
-      }
-      border: 1px solid $alternativeColor;
-      padding: 1px;
-      border-radius: 50%;
-      overflow: hidden;
-      font-size: 44px;
 
-      .imageContainer {
+    .chatInfoWrapper {
+      display: flex;
+      align-items: center;
+
+      .imageOrIcon {
         width: 60px;
         height: 60px;
         @media screen and (max-width: $xl) {
           width: 56px;
           height: 56px;
         }
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: transform 0.1s ease-in-out;
-      }
-
-      img {
+        border: 1px solid $alternativeColor;
+        padding: 1px;
         border-radius: 50%;
-        object-fit: cover;
+        overflow: hidden;
+        font-size: 44px;
+
+        .imageContainer {
+          width: 60px;
+          height: 60px;
+          @media screen and (max-width: $xl) {
+            width: 56px;
+            height: 56px;
+          }
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          transition: transform 0.1s ease-in-out;
+        }
+
+        img {
+          border-radius: 50%;
+          object-fit: cover;
+        }
+      }
+      .chatHeaders {
+        margin-left: 10px;
+        p {
+          margin: 0;
+        }
+        .chatName {
+          font-size: 22px;
+          font-weight: bold;
+        }
+        .chatDescription {
+          font-size: 16px;
+        }
       }
     }
-    .chatHeaders {
-      margin-left: 10px;
-      p {
-        margin: 0;
-      }
-      .chatName {
-        font-size: 22px;
-        font-weight: bold;
-      }
-      .chatDescription {
-        font-size: 16px;
-      }
-    }
+
     .showSettings {
       margin-left: 20px;
       display: flex;
+
+      .openSettings {
+        display: flex;
+        @media screen and (min-width: $xl) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .content {
+    height: 400px;
+    display: flex;
+    flex-grow: 1;
+
+    .eee {
+      width: 30%;
     }
   }
 
@@ -76,76 +101,5 @@
     padding: 10px;
     background-color: $secondaryColor;
     border-radius: 0 0 8px 8px;
-
-    .chatFormFields {
-      position: relative;
-
-      .inputs {
-        display: flex;
-        align-items: center;
-      }
-      .actionButton {
-        font-size: 20px;
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        margin-left: 5px;
-        background-color: lighten($color: $mainColor, $amount: 10);
-      }
-
-      .actionButtonActive {
-        font-size: 20px;
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        margin-left: 5px;
-        background-color: rgb(5, 168, 27);
-      }
-
-      .sendButton{
-        font-size: 20px;
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        margin-left: 5px;
-        color: $textColor !important;
-      }
-
-      .sendButtonDisabled {
-        font-size: 20px;
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        margin-left: 5px;
-        background-color: gray !important;
-        cursor: not-allowed !important;
-      }
-
-      .picker {
-        position: absolute;
-        bottom: 80px;
-        right: 0;
-
-        aside {
-          background-color: $secondaryColor;
-          border: 2px solid $alternativeColor;
-          box-shadow: 0 0 20px $alternativeColor;
-          input {
-            background-color: $secondaryColor !important;
-            border: 2px solid $alternativeColor;
-            color: $textColor;
-          }
-          ul {
-            &::before {
-              background-color: $secondaryColor;
-            }
-          }
-        }
-      }
-
-      .fileInput {
-        display: none;
-      }
-    }
   }
 }

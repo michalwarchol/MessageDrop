@@ -1,0 +1,17 @@
+@import "../../styles/config";
+
+.radioButtons {
+    display: flex;
+    margin-bottom: 10px;
+}
+.photo {
+    @include RegularBrowsedImage();
+}
+
+.disabledButton {
+    background-color: gray;
+    &:hover {
+        background-color: gray;
+        cursor: not-allowed;
+    }
+}
