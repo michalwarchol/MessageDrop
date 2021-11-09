@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import styles from "./UserNode.module.scss";
 import {
   useChangeUserRoomPermissionsMutation,
@@ -13,6 +13,8 @@ import { FaUserAlt } from "react-icons/fa";
 import { RoomContext } from "../../utils/RoomContext";
 import { settingsKickUser } from "../../cacheModifications/settingsKickUser";
 import { settingsPromoteDemoteUser } from "../../cacheModifications/settingsPromoteDemoteUser";
+import IconButton from "../IconButton/IconButton";
+import { BsThreeDots } from "react-icons/bs";
 
 interface Props {
   userWithAvatar: UserWithAvatar;
@@ -29,18 +31,22 @@ const UserNode: React.FC<Props> = ({
   const [kickUser] = useKickUserMutation();
   const [changeUserRoomPermissions] = useChangeUserRoomPermissionsMutation();
 
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
+
   const changePermissions = async () => {
     await changeUserRoomPermissions({
       variables: { roomId, userId: userWithAvatar.user._id },
-      update: settingsPromoteDemoteUser(roomId, userWithAvatar)
+      update: settingsPromoteDemoteUser(roomId, userWithAvatar),
     });
+    setSettingsOpen(false);
   };
 
   const kick = async () => {
     await kickUser({
       variables: { roomId, userId: userWithAvatar.user._id },
-      update: settingsKickUser(roomId, userWithAvatar)
+      update: settingsKickUser(roomId, userWithAvatar),
     });
+    setSettingsOpen(false);
   };
 
   let buttons = null;
@@ -76,7 +82,18 @@ const UserNode: React.FC<Props> = ({
           <h5>{userWithAvatar.user.name}</h5>
         </div>
       </div>
-      <div className={styles.actions}>{buttons}</div>
+      <div className={styles.actions}>
+        {myPermissions != Permissions.USER && (
+          <IconButton
+            Icon={BsThreeDots}
+            variant="outline"
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className={settingsOpen ? styles.open : undefined}
+          />
+        )}
+
+        {settingsOpen && buttons}
+      </div>
     </div>
   );
 };

@@ -34,8 +34,22 @@
             }
         }
     }
+    .actions {
+        position: relative;
+
+        .open {
+            background-color: $green;
+        }
+    }
     .buttons {
+        position: absolute;
         display: flex;
+        right: 0;
+        margin-top: 4px;
+        background-color: $secondaryColor;
+        border: 2px solid $alternativeColor;
+        border-radius: 8px;
+        padding: 4px;
         .kickButton {
             margin-left: 6px;
         }
