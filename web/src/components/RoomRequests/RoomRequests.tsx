@@ -18,6 +18,7 @@ const RoomRequests: React.FC = () => {
         Icon={MdNotificationsActive}
         variant="outline"
         onClick={() => setShowRequest(!showRequests)}
+        className={showRequests ? styles.open : undefined}
       />
       {showRequests && data && <div className={styles.requestsContainer}>{
         data.getChatRoomRequests.length > 0 ?

@@ -2,9 +2,11 @@
 
 .roomRequests {
     margin-right: 10px;
+    position: relative;
 
     .requestsContainer {
         position: absolute;
+        right: 0;
         padding: 10px;
         background-color: $secondaryColor;
         border: 2px solid $alternativeColor;
@@ -14,5 +16,9 @@
     .empty {
         width: 300px;
         text-align: center;
+    }
+
+    .open {
+        background-color: $green;
     }
 }
