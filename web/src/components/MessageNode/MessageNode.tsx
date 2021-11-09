@@ -8,14 +8,16 @@ import styles from "./MessageNode.module.scss";
 import NextImage from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import FileDownloader from "../FileDownloader/FileDownloader";
+import { getFullDate } from "../../utils/getFullDate";
 
 interface Props {
   message: MessageWithMedia;
   newUser: boolean;
   myRef?: any;
+  showTime?: boolean;
 }
 
-const MessageNode: React.FC<Props> = ({ message, newUser, myRef }) => {
+const MessageNode: React.FC<Props> = ({ message, newUser, myRef, showTime=false }) => {
   const [proportion, setProportion] = useState<number>(1);
 
   const { data: me } = useMeQuery();
@@ -37,6 +39,9 @@ const MessageNode: React.FC<Props> = ({ message, newUser, myRef }) => {
       setProportion(img.height / img.width);
     };
   }
+
+  let date = new Date(message.message.createdAt);
+
   return (
     <div
       className={styles.messageNode}
@@ -48,7 +53,8 @@ const MessageNode: React.FC<Props> = ({ message, newUser, myRef }) => {
         alignItems: position,
       }}
     >
-      {newUser && me?.me?._id != message.message.creatorId && (
+      {showTime && <div className={styles.dayNote}>{getFullDate(date)}</div>}
+      {(newUser || showTime ) && me?.me?._id != message.message.creatorId && (
         <div className={styles.creator}>{creator?.getUserById.user.name}</div>
       )}
       {message.message.text!.length > 0 && (

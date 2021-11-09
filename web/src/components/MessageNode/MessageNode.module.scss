@@ -2,12 +2,18 @@
 
 .messageNode {
     color: $textColor;
-    margin-left: 10px;
-    margin-right: 10px; 
     width: fit-content;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    width: 100%;
+
+    .dayNote {
+        width: 100%;
+        text-align: center;
+        color: gray;
+        font-size: 13px;
+    }
 
     .creator {
         font-size: 14px;
