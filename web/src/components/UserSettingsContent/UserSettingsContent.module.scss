@@ -1,0 +1,53 @@
+@import "../../styles/config";
+
+.userSettingsContent {
+  .userInfo {
+    width: 100%;
+    background-color: $secondaryColor;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+    display: flex;
+
+    .imageOrIcon {
+      width: 200px;
+      height: 200px;
+
+      .imageContainer {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 2px solid $alternativeColor;
+        font-size: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .userHeaders {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      margin-left: 20px;
+      h3 {
+        margin: 0;
+        span {
+          font-weight: 300;
+          color: gray;
+        }
+      }
+    }
+  }
+
+  .editSection {
+    margin-top: 10px;
+    background-color: $secondaryColor;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
