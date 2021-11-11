@@ -67,6 +67,18 @@ export class UserResolver {
     };
   }
 
+  @Query(()=> String, {nullable: true})
+  async getUserAvatar(
+    @Ctx(){ s3 }: Context,
+    @Arg("avatarId", ()=> String, {nullable: true}) avatarId?: string
+  ): Promise<string|null>{
+    if(!avatarId){
+      return null;
+    }
+    const avatar = await getFile(s3, avatarId);
+    return avatar;
+  }
+
   @Query(() => [UserWithAvatar])
   async findUsers(
     @Ctx() { s3, req }: Context,
