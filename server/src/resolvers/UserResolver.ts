@@ -6,6 +6,7 @@ import {
   ObjectType,
   Query,
   Resolver,
+  UseMiddleware,
 } from "type-graphql";
 import { User, UserModel } from "../entities/User";
 import { Context } from "../types";
@@ -16,6 +17,8 @@ import bcrypt from "bcrypt";
 import { generateVerificationCode } from "../utils/generateVerificationCode";
 import { COOKIE_NAME, VERIFICATION_PREFIX } from "../constants";
 import { getFile } from "../utils/getFile";
+import { isAuth } from "../middleware/isAuth";
+import { brotliCompress } from "zlib";
 
 @ObjectType()
 class UserResponse {
@@ -24,6 +27,18 @@ class UserResponse {
 
   @Field(() => User, { nullable: true })
   user?: User;
+}
+
+@ObjectType()
+class UserEditResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field(() => Boolean)
+  isOk: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  redirect?: boolean;
 }
 
 @ObjectType()
@@ -67,12 +82,12 @@ export class UserResolver {
     };
   }
 
-  @Query(()=> String, {nullable: true})
+  @Query(() => String, { nullable: true })
   async getUserAvatar(
-    @Ctx(){ s3 }: Context,
-    @Arg("avatarId", ()=> String, {nullable: true}) avatarId?: string
-  ): Promise<string|null>{
-    if(!avatarId){
+    @Ctx() { s3 }: Context,
+    @Arg("avatarId", () => String, { nullable: true }) avatarId?: string
+  ): Promise<string | null> {
+    if (!avatarId) {
       return null;
     }
     const avatar = await getFile(s3, avatarId);
@@ -222,7 +237,7 @@ export class UserResolver {
   }
 
   @Mutation(() => Boolean)
-  logout(@Ctx() { req, res }: Context) {
+  async logout(@Ctx() { req, res }: Context) {
     return new Promise((resolve) =>
       req.session.destroy((err) => {
         res.clearCookie(COOKIE_NAME);
@@ -234,5 +249,55 @@ export class UserResolver {
         resolve(true);
       })
     );
+  }
+
+  @Mutation(() => UserEditResponse)
+  @UseMiddleware(isAuth)
+  async changePassword(
+    @Ctx() { req }: Context,
+    @Arg("old_password", () => String) old_password: string,
+    @Arg("new_password", () => String) new_password: string
+  ): Promise<UserEditResponse> {
+    const user = await UserModel.findById(req.session.userId);
+    if (!user) {
+      return {
+        isOk: false,
+        redirect: true,
+      };
+    }
+
+    if (new_password.length < 8) {
+      return {
+        isOk: false,
+        errors: [
+          {
+            field: "new_password",
+            message: "Password should be at least 8 characters long!",
+          },
+        ],
+      };
+    }
+
+    const compare = await bcrypt.compare(old_password, user.password);
+    if (!compare) {
+      return {
+        isOk: false,
+        errors: [
+          {
+            field: "old_password",
+            message: "Incorrect password!",
+          },
+        ],
+      };
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(new_password, salt);
+    await UserModel.updateOne(
+      { _id: req.session.userId },
+      { password: hashedPassword }
+    );
+
+    return { isOk: true };
   }
 }
