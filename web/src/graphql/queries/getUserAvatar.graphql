@@ -1,0 +1,3 @@
+query GetUserAvatar($avatarId: String) {
+    getUserAvatar(avatarId: $avatarId)
+}
