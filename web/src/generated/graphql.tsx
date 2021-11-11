@@ -115,6 +115,7 @@ export type MessageWithMedia = {
 export type Mutation = {
   __typename?: 'Mutation';
   acceptChatRequest: Scalars['Boolean'];
+  changePassword: UserEditResponse;
   changeUserRoomPermissions: Scalars['Boolean'];
   createChatRequest: Scalars['Boolean'];
   createChatRoom: ChatRoomResponse;
@@ -132,6 +133,12 @@ export type Mutation = {
 export type MutationAcceptChatRequestArgs = {
   requestId: Scalars['String'];
   roomId: Scalars['String'];
+};
+
+
+export type MutationChangePasswordArgs = {
+  new_password: Scalars['String'];
+  old_password: Scalars['String'];
 };
 
 
@@ -212,6 +219,7 @@ export type Query = {
   getChatRooms: Array<ChatRoom>;
   getRoomMessages: PaginatedMessages;
   getSuggestedChatRooms: Array<ChatRoomWithImage>;
+  getUserAvatar?: Maybe<Scalars['String']>;
   getUserById: UserWithAvatar;
   getUserChatRooms: Array<ChatRoomWithImage>;
   getUsers: Array<User>;
@@ -249,6 +257,11 @@ export type QueryGetRoomMessagesArgs = {
   limit: Scalars['Int'];
   roomId: Scalars['String'];
   skip?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryGetUserAvatarArgs = {
+  avatarId?: Maybe<Scalars['String']>;
 };
 
 
@@ -308,6 +321,13 @@ export type User = {
   verified: Scalars['Boolean'];
 };
 
+export type UserEditResponse = {
+  __typename?: 'UserEditResponse';
+  errors?: Maybe<Array<FieldError>>;
+  isOk: Scalars['Boolean'];
+  redirect?: Maybe<Scalars['Boolean']>;
+};
+
 export type UserResponse = {
   __typename?: 'UserResponse';
   errors?: Maybe<Array<FieldError>>;
@@ -335,6 +355,14 @@ export type AcceptChatRequestMutationVariables = Exact<{
 
 
 export type AcceptChatRequestMutation = { __typename?: 'Mutation', acceptChatRequest: boolean };
+
+export type ChangePasswordMutationVariables = Exact<{
+  new_password: Scalars['String'];
+  old_password: Scalars['String'];
+}>;
+
+
+export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserEditResponse', isOk: boolean, redirect?: boolean | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
 
 export type ChangeUserRoomPermissionsMutationVariables = Exact<{
   roomId: Scalars['String'];
@@ -479,6 +507,13 @@ export type GetSuggestedChatRoomsQueryVariables = Exact<{ [key: string]: never; 
 
 export type GetSuggestedChatRoomsQuery = { __typename?: 'Query', getSuggestedChatRooms: Array<{ __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } }> };
 
+export type GetUserAvatarQueryVariables = Exact<{
+  avatarId?: Maybe<Scalars['String']>;
+}>;
+
+
+export type GetUserAvatarQuery = { __typename?: 'Query', getUserAvatar?: string | null | undefined };
+
 export type GetUserByIdQueryVariables = Exact<{
   userId: Scalars['String'];
 }>;
@@ -593,6 +628,45 @@ export function useAcceptChatRequestMutation(baseOptions?: Apollo.MutationHookOp
 export type AcceptChatRequestMutationHookResult = ReturnType<typeof useAcceptChatRequestMutation>;
 export type AcceptChatRequestMutationResult = Apollo.MutationResult<AcceptChatRequestMutation>;
 export type AcceptChatRequestMutationOptions = Apollo.BaseMutationOptions<AcceptChatRequestMutation, AcceptChatRequestMutationVariables>;
+export const ChangePasswordDocument = gql`
+    mutation ChangePassword($new_password: String!, $old_password: String!) {
+  changePassword(new_password: $new_password, old_password: $old_password) {
+    errors {
+      field
+      message
+    }
+    isOk
+    redirect
+  }
+}
+    `;
+export type ChangePasswordMutationFn = Apollo.MutationFunction<ChangePasswordMutation, ChangePasswordMutationVariables>;
+
+/**
+ * __useChangePasswordMutation__
+ *
+ * To run a mutation, you first call `useChangePasswordMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChangePasswordMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [changePasswordMutation, { data, loading, error }] = useChangePasswordMutation({
+ *   variables: {
+ *      new_password: // value for 'new_password'
+ *      old_password: // value for 'old_password'
+ *   },
+ * });
+ */
+export function useChangePasswordMutation(baseOptions?: Apollo.MutationHookOptions<ChangePasswordMutation, ChangePasswordMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument, options);
+      }
+export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswordMutation>;
+export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
+export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const ChangeUserRoomPermissionsDocument = gql`
     mutation ChangeUserRoomPermissions($roomId: String!, $userId: String!) {
   changeUserRoomPermissions(roomId: $roomId, userId: $userId)
@@ -1304,6 +1378,39 @@ export function useGetSuggestedChatRoomsLazyQuery(baseOptions?: Apollo.LazyQuery
 export type GetSuggestedChatRoomsQueryHookResult = ReturnType<typeof useGetSuggestedChatRoomsQuery>;
 export type GetSuggestedChatRoomsLazyQueryHookResult = ReturnType<typeof useGetSuggestedChatRoomsLazyQuery>;
 export type GetSuggestedChatRoomsQueryResult = Apollo.QueryResult<GetSuggestedChatRoomsQuery, GetSuggestedChatRoomsQueryVariables>;
+export const GetUserAvatarDocument = gql`
+    query GetUserAvatar($avatarId: String) {
+  getUserAvatar(avatarId: $avatarId)
+}
+    `;
+
+/**
+ * __useGetUserAvatarQuery__
+ *
+ * To run a query within a React component, call `useGetUserAvatarQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserAvatarQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserAvatarQuery({
+ *   variables: {
+ *      avatarId: // value for 'avatarId'
+ *   },
+ * });
+ */
+export function useGetUserAvatarQuery(baseOptions?: Apollo.QueryHookOptions<GetUserAvatarQuery, GetUserAvatarQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetUserAvatarQuery, GetUserAvatarQueryVariables>(GetUserAvatarDocument, options);
+      }
+export function useGetUserAvatarLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserAvatarQuery, GetUserAvatarQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetUserAvatarQuery, GetUserAvatarQueryVariables>(GetUserAvatarDocument, options);
+        }
+export type GetUserAvatarQueryHookResult = ReturnType<typeof useGetUserAvatarQuery>;
+export type GetUserAvatarLazyQueryHookResult = ReturnType<typeof useGetUserAvatarLazyQuery>;
+export type GetUserAvatarQueryResult = Apollo.QueryResult<GetUserAvatarQuery, GetUserAvatarQueryVariables>;
 export const GetUserByIdDocument = gql`
     query GetUserById($userId: String!) {
   getUserById(userId: $userId) {
