@@ -68,9 +68,9 @@ const UserNode: React.FC<Props> = ({
     <div className={styles.userNode}>
       <div className={styles.info}>
         <div className={styles.image}>
-          <div>
+          <div className={styles.imageContainer}>
             {userWithAvatar.avatar ? (
-              <Image src={base64ToObjectURL(userWithAvatar.avatar)} />
+              <Image height={50} width={50} src={base64ToObjectURL(userWithAvatar.avatar)} />
             ) : (
               <div className={styles.imageFallback}>
                 <FaUserAlt />

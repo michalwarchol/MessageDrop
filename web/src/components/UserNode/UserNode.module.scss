@@ -1,57 +1,74 @@
 @import "../../styles/config";
 
 .userNode {
-    padding: 10px;
-    border-radius: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  &:hover {
+    background-color: lighten($color: $secondaryColor, $amount: 10);
+  }
+  .info {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
     align-items: center;
-    &:hover {
-        background-color: lighten($color: $secondaryColor, $amount: 10);
-    }
-    .info {
+    .image {
+      border-radius: 50%;
+      border: 2px solid $alternativeColor;
+
+      .imageContainer {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        .image {
-            border-radius: 50%;
-            border: 2px solid $alternativeColor;
-            padding: 10px;
+        justify-content: center;
+        overflow: hidden;
+        img {
+          border-radius: 50%;
+          object-fit: cover;
         }
-        .imageFallback {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            font-size: 20px;
-        }
-        .username {
-            margin-left: 10px;
-            h1, h2, h3, h4, h5 {
-                margin: 0;
-                font-size: 16px;
-            }
-        }
+      }
     }
-    .actions {
-        position: relative;
+    .imageFallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      font-size: 20px;
+    }
+    .username {
+      margin-left: 10px;
+      h1,
+      h2,
+      h3,
+      h4,
+      h5 {
+        margin: 0;
+        font-size: 16px;
+      }
+    }
+  }
+  .actions {
+    position: relative;
 
-        .open {
-            background-color: $green;
-        }
+    .open {
+      background-color: $green;
     }
-    .buttons {
-        position: absolute;
-        display: flex;
-        right: 0;
-        margin-top: 4px;
-        background-color: $secondaryColor;
-        border: 2px solid $alternativeColor;
-        border-radius: 8px;
-        padding: 4px;
-        .kickButton {
-            margin-left: 6px;
-        }
+  }
+  .buttons {
+    position: absolute;
+    display: flex;
+    right: 0;
+    margin-top: 4px;
+    background-color: $secondaryColor;
+    border: 2px solid $alternativeColor;
+    border-radius: 8px;
+    padding: 4px;
+    .kickButton {
+      margin-left: 6px;
     }
+  }
 }
