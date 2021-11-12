@@ -1,10 +1,12 @@
 import React from "react";
 import styles from "./UserSettingsContent.module.scss";
-import { useGetUserAvatarQuery, useMeQuery } from "../../generated/graphql";
+import { useGetUserAvatarQuery, useMeQuery, useSetUserAvatarMutation } from "../../generated/graphql";
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import { FaUserAlt } from "react-icons/fa";
+import { AiFillCamera } from "react-icons/ai";
 import UserSettingsPasswordModal from "../UserSettingsPasswordModal/UserSettingsPasswordModal";
+import { setUserAvatarUpdate } from "../../cacheModifications/setUserAvatarUpdate";
 
 const UserSettingsContent: React.FC = () => {
   const { data: me } = useMeQuery();
@@ -12,25 +14,53 @@ const UserSettingsContent: React.FC = () => {
     variables: { avatarId: me?.me?.avatarId },
     skip: !me || !me?.me?.avatarId,
   });
+  const [setUserAvatar] = useSetUserAvatarMutation();
+
   return (
     <div className={styles.userSettingsContent}>
       <div className={styles.userInfo}>
         {avatar?.getUserAvatar ? (
-          <div className={styles.imageOrIcon}>
+          <label className={styles.imageOrIcon} htmlFor="avatar">
             <div className={styles.imageContainer}>
               <Image
                 src={base64ToObjectURL(avatar?.getUserAvatar)}
-                width={100}
-                height={100}
+                width={200}
+                height={200}
               />
+              <div className={styles.avatarHover}>
+                <AiFillCamera />
+                <input
+                  type="file"
+                  id="avatar"
+                  className={styles.fileInput}
+                  onChange={async (e) => {
+                    if(e.currentTarget.files)
+                    await setUserAvatar({variables: {avatar: e.currentTarget.files[0]},
+                    update: setUserAvatarUpdate(me!.me!._id, me!.me!.avatarId||null)})
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          </label>
         ) : (
-          <div className={styles.imageOrIcon}>
+          <label className={styles.imageOrIcon} htmlFor="avatar">
             <div className={styles.imageContainer}>
               <FaUserAlt />
+              <div className={styles.avatarHover}>
+                <AiFillCamera />
+                <input
+                  type="file"
+                  id="avatar"
+                  className={styles.fileInput}
+                  onChange={async (e) => {
+                    if(e.currentTarget.files)
+                    await setUserAvatar({variables: {avatar: e.currentTarget.files[0]},
+                    update: setUserAvatarUpdate(me!.me!._id, me!.me!.avatarId||null)})
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          </label>
         )}
         <div className={styles.userHeaders}>
           <h3>

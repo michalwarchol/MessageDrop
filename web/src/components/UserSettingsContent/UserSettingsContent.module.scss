@@ -12,6 +12,7 @@
     .imageOrIcon {
       width: 200px;
       height: 200px;
+      
 
       .imageContainer {
         width: 200px;
@@ -19,9 +20,40 @@
         border-radius: 50%;
         border: 2px solid $alternativeColor;
         font-size: 120px;
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+
+        img {
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
+        &:hover {
+          cursor: pointer;
+          .avatarHover{
+            display: flex;
+          }
+        }
+        .avatarHover{
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 40px;
+          background-color: rgba(0,0,0, 0.2);
+          display: none;
+        }
+
+        .fileInput {
+          display: none;
+        }
       }
     }
 
