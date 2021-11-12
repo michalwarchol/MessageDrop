@@ -19,6 +19,10 @@ import { COOKIE_NAME, VERIFICATION_PREFIX } from "../constants";
 import { getFile } from "../utils/getFile";
 import { isAuth } from "../middleware/isAuth";
 import { brotliCompress } from "zlib";
+import { FileUpload, GraphQLUpload } from "graphql-upload";
+import { v4 } from "uuid";
+import { createFileBuffer } from "../utils/createFileBuffer";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 @ObjectType()
 class UserResponse {
@@ -92,6 +96,28 @@ export class UserResolver {
     }
     const avatar = await getFile(s3, avatarId);
     return avatar;
+  }
+
+  @Mutation(() => String, { nullable: true })
+  @UseMiddleware(isAuth)
+  async setUserAvatar(
+    @Ctx() { req, s3 }: Context,
+    @Arg("avatar", () => GraphQLUpload) avatar: FileUpload
+  ): Promise<string|null> {
+    let avatarKey: string = v4();
+
+    const buffer: Buffer = await createFileBuffer(avatar);
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: avatarKey,
+        Body: buffer,
+      })
+    );
+
+    await UserModel.findByIdAndUpdate({_id: req.session.userId}, {avatarId: avatarKey});
+
+    return buffer.toString("base64");
   }
 
   @Query(() => [UserWithAvatar])

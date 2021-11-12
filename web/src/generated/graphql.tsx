@@ -126,6 +126,7 @@ export type Mutation = {
   logout: Scalars['Boolean'];
   register: UserResponse;
   rejectChatRequest: Scalars['Boolean'];
+  setUserAvatar: Scalars['Boolean'];
   updateChatRoomSettings: Scalars['Boolean'];
 };
 
@@ -193,6 +194,11 @@ export type MutationRegisterArgs = {
 export type MutationRejectChatRequestArgs = {
   requestId: Scalars['String'];
   roomId: Scalars['String'];
+};
+
+
+export type MutationSetUserAvatarArgs = {
+  avatar: Scalars['Upload'];
 };
 
 
@@ -443,6 +449,13 @@ export type RejectChatRequstMutationVariables = Exact<{
 
 
 export type RejectChatRequstMutation = { __typename?: 'Mutation', rejectChatRequest: boolean };
+
+export type SetUserAvatarMutationVariables = Exact<{
+  avatar: Scalars['Upload'];
+}>;
+
+
+export type SetUserAvatarMutation = { __typename?: 'Mutation', setUserAvatar: boolean };
 
 export type UpdateChatRoomSettingsMutationVariables = Exact<{
   roomId: Scalars['String'];
@@ -1016,6 +1029,37 @@ export function useRejectChatRequstMutation(baseOptions?: Apollo.MutationHookOpt
 export type RejectChatRequstMutationHookResult = ReturnType<typeof useRejectChatRequstMutation>;
 export type RejectChatRequstMutationResult = Apollo.MutationResult<RejectChatRequstMutation>;
 export type RejectChatRequstMutationOptions = Apollo.BaseMutationOptions<RejectChatRequstMutation, RejectChatRequstMutationVariables>;
+export const SetUserAvatarDocument = gql`
+    mutation SetUserAvatar($avatar: Upload!) {
+  setUserAvatar(avatar: $avatar)
+}
+    `;
+export type SetUserAvatarMutationFn = Apollo.MutationFunction<SetUserAvatarMutation, SetUserAvatarMutationVariables>;
+
+/**
+ * __useSetUserAvatarMutation__
+ *
+ * To run a mutation, you first call `useSetUserAvatarMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSetUserAvatarMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [setUserAvatarMutation, { data, loading, error }] = useSetUserAvatarMutation({
+ *   variables: {
+ *      avatar: // value for 'avatar'
+ *   },
+ * });
+ */
+export function useSetUserAvatarMutation(baseOptions?: Apollo.MutationHookOptions<SetUserAvatarMutation, SetUserAvatarMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SetUserAvatarMutation, SetUserAvatarMutationVariables>(SetUserAvatarDocument, options);
+      }
+export type SetUserAvatarMutationHookResult = ReturnType<typeof useSetUserAvatarMutation>;
+export type SetUserAvatarMutationResult = Apollo.MutationResult<SetUserAvatarMutation>;
+export type SetUserAvatarMutationOptions = Apollo.BaseMutationOptions<SetUserAvatarMutation, SetUserAvatarMutationVariables>;
 export const UpdateChatRoomSettingsDocument = gql`
     mutation UpdateChatRoomSettings($roomId: String!, $settings: SettingsInput!, $image: Upload) {
   updateChatRoomSettings(roomId: $roomId, settings: $settings, image: $image)
