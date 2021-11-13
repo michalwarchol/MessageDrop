@@ -16,13 +16,14 @@ import {
 import { RoomContext } from "../../utils/RoomContext";
 import MessageNode from "../MessageNode/MessageNode";
 import NewMessageInfo from "../NewMessageInfo/NewMessageInfo";
-import {isNewDay} from "../../utils/isNewDay";
+import { isNewDay } from "../../utils/isNewDay";
 
 const MessagesSection: React.FC = () => {
   const roomId = useContext(RoomContext);
 
   const [triggerNewMessage, setTriggerNewMessage] = useState<boolean>(false);
-  const [newMessageNotification, setNewMessageNotification] = useState<boolean>(false);
+  const [newMessageNotification, setNewMessageNotification] =
+    useState<boolean>(false);
 
   const { data: me } = useMeQuery();
   const { data, loading, fetchMore, subscribeToMore } = useGetRoomMessagesQuery(
@@ -80,7 +81,11 @@ const MessagesSection: React.FC = () => {
 
         //if I am at the bottom of the chat don't notify!!!
         //if I write a new message, don't notify!!!
-        if (chatRef.current && chatRef.current?.scrollTop < -100 && me?.me?._id != newMessage.message.creatorId) {
+        if (
+          chatRef.current &&
+          chatRef.current?.scrollTop < -100 &&
+          me?.me?._id != newMessage.message.creatorId
+        ) {
           setTriggerNewMessage(true);
         }
         return newMessgs;
@@ -105,10 +110,9 @@ const MessagesSection: React.FC = () => {
           setNewMessageNotification(true);
         }
 
-        if(entries[0].isIntersecting){
-            setNewMessageNotification(false);
+        if (entries[0].isIntersecting) {
+          setNewMessageNotification(false);
         }
-
       });
       if (node) newMessageObserver.current.observe(node);
     },
@@ -118,12 +122,15 @@ const MessagesSection: React.FC = () => {
   return (
     <div className={styles.messagesSection}>
       <div className={styles.messagesChat} ref={chatRef}>
+        {data && data.getRoomMessages.messages.length < 1 && (
+          <h1>Say hello to everyone :D</h1>
+        )}
         {data &&
           data.getRoomMessages.messages.map((elem, index, arr) => {
             let isDifferentDay = true;
-            if(index+1<arr.length){
+            if (index + 1 < arr.length) {
               let date = new Date(elem.message.createdAt);
-              let previousDate = new Date(arr[index+1].message.createdAt);  
+              let previousDate = new Date(arr[index + 1].message.createdAt);
               isDifferentDay = isNewDay(date, previousDate);
             }
             let newUser;
@@ -154,7 +161,12 @@ const MessagesSection: React.FC = () => {
               newUser =
                 arr[index + 1].message.creatorId != elem.message.creatorId;
               return (
-                <MessageNode message={elem} key={index} newUser={newUser} showTime={isDifferentDay} />
+                <MessageNode
+                  message={elem}
+                  key={index}
+                  newUser={newUser}
+                  showTime={isDifferentDay}
+                />
               );
             }
           })}
@@ -164,12 +176,15 @@ const MessagesSection: React.FC = () => {
           </div>
         )}
       </div>
-      <NewMessageInfo condition={newMessageNotification} onClick={() => {
-              if(chatRef.current){
-                chatRef.current.scrollTo(0,chatRef.current.scrollHeight);
-              }
-            setNewMessageNotification(false);
-          }} />
+      <NewMessageInfo
+        condition={newMessageNotification}
+        onClick={() => {
+          if (chatRef.current) {
+            chatRef.current.scrollTo(0, chatRef.current.scrollHeight);
+          }
+          setNewMessageNotification(false);
+        }}
+      />
     </div>
   );
 };
