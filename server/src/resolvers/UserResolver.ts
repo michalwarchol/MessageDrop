@@ -74,11 +74,11 @@ export class UserResolver {
   async getUserById(
     @Ctx() { s3 }: Context,
     @Arg("userId", () => String) userId: string
-  ) {
-    const user = await UserModel.findOne({ _id: userId });
+  ): Promise<UserWithAvatar> {
+    const user = (await UserModel.findOne({ _id: userId })) as User;
     let avatar = null;
     if (user?.avatarId) {
-      avatar = getFile(s3, user.avatarId);
+      avatar = await getFile(s3, user.avatarId);
     }
     return {
       user,
@@ -103,7 +103,7 @@ export class UserResolver {
   async setUserAvatar(
     @Ctx() { req, s3 }: Context,
     @Arg("avatar", () => GraphQLUpload) avatar: FileUpload
-  ): Promise<string|null> {
+  ): Promise<string | null> {
     let avatarKey: string = v4();
 
     const buffer: Buffer = await createFileBuffer(avatar);
@@ -115,7 +115,10 @@ export class UserResolver {
       })
     );
 
-    await UserModel.findByIdAndUpdate({_id: req.session.userId}, {avatarId: avatarKey});
+    await UserModel.findByIdAndUpdate(
+      { _id: req.session.userId },
+      { avatarId: avatarKey }
+    );
 
     return buffer.toString("base64");
   }
