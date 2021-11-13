@@ -22,7 +22,7 @@ import { brotliCompress } from "zlib";
 import { FileUpload, GraphQLUpload } from "graphql-upload";
 import { v4 } from "uuid";
 import { createFileBuffer } from "../utils/createFileBuffer";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
 @ObjectType()
 class UserResponse {
@@ -56,11 +56,6 @@ export class UserWithAvatar {
 
 @Resolver(() => User)
 export class UserResolver {
-  @Query(() => [User])
-  async getUsers(): Promise<User[]> {
-    return await UserModel.find();
-  }
-
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req }: Context): Promise<User | null> {
     if (!req.session.userId) {
@@ -106,6 +101,7 @@ export class UserResolver {
   ): Promise<string | null> {
     let avatarKey: string = v4();
 
+    //send a new image to aws
     const buffer: Buffer = await createFileBuffer(avatar);
     await s3.send(
       new PutObjectCommand({
@@ -114,11 +110,20 @@ export class UserResolver {
         Body: buffer,
       })
     );
-
-    await UserModel.findByIdAndUpdate(
+    
+    //update user's avatarId
+    const user = await UserModel.findByIdAndUpdate(
       { _id: req.session.userId },
       { avatarId: avatarKey }
-    );
+    ) as User;
+
+    //delete an old avatar from aws
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: user.avatarId
+      })
+    )
 
     return buffer.toString("base64");
   }
