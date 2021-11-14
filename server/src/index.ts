@@ -16,6 +16,7 @@ import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-co
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { execute, subscribe } from 'graphql';
 import { createServer } from 'http';
+import twilio from "twilio";
 import { ChatRoomResolver } from "./resolvers/ChatRoomResolver";
 import { MessageResolver } from "./resolvers/MessageResolver";
 import { ChatRequestResolver } from "./resolvers/ChatRequestResolver";
@@ -53,6 +54,8 @@ const main = async () => {
     })
   );
 
+  const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
   app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 2 }));
   app.use(express.json({limit: '100mb'}));
 
@@ -78,6 +81,7 @@ const main = async () => {
       res,
       redis,
       s3,
+      twilio: twilioClient
     }),
     plugins: [ApolloServerPluginLandingPageGraphQLPlayground(),
       {
