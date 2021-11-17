@@ -410,7 +410,7 @@ export class UserResolver {
       .create({
         body: "Your MessageDrop verification code is: " + verificationCode,
         from: process.env.TWILIO_PHONE_NUMBER,
-        to: "+48785333253",
+        to: phoneNumber,
       })
       .catch((err) => {
         console.log("err: ", err);
@@ -478,12 +478,14 @@ export class UserResolver {
     const code = generateVerificationCode();
     await redis.set(key, code, "EX", 60*20);
 
+    const phoneNumber = await redis.get(UPDATE_PHONE_PREFIX+req.session.userId);
+
     //send auth code to a new phone number
     twilio.messages
       .create({
         body: "Your MessageDrop verification code is: " + code,
         from: process.env.TWILIO_PHONE_NUMBER,
-        to: "+48785333253",
+        to: phoneNumber || "",
       })
       .catch((err) => {
         console.log("err: ", err);
