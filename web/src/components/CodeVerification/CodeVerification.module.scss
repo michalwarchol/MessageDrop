@@ -1,0 +1,61 @@
+@import "../../styles/config";
+
+.codeVerification {
+    padding: 10px;
+    .header{
+        font-size: 20px;
+        text-align: center;
+    }
+
+    .numbers{
+        display: flex;
+        justify-content: space-between;
+        & > * {
+            margin-left: 4px;
+            margin-right: 4px;
+        }
+    }
+
+    .error {
+        p {
+            margin: 0;
+            color: red;
+            text-align: center;
+        }
+    }
+
+    .buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        p{
+            margin: 0;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .generateButton {
+            font-size: 16px;
+            padding: 4px;
+            width: 200px;
+            margin-bottom: 20px;
+        }
+
+        .actionButtons{
+            display: flex;
+            font-size: 20px;
+            width: 100%;
+            button {
+                font-size: 20px;
+            }
+        }
+
+        .submitButton {
+            margin-left: 10px;
+        }
+        .submitButtonDisabled {
+            background-color: gray;
+            cursor: not-allowed;
+            margin-left: 10px;
+        }
+    }
+}
