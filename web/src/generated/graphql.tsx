@@ -120,14 +120,17 @@ export type Mutation = {
   createChatRequest: Scalars['Boolean'];
   createChatRoom: ChatRoomResponse;
   createMessage: Message;
+  generateNewCode: Scalars['Boolean'];
   joinRoom: Scalars['Boolean'];
   kickUser: Scalars['Boolean'];
   login?: Maybe<UserResponse>;
   logout: Scalars['Boolean'];
   register: UserResponse;
   rejectChatRequest: Scalars['Boolean'];
-  setUserAvatar: Scalars['Boolean'];
+  requestPhoneNumberUpdate: UserEditResponse;
+  setUserAvatar?: Maybe<Scalars['String']>;
   updateChatRoomSettings: Scalars['Boolean'];
+  updatePhoneNumber: UserEditResponse;
 };
 
 
@@ -197,6 +200,12 @@ export type MutationRejectChatRequestArgs = {
 };
 
 
+export type MutationRequestPhoneNumberUpdateArgs = {
+  password: Scalars['String'];
+  phoneNumber: Scalars['String'];
+};
+
+
 export type MutationSetUserAvatarArgs = {
   avatar: Scalars['Upload'];
 };
@@ -206,6 +215,11 @@ export type MutationUpdateChatRoomSettingsArgs = {
   image?: Maybe<Scalars['Upload']>;
   roomId: Scalars['String'];
   settings: SettingsInput;
+};
+
+
+export type MutationUpdatePhoneNumberArgs = {
+  code: Scalars['String'];
 };
 
 export type PaginatedMessages = {
@@ -228,7 +242,6 @@ export type Query = {
   getUserAvatar?: Maybe<Scalars['String']>;
   getUserById: UserWithAvatar;
   getUserChatRooms: Array<ChatRoomWithImage>;
-  getUsers: Array<User>;
   isChatMember: Scalars['Boolean'];
   me?: Maybe<User>;
 };
@@ -403,6 +416,11 @@ export type CreateMessageMutationVariables = Exact<{
 
 export type CreateMessageMutation = { __typename?: 'Mutation', createMessage: { __typename?: 'Message', _id: string, text?: string | null | undefined, roomId: string, creatorId: string, mediaId?: string | null | undefined, createdAt: any, updatedAt: any, fileData?: { __typename?: 'FileData', fileId: string, filename: string, mimeType: string } | null | undefined, messageReactions: Array<{ __typename?: 'MessageReactions', reaction: string, value: number }> } };
 
+export type GenerateNewCodeMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GenerateNewCodeMutation = { __typename?: 'Mutation', generateNewCode: boolean };
+
 export type JoinRoomMutationVariables = Exact<{
   roomId: Scalars['String'];
   userId?: Maybe<Scalars['String']>;
@@ -450,12 +468,20 @@ export type RejectChatRequstMutationVariables = Exact<{
 
 export type RejectChatRequstMutation = { __typename?: 'Mutation', rejectChatRequest: boolean };
 
+export type RequestPhoneNumberUpdateMutationVariables = Exact<{
+  password: Scalars['String'];
+  phoneNumber: Scalars['String'];
+}>;
+
+
+export type RequestPhoneNumberUpdateMutation = { __typename?: 'Mutation', requestPhoneNumberUpdate: { __typename?: 'UserEditResponse', isOk: boolean, redirect?: boolean | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
+
 export type SetUserAvatarMutationVariables = Exact<{
   avatar: Scalars['Upload'];
 }>;
 
 
-export type SetUserAvatarMutation = { __typename?: 'Mutation', setUserAvatar: boolean };
+export type SetUserAvatarMutation = { __typename?: 'Mutation', setUserAvatar?: string | null | undefined };
 
 export type UpdateChatRoomSettingsMutationVariables = Exact<{
   roomId: Scalars['String'];
@@ -465,6 +491,13 @@ export type UpdateChatRoomSettingsMutationVariables = Exact<{
 
 
 export type UpdateChatRoomSettingsMutation = { __typename?: 'Mutation', updateChatRoomSettings: boolean };
+
+export type UpdatePhoneNumberMutationVariables = Exact<{
+  code: Scalars['String'];
+}>;
+
+
+export type UpdatePhoneNumberMutation = { __typename?: 'Mutation', updatePhoneNumber: { __typename?: 'UserEditResponse', isOk: boolean, redirect?: boolean | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
 
 export type GetUserChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -819,6 +852,36 @@ export function useCreateMessageMutation(baseOptions?: Apollo.MutationHookOption
 export type CreateMessageMutationHookResult = ReturnType<typeof useCreateMessageMutation>;
 export type CreateMessageMutationResult = Apollo.MutationResult<CreateMessageMutation>;
 export type CreateMessageMutationOptions = Apollo.BaseMutationOptions<CreateMessageMutation, CreateMessageMutationVariables>;
+export const GenerateNewCodeDocument = gql`
+    mutation GenerateNewCode {
+  generateNewCode
+}
+    `;
+export type GenerateNewCodeMutationFn = Apollo.MutationFunction<GenerateNewCodeMutation, GenerateNewCodeMutationVariables>;
+
+/**
+ * __useGenerateNewCodeMutation__
+ *
+ * To run a mutation, you first call `useGenerateNewCodeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGenerateNewCodeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [generateNewCodeMutation, { data, loading, error }] = useGenerateNewCodeMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGenerateNewCodeMutation(baseOptions?: Apollo.MutationHookOptions<GenerateNewCodeMutation, GenerateNewCodeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GenerateNewCodeMutation, GenerateNewCodeMutationVariables>(GenerateNewCodeDocument, options);
+      }
+export type GenerateNewCodeMutationHookResult = ReturnType<typeof useGenerateNewCodeMutation>;
+export type GenerateNewCodeMutationResult = Apollo.MutationResult<GenerateNewCodeMutation>;
+export type GenerateNewCodeMutationOptions = Apollo.BaseMutationOptions<GenerateNewCodeMutation, GenerateNewCodeMutationVariables>;
 export const JoinRoomDocument = gql`
     mutation JoinRoom($roomId: String!, $userId: String) {
   joinRoom(roomId: $roomId, userId: $userId)
@@ -1029,6 +1092,45 @@ export function useRejectChatRequstMutation(baseOptions?: Apollo.MutationHookOpt
 export type RejectChatRequstMutationHookResult = ReturnType<typeof useRejectChatRequstMutation>;
 export type RejectChatRequstMutationResult = Apollo.MutationResult<RejectChatRequstMutation>;
 export type RejectChatRequstMutationOptions = Apollo.BaseMutationOptions<RejectChatRequstMutation, RejectChatRequstMutationVariables>;
+export const RequestPhoneNumberUpdateDocument = gql`
+    mutation RequestPhoneNumberUpdate($password: String!, $phoneNumber: String!) {
+  requestPhoneNumberUpdate(password: $password, phoneNumber: $phoneNumber) {
+    isOk
+    errors {
+      field
+      message
+    }
+    redirect
+  }
+}
+    `;
+export type RequestPhoneNumberUpdateMutationFn = Apollo.MutationFunction<RequestPhoneNumberUpdateMutation, RequestPhoneNumberUpdateMutationVariables>;
+
+/**
+ * __useRequestPhoneNumberUpdateMutation__
+ *
+ * To run a mutation, you first call `useRequestPhoneNumberUpdateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRequestPhoneNumberUpdateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [requestPhoneNumberUpdateMutation, { data, loading, error }] = useRequestPhoneNumberUpdateMutation({
+ *   variables: {
+ *      password: // value for 'password'
+ *      phoneNumber: // value for 'phoneNumber'
+ *   },
+ * });
+ */
+export function useRequestPhoneNumberUpdateMutation(baseOptions?: Apollo.MutationHookOptions<RequestPhoneNumberUpdateMutation, RequestPhoneNumberUpdateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RequestPhoneNumberUpdateMutation, RequestPhoneNumberUpdateMutationVariables>(RequestPhoneNumberUpdateDocument, options);
+      }
+export type RequestPhoneNumberUpdateMutationHookResult = ReturnType<typeof useRequestPhoneNumberUpdateMutation>;
+export type RequestPhoneNumberUpdateMutationResult = Apollo.MutationResult<RequestPhoneNumberUpdateMutation>;
+export type RequestPhoneNumberUpdateMutationOptions = Apollo.BaseMutationOptions<RequestPhoneNumberUpdateMutation, RequestPhoneNumberUpdateMutationVariables>;
 export const SetUserAvatarDocument = gql`
     mutation SetUserAvatar($avatar: Upload!) {
   setUserAvatar(avatar: $avatar)
@@ -1093,6 +1195,44 @@ export function useUpdateChatRoomSettingsMutation(baseOptions?: Apollo.MutationH
 export type UpdateChatRoomSettingsMutationHookResult = ReturnType<typeof useUpdateChatRoomSettingsMutation>;
 export type UpdateChatRoomSettingsMutationResult = Apollo.MutationResult<UpdateChatRoomSettingsMutation>;
 export type UpdateChatRoomSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateChatRoomSettingsMutation, UpdateChatRoomSettingsMutationVariables>;
+export const UpdatePhoneNumberDocument = gql`
+    mutation UpdatePhoneNumber($code: String!) {
+  updatePhoneNumber(code: $code) {
+    isOk
+    errors {
+      field
+      message
+    }
+    redirect
+  }
+}
+    `;
+export type UpdatePhoneNumberMutationFn = Apollo.MutationFunction<UpdatePhoneNumberMutation, UpdatePhoneNumberMutationVariables>;
+
+/**
+ * __useUpdatePhoneNumberMutation__
+ *
+ * To run a mutation, you first call `useUpdatePhoneNumberMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePhoneNumberMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePhoneNumberMutation, { data, loading, error }] = useUpdatePhoneNumberMutation({
+ *   variables: {
+ *      code: // value for 'code'
+ *   },
+ * });
+ */
+export function useUpdatePhoneNumberMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePhoneNumberMutation, UpdatePhoneNumberMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePhoneNumberMutation, UpdatePhoneNumberMutationVariables>(UpdatePhoneNumberDocument, options);
+      }
+export type UpdatePhoneNumberMutationHookResult = ReturnType<typeof useUpdatePhoneNumberMutation>;
+export type UpdatePhoneNumberMutationResult = Apollo.MutationResult<UpdatePhoneNumberMutation>;
+export type UpdatePhoneNumberMutationOptions = Apollo.BaseMutationOptions<UpdatePhoneNumberMutation, UpdatePhoneNumberMutationVariables>;
 export const GetUserChatRoomsDocument = gql`
     query GetUserChatRooms {
   getUserChatRooms {

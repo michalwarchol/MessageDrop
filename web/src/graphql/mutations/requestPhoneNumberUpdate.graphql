@@ -1,0 +1,10 @@
+mutation RequestPhoneNumberUpdate($password: String!, $phoneNumber: String!) {
+  requestPhoneNumberUpdate(password: $password, phoneNumber: $phoneNumber){
+    isOk
+    errors {
+      field
+      message
+    }
+    redirect
+  }
+}

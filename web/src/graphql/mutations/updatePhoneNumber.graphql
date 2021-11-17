@@ -1,0 +1,10 @@
+mutation UpdatePhoneNumber($code: String!) {
+    updatePhoneNumber(code: $code){
+        isOk
+        errors {
+            field
+            message
+        }
+        redirect
+    }
+}
