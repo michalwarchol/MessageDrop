@@ -17,16 +17,20 @@ import bcrypt from "bcrypt";
 import { generateVerificationCode } from "../utils/generateVerificationCode";
 import {
   COOKIE_NAME,
+  UPDATE_EMAIL_PREFIX,
   UPDATE_PHONE_PREFIX,
   VERIFICATION_PREFIX,
 } from "../constants";
 import { getFile } from "../utils/getFile";
 import { isAuth } from "../middleware/isAuth";
-import { brotliCompress } from "zlib";
 import { FileUpload, GraphQLUpload } from "graphql-upload";
 import { v4 } from "uuid";
 import { createFileBuffer } from "../utils/createFileBuffer";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { UserSettingsInput } from "./types/UserSettingsInput";
+import { findErrors } from "../utils/findErrors";
+import { sendSMS } from "../utils/sendSMS";
+import { sendEmail } from "../utils/sendEmail";
 
 @ObjectType()
 class UserResponse {
@@ -38,7 +42,7 @@ class UserResponse {
 }
 
 @ObjectType()
-class UserEditResponse {
+export class UserEditResponse {
   @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
@@ -298,12 +302,13 @@ export class UserResolver {
     @Arg("old_password", () => String) old_password: string,
     @Arg("new_password", () => String) new_password: string
   ): Promise<UserEditResponse> {
-    const user = await UserModel.findById(req.session.userId);
-    if (!user) {
-      return {
-        isOk: false,
-        redirect: true,
-      };
+    //check errors
+    const errors = await findErrors({
+      userId: req.session.userId,
+      password: old_password,
+    });
+    if (!errors.isOk) {
+      return errors;
     }
 
     if (new_password.length < 8) {
@@ -313,19 +318,6 @@ export class UserResolver {
           {
             field: "new_password",
             message: "Password should be at least 8 characters long!",
-          },
-        ],
-      };
-    }
-
-    const compare = await bcrypt.compare(old_password, user.password);
-    if (!compare) {
-      return {
-        isOk: false,
-        errors: [
-          {
-            field: "old_password",
-            message: "Incorrect password!",
           },
         ],
       };
@@ -348,149 +340,225 @@ export class UserResolver {
     @Arg("password", () => String) password: string,
     @Arg("phoneNumber", () => String) phoneNumber: string
   ): Promise<UserEditResponse> {
-
-    //check if user exists
-    const user = await UserModel.findById(req.session.userId);
-    if (!user) {
-      return {
-        isOk: false,
-        redirect: true,
-      };
-    }
-
-    //password verification
-    const compare = await bcrypt.compare(password, user.password);
-    if (!compare) {
-      return {
-        isOk: false,
-        errors: [
-          {
-            field: "password",
-            message: "Incorrect password!",
-          },
-        ],
-      };
-    }
-
-    //phone number validity verification
-    if (
-      /((?:\+|00)[17](?: |\-)?|(?:\+|00)[1-9]\d{0,2}(?: |\-)?|(?:\+|00)1\-\d{3}(?: |\-)?)?(0\d|\([0-9]{3}\)|[1-9]{0,3})(?:((?: |\-)[0-9]{2}){4}|((?:[0-9]{2}){4})|((?: |\-)[0-9]{3}(?: |\-)[0-9]{4})|([0-9]{7}))/g
-      .test(
-        phoneNumber
-      ) == false
-    ) {
-      return {
-        isOk: false,
-        errors: [
-          { field: "phoneNumber", message: "Phone number is not valid" },
-        ],
-      };
-    }
-
-    //check if this phone number is in use
-    const phoneExists = await UserModel.findOne({phone: phoneNumber});
-    if(phoneExists){
-      return {
-        isOk: false,
-        errors: [
-          {field: "phoneNumber", message: "Phone number is already in use!"}
-        ]
-      }
+    //check errors
+    const errors = await findErrors({
+      userId: req.session.userId,
+      phoneNumber,
+      password,
+    });
+    if (!errors.isOk) {
+      return errors;
     }
 
     //generate auth code and store it in redis
     const verificationCode = generateVerificationCode();
-    await redis.set(VERIFICATION_PREFIX + req.session.userId, verificationCode, "EX", 60*20); 
+    await redis.set(
+      VERIFICATION_PREFIX + req.session.userId,
+      verificationCode,
+      "EX",
+      60 * 20
+    );
 
     //new phone number also store in redis, it will be needed after code verification
-    await redis.set(UPDATE_PHONE_PREFIX + req.session.userId, phoneNumber, "EX", 60*60);
+    await redis.set(
+      UPDATE_PHONE_PREFIX + req.session.userId,
+      phoneNumber,
+      "EX",
+      60 * 60 * 24
+    );
 
     //send auth code to a new phone number
-    twilio.messages
-      .create({
-        body: "Your MessageDrop verification code is: " + verificationCode,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: phoneNumber,
-      })
-      .catch((err) => {
-        console.log("err: ", err);
-      });
-
-      return {
-        isOk: true
-      }
-  }
-
-  @Mutation(()=>UserEditResponse)
-  async updatePhoneNumber(
-    @Ctx(){redis, req}: Context,
-    @Arg("code", ()=>String) code: string
-  ): Promise<UserEditResponse>{
-
-    //take generated verification code from redis
-    const generatedCodeKey = VERIFICATION_PREFIX+req.session.userId;
-    const generatedCode = await redis.get(generatedCodeKey);
-
-    //check if code exists
-    if(!generatedCode){
-      return {
-        isOk: false,
-        errors: [{field: "code", message: "Verification code expired. Generate a new one!"}]
-      }
-    }
-
-    //check the code
-    if(generatedCode != code) {
-      return {
-        isOk: false,
-        errors: [{field: "code", message: "Verification code doesn't match!"}]
-      }
-    }
-
-    //take new phone number from redis
-    const phoneNumberKey = UPDATE_PHONE_PREFIX+req.session.userId;
-    const phoneNumber = await redis.get(phoneNumberKey);
-    if(!phoneNumber){
-      return {
-        isOk: false,
-        errors: [{field: "code", message: "Verification code expired. Generate a new one!"}]
-      }
-    }
-
-    //update the user
-    await UserModel.updateOne({_id: req.session.userId}, {phone: phoneNumber});
-
-    //delete useless keys
-    redis.del(generatedCodeKey);
-    redis.del(phoneNumberKey);
+    await sendSMS(twilio, verificationCode, phoneNumber);
 
     return {
-      isOk: true
-    }
+      isOk: true,
+    };
   }
 
-  @Mutation(()=>Boolean)
+  @Mutation(() => UserEditResponse)
+  async updateUserSettings(
+    @Ctx() { redis, req }: Context,
+    @Arg("userSettingsInput", () => UserSettingsInput)
+    { code, phoneOrEmail }: UserSettingsInput
+  ): Promise<UserEditResponse> {
+    //take generated verification code from redis
+    const generatedCodeKey = VERIFICATION_PREFIX + req.session.userId;
+    const generatedCode = await redis.get(generatedCodeKey);
+
+    //check errors
+    const errors = await findErrors({
+      userId: req.session.userId,
+      code: {
+        generatedCode,
+        passedCode: code,
+      },
+    });
+    if (!errors.isOk) {
+      return errors;
+    }
+
+    //update phone number
+    if (phoneOrEmail == "phone") {
+      //take new phone number from redis
+      const phoneNumberKey = UPDATE_PHONE_PREFIX + req.session.userId;
+      const phoneNumber = await redis.get(phoneNumberKey);
+      if (!phoneNumber) {
+        return {
+          isOk: false,
+          errors: [
+            {
+              field: "code",
+              message: "Verification code expired. Generate a new one!",
+            },
+          ],
+        };
+      }
+
+      //update the user
+      await UserModel.updateOne(
+        { _id: req.session.userId },
+        { phone: phoneNumber }
+      );
+
+      //delete useless keys
+      redis.del(generatedCodeKey);
+      redis.del(phoneNumberKey);
+    }
+
+    //update email
+    else {
+      //take new email from redis
+      const emailKey = UPDATE_EMAIL_PREFIX + req.session.userId;
+      const email = await redis.get(emailKey);
+      if (!email) {
+        return {
+          isOk: false,
+          errors: [
+            {
+              field: "code",
+              message: "Verification code expired. Generate a new one!",
+            },
+          ],
+        };
+      }
+
+      //update the user
+      await UserModel.updateOne({ _id: req.session.userId }, { email });
+
+      //delete useless keys
+      redis.del(generatedCodeKey);
+      redis.del(emailKey);
+    }
+
+    return {
+      isOk: true,
+    };
+  }
+
+  @Mutation(() => UserEditResponse)
   @UseMiddleware(isAuth)
   async generateNewCode(
-    @Ctx(){req, redis, twilio}: Context
-  ): Promise<boolean>{
-    const key = VERIFICATION_PREFIX+req.session.userId;
+    @Ctx() { req, redis, twilio }: Context,
+    @Arg("phoneOrEmail", () => String) phoneOrEmail: string
+  ): Promise<UserEditResponse> {
+    const key = VERIFICATION_PREFIX + req.session.userId;
     const code = generateVerificationCode();
-    await redis.set(key, code, "EX", 60*20);
+    await redis.set(key, code, "EX", 60 * 20);
 
-    const phoneNumber = await redis.get(UPDATE_PHONE_PREFIX+req.session.userId);
+    //send new code by SMS
+    if (phoneOrEmail == "phone") {
+      const phoneNumber = await redis.get(
+        UPDATE_PHONE_PREFIX + req.session.userId
+      );
 
-    //send auth code to a new phone number
-    twilio.messages
-      .create({
-        body: "Your MessageDrop verification code is: " + code,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: phoneNumber || "",
-      })
-      .catch((err) => {
-        console.log("err: ", err);
-      });
+      //check if new phoneNumber exists
+      if (!phoneNumber) {
+        return {
+          isOk: false,
+          errors: [
+            {
+              field: "code",
+              message: "Internal error, try refreshing your page!",
+            },
+          ],
+        };
+      }
 
-    return true;
+      //send auth code to a new phone number
+      await sendSMS(twilio, code, phoneNumber);
+
+      //send new code by EMAIL
+    } else {
+      const email = await redis.get(UPDATE_EMAIL_PREFIX + req.session.userId);
+
+      //check if new email exists
+      if (!email) {
+        return {
+          isOk: false,
+          errors: [
+            {
+              field: "code",
+              message: "Internal error, try refreshing your page!",
+            },
+          ],
+        };
+      }
+
+      await sendEmail(code, email);
+    }
+
+    return { isOk: true };
+  }
+
+  @Mutation(() => UserEditResponse)
+  @UseMiddleware(isAuth)
+  async requestEmailUpdate(
+    @Ctx() { req, redis }: Context,
+    @Arg("password", () => String) password: string,
+    @Arg("email", () => String) email: string
+  ): Promise<UserEditResponse> {
+    //check errors
+    const errors = await findErrors({
+      userId: req.session.userId,
+      email,
+      password,
+    });
+    if (!errors.isOk) {
+      return errors;
+    }
+
+    //generate auth code and store it in redis
+    const verificationCode = generateVerificationCode();
+    await redis.set(
+      VERIFICATION_PREFIX + req.session.userId,
+      verificationCode,
+      "EX",
+      60 * 20
+    );
+
+    //new email also store in redis, it will be needed after code verification
+    await redis.set(
+      UPDATE_EMAIL_PREFIX + req.session.userId,
+      email,
+      "EX",
+      60 * 60 * 24
+    );
+
+    //send mail with verification code
+    const response = await sendEmail(verificationCode, email);
+
+    //check if there was a problem sending mail
+    if (response.rejected.length > 0) {
+      return {
+        isOk: false,
+        errors: [
+          { field: "email", message: "Failed to send a message! Try again." },
+        ],
+      };
+    }
+
+    return {
+      isOk: true,
+    };
   }
 }
