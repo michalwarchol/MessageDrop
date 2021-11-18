@@ -8,6 +8,7 @@ import { AiFillCamera } from "react-icons/ai";
 import UserSettingsPasswordModal from "../UserSettingsPasswordModal/UserSettingsPasswordModal";
 import { setUserAvatarUpdate } from "../../cacheModifications/setUserAvatarUpdate";
 import UserSettingsPhoneNumberModal from "../UserSettingsPhoneNumberModal/UserSettingsPhoneNumberModal";
+import UserSettingsEmailModal from "../UserSettingsEmailModal/UserSettingsEmailModal";
 
 const UserSettingsContent: React.FC = () => {
   const { data: me } = useMeQuery();
@@ -84,6 +85,7 @@ const UserSettingsContent: React.FC = () => {
         <div className={styles.dataChanges}>
           <UserSettingsPasswordModal />
           <UserSettingsPhoneNumberModal />
+          <UserSettingsEmailModal />
         </div>
       </div>
     </div>

@@ -1,0 +1,10 @@
+mutation UpdateUserSettings($userSettingsInput: UserSettingsInput!) {
+    updateUserSettings(userSettingsInput: $userSettingsInput){
+        isOk
+        errors {
+            field
+            message
+        }
+        redirect
+    }
+}

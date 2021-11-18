@@ -1,0 +1,10 @@
+mutation RequestEmailUpdate($password: String!, $email: String!) {
+  requestEmailUpdate(password: $password, email: $email) {
+    errors {
+      field
+      message
+    }
+    isOk
+    redirect
+  }
+}
