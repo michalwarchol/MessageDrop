@@ -1,3 +1,10 @@
-mutation GenerateNewCode {
-    generateNewCode
+mutation GenerateNewCode($phoneOrEmail: String!) {
+    generateNewCode(phoneOrEmail: $phoneOrEmail) {
+        isOk
+        errors {
+            field
+            message
+        }
+        redirect
+    }
 }

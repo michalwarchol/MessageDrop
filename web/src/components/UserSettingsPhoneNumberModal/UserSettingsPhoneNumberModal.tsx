@@ -43,7 +43,7 @@ const UserSettingsPhoneNumberModal: React.FC = () => {
       }
     >
       {success ? (
-        <CodeVerification setIsOpen={setIsOpen} setSuccess={setSuccess} />
+        <CodeVerification setIsOpen={setIsOpen} setSuccess={setSuccess} phoneOrEmail="phone" />
       ) : (
         <Formik
           initialValues={{

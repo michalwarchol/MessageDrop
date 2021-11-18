@@ -2,21 +2,22 @@ import { Form, Formik } from "formik";
 import React, { useRef, useState } from "react";
 import {
   useGenerateNewCodeMutation,
-  useUpdatePhoneNumberMutation,
+  useUpdateUserSettingsMutation,
 } from "../../generated/graphql";
 import Button from "../Button/Button";
 import InputField from "../InputField/InputField";
 import styles from "./CodeVerification.module.scss";
 
 interface Props {
+  phoneOrEmail: "phone" | "email";
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const CodeVerification: React.FC<Props> = ({ setIsOpen, setSuccess }) => {
+const CodeVerification: React.FC<Props> = ({ phoneOrEmail, setIsOpen, setSuccess }) => {
   const [error, setError] = useState<string>("");
   const [generateNewCode] = useGenerateNewCodeMutation();
-  const [updatePhoneNumber, { loading }] = useUpdatePhoneNumberMutation();
+  const [updateUserSettings, { loading }] = useUpdateUserSettingsMutation();
 
   const val1 = useRef<HTMLInputElement>(null);
   const val2 = useRef<HTMLInputElement>(null);
@@ -60,14 +61,15 @@ const CodeVerification: React.FC<Props> = ({ setIsOpen, setSuccess }) => {
           }
           const { val1, val2, val3, val4, val5, val6 } = values;
           const code = `${val1}${val2}${val3}${val4}${val5}${val6}`;
-          const response = await updatePhoneNumber({ variables: { code } });
+          const response = await updateUserSettings({ variables: { userSettingsInput: {code, phoneOrEmail} } });
 
-          if (response.data?.updatePhoneNumber.errors) {
-            setError(response.data.updatePhoneNumber.errors[0].message);
+          if (response.data?.updateUserSettings.errors) {
+            setError(response.data.updateUserSettings.errors[0].message);
           }
-          if(response.data?.updatePhoneNumber.isOk) {
+          if(response.data?.updateUserSettings.isOk) {
             resetForm();
             setIsOpen(false);
+            setSuccess(false);
           }
         }}
       >
@@ -145,7 +147,10 @@ const CodeVerification: React.FC<Props> = ({ setIsOpen, setSuccess }) => {
                   className={styles.generateButton}
                   type="button"
                   onClick={async () => {
-                    await generateNewCode();
+                    const response = await generateNewCode({variables: {phoneOrEmail}});
+                    if(response.data?.generateNewCode.errors){
+                      setError(response.data.generateNewCode.errors[0].message);
+                    }
                   }}
                 />
                 <div className={styles.actionButtons}>
