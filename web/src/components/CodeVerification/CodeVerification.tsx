@@ -2,6 +2,7 @@ import { Form, Formik } from "formik";
 import React, { useRef, useState } from "react";
 import { BsShieldFillCheck } from "react-icons/bs";
 import {
+  MeDocument,
   useGenerateNewCodeMutation,
   useUpdateUserSettingsMutation,
 } from "../../generated/graphql";
@@ -13,10 +14,17 @@ interface Props {
   phoneOrEmail: "phone" | "email";
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
-  setSettingChangedInfo: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
+  setSettingChangedInfo: React.Dispatch<
+    React.SetStateAction<JSX.Element | null>
+  >;
 }
 
-const CodeVerification: React.FC<Props> = ({ phoneOrEmail, setIsOpen, setSuccess, setSettingChangedInfo }) => {
+const CodeVerification: React.FC<Props> = ({
+  phoneOrEmail,
+  setIsOpen,
+  setSuccess,
+  setSettingChangedInfo,
+}) => {
   const [error, setError] = useState<string>("");
   const [generateNewCode] = useGenerateNewCodeMutation();
   const [updateUserSettings, { loading }] = useUpdateUserSettingsMutation();
@@ -57,22 +65,29 @@ const CodeVerification: React.FC<Props> = ({ phoneOrEmail, setIsOpen, setSuccess
           val5: "",
           val6: "",
         }}
-        onSubmit={async (values, {resetForm}) => {
+        onSubmit={async (values, { resetForm }) => {
           if (Object.values(values).some((elem) => elem.length < 1)) {
             return;
           }
           const { val1, val2, val3, val4, val5, val6 } = values;
           const code = `${val1}${val2}${val3}${val4}${val5}${val6}`;
-          const response = await updateUserSettings({ variables: { userSettingsInput: {code, phoneOrEmail} } });
+          const response = await updateUserSettings({
+            variables: { userSettingsInput: { code, phoneOrEmail } },
+            refetchQueries: [MeDocument, "me"],
+          });
 
           if (response.data?.updateUserSettings.errors) {
             setError(response.data.updateUserSettings.errors[0].message);
           }
-          if(response.data?.updateUserSettings.isOk) {
+          if (response.data?.updateUserSettings.isOk) {
             resetForm();
             setIsOpen(false);
             setSuccess(false);
-            setSettingChangedInfo(<h4><BsShieldFillCheck /> Settings changed successfully!</h4>);
+            setSettingChangedInfo(
+              <h4>
+                <BsShieldFillCheck /> Settings changed successfully!
+              </h4>
+            );
           }
         }}
       >
@@ -143,15 +158,20 @@ const CodeVerification: React.FC<Props> = ({ phoneOrEmail, setIsOpen, setSuccess
                 </div>
               )}
               <div className={styles.buttons}>
-                <p>Your message will come shortly. If something went wrong, you can</p>
+                <p>
+                  Your message will come shortly. If something went wrong, you
+                  can
+                </p>
                 <Button
                   text="Generate a new code"
                   variant="outline"
                   className={styles.generateButton}
                   type="button"
                   onClick={async () => {
-                    const response = await generateNewCode({variables: {phoneOrEmail}});
-                    if(response.data?.generateNewCode.errors){
+                    const response = await generateNewCode({
+                      variables: { phoneOrEmail },
+                    });
+                    if (response.data?.generateNewCode.errors) {
                       setError(response.data.generateNewCode.errors[0].message);
                     }
                   }}
