@@ -10,7 +10,11 @@ import { toErrorMap } from "../../utils/toErrorMap";
 import { useRequestEmailUpdateMutation } from "../../generated/graphql";
 import { AiFillMail } from "react-icons/ai";
 
-const UserSettingsEmailModal: React.FC = () => {
+interface Props {
+  setSettingChangedInfo: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
+}
+
+const UserSettingsEmailModal: React.FC<Props> = ({setSettingChangedInfo}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
 
@@ -35,6 +39,7 @@ const UserSettingsEmailModal: React.FC = () => {
           setIsOpen={setIsOpen}
           setSuccess={setSuccess}
           phoneOrEmail="email"
+          setSettingChangedInfo={setSettingChangedInfo}
         />
       ) : (
         <Formik
@@ -43,6 +48,11 @@ const UserSettingsEmailModal: React.FC = () => {
             email: "",
           }}
           onSubmit={async (values, { setErrors, resetForm }) => {
+
+            if (Object.values(values).some((elem) => elem.length < 1)) {
+              return;
+            }
+
             const response = await requestEmailUpdate({
               variables: { ...values },
             });
@@ -63,7 +73,12 @@ const UserSettingsEmailModal: React.FC = () => {
             }
           }}
         >
-          {({ resetForm }) => (
+          {({ resetForm, values }) => {
+            let className = styles.submitButtonDisabled;
+            if (!Object.values(values).some((elem) => elem.length < 1)) {
+              className = styles.submitButton;
+            }
+            return (
             <Form className={styles.userSettingsPassordModal}>
               <InputField
                 name="password"
@@ -82,10 +97,10 @@ const UserSettingsEmailModal: React.FC = () => {
                     setSuccess(false);
                   }}
                 />
-                <Button text="Apply" type="submit" loading={loading} />
+                <Button text="Apply" type="submit" loading={loading} className={className} />
               </div>
             </Form>
-          )}
+          )}}
         </Formik>
       )}
     </Modal>

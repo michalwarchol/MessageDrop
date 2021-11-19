@@ -10,9 +10,12 @@ import { BsShieldFillCheck } from 'react-icons/bs';
 import { RiLockPasswordLine } from 'react-icons/ri';
 import { useRouter } from "next/router";
 
-const UserSettingsPasswordModal: React.FC = () => {
+interface Props {
+  setSettingChangedInfo: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
+}
+
+const UserSettingsPasswordModal: React.FC<Props> = ({setSettingChangedInfo}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [success, setSuccess] = useState<boolean>(false);
   const [changePassword] = useChangePasswordMutation();
 
   const router = useRouter();
@@ -31,9 +34,13 @@ const UserSettingsPasswordModal: React.FC = () => {
           repeat_new_password: "",
         }}
         onSubmit={async (values, {setErrors, resetForm}) => {
+
+          if (Object.values(values).some((elem) => elem.length < 1)) {
+            return;
+          }
+
           if(values.new_password != values.repeat_new_password){
             setErrors({repeat_new_password: "Repeated password doesn't match new password"})
-            setSuccess(false);
             return;
           }
 
@@ -41,7 +48,6 @@ const UserSettingsPasswordModal: React.FC = () => {
 
           if(response.data?.changePassword.errors){
               setErrors(toErrorMap(response.data.changePassword.errors));
-              setSuccess(false);
           }
 
           if(response.data?.changePassword.redirect){
@@ -49,14 +55,19 @@ const UserSettingsPasswordModal: React.FC = () => {
           }
 
           if(response.data?.changePassword.isOk){
-              setSuccess(true);
+              setSettingChangedInfo(<h4><BsShieldFillCheck /> Password changed successfully!</h4>);
               resetForm();
+              setIsOpen(false);
           }
         }}
       >
-        {({ resetForm }) => (
+        {({ resetForm, values }) => {
+          let className = styles.submitButtonDisabled;
+          if (!Object.values(values).some((elem) => elem.length < 1)) {
+            className = styles.submitButton;
+          }
+          return (
           <Form className={styles.userSettingsPassordModal}>
-              {success && <h5> <BsShieldFillCheck /> Password changed successfully!</h5>}
             <InputField
               name="old_password"
               placeholder="old password"
@@ -80,13 +91,12 @@ const UserSettingsPasswordModal: React.FC = () => {
                 onClick={() => {
                   resetForm();
                   setIsOpen(false);
-                  setSuccess(false);
                 }}
               />
-              <Button text="Change password" type="submit" />
+              <Button text="Change password" type="submit" className={className} />
             </div>
           </Form>
-        )}
+        )}}
       </Formik>
     </Modal>
   );

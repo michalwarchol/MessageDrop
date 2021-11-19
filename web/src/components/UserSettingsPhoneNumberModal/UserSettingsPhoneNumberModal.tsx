@@ -16,7 +16,11 @@ import { useRouter } from "next/router";
 import { isValidPhoneNumber } from "react-phone-number-input";
 import CodeVerification from "../CodeVerification/CodeVerification";
 
-const UserSettingsPhoneNumberModal: React.FC = () => {
+interface Props {
+  setSettingChangedInfo: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
+}
+
+const UserSettingsPhoneNumberModal: React.FC<Props> = ({setSettingChangedInfo}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
   const [phoneNumber, setPhoneNumber] = useState<E164Number | undefined>();
@@ -43,13 +47,26 @@ const UserSettingsPhoneNumberModal: React.FC = () => {
       }
     >
       {success ? (
-        <CodeVerification setIsOpen={setIsOpen} setSuccess={setSuccess} phoneOrEmail="phone" />
+        <CodeVerification
+          setIsOpen={setIsOpen}
+          setSuccess={setSuccess}
+          phoneOrEmail="phone"
+          setSettingChangedInfo={setSettingChangedInfo}
+        />
       ) : (
         <Formik
           initialValues={{
             password: "",
           }}
           onSubmit={async (values, { setErrors, resetForm }) => {
+            if (
+              Object.values(values).some((elem) => elem.length < 1) ||
+              !phoneNumber ||
+              phoneNumber.length < 1
+            ) {
+              return;
+            }
+            console.log("eeeee");
             setPhoneNumberError(undefined);
             if (!isValidPhoneNumber(phoneNumber as string)) {
               setPhoneNumberError({
@@ -85,38 +102,54 @@ const UserSettingsPhoneNumberModal: React.FC = () => {
             }
           }}
         >
-          {({ resetForm }) => (
-            <Form className={styles.userSettingsPassordModal}>
-              <InputField
-                name="password"
-                placeholder="password"
-                type="password"
-              />
-              <PhoneInput
-                defaultCountry="PL"
-                name="phoneNumber"
-                placeholder="new phone number"
-                value={phoneNumber}
-                onChange={setPhoneNumber}
-                error={phoneNumberError}
-              />
-              <div className={styles.buttons}>
-                <Button
-                  text="Cancel"
-                  variant="outline"
-                  type="button"
-                  onClick={() => {
-                    resetForm();
-                    setIsOpen(false);
-                    setSuccess(false);
-                    setPhoneNumber(undefined);
-                    setPhoneNumberError(undefined);
-                  }}
+          {({ resetForm, values }) => {
+            let className = styles.submitButtonDisabled;
+            if (
+              !Object.values(values).some((elem) => elem.length < 1) &&
+              phoneNumber &&
+              phoneNumber.length > 0
+            ) {
+              className = styles.submitButton;
+            }
+
+            return (
+              <Form className={styles.userSettingsPassordModal}>
+                <InputField
+                  name="password"
+                  placeholder="password"
+                  type="password"
                 />
-                <Button text="Apply" type="submit" loading={loading} />
-              </div>
-            </Form>
-          )}
+                <PhoneInput
+                  defaultCountry="PL"
+                  name="phoneNumber"
+                  placeholder="new phone number"
+                  value={phoneNumber}
+                  onChange={setPhoneNumber}
+                  error={phoneNumberError}
+                />
+                <div className={styles.buttons}>
+                  <Button
+                    text="Cancel"
+                    variant="outline"
+                    type="button"
+                    onClick={() => {
+                      resetForm();
+                      setIsOpen(false);
+                      setSuccess(false);
+                      setPhoneNumber(undefined);
+                      setPhoneNumberError(undefined);
+                    }}
+                  />
+                  <Button
+                    text="Apply"
+                    type="submit"
+                    loading={loading}
+                    className={className}
+                  />
+                </div>
+              </Form>
+            );
+          }}
         </Formik>
       )}
     </Modal>

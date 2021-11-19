@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./UserSettingsContent.module.scss";
 import { useGetUserAvatarQuery, useMeQuery, useSetUserAvatarMutation } from "../../generated/graphql";
 import Image from "next/image";
@@ -17,6 +17,8 @@ const UserSettingsContent: React.FC = () => {
     skip: !me || !me?.me?.avatarId,
   });
   const [setUserAvatar] = useSetUserAvatarMutation();
+
+  const [settingChangedInfo, setSettingChangedInfo] = useState<JSX.Element | null>(null);
 
   return (
     <div className={styles.userSettingsContent}>
@@ -82,10 +84,11 @@ const UserSettingsContent: React.FC = () => {
 
       <div className={styles.editSection}>
         <h2>Settings</h2>
+        {settingChangedInfo}
         <div className={styles.dataChanges}>
-          <UserSettingsPasswordModal />
-          <UserSettingsPhoneNumberModal />
-          <UserSettingsEmailModal />
+          <UserSettingsPasswordModal setSettingChangedInfo={setSettingChangedInfo} />
+          <UserSettingsPhoneNumberModal setSettingChangedInfo={setSettingChangedInfo} />
+          <UserSettingsEmailModal setSettingChangedInfo={setSettingChangedInfo} />
         </div>
       </div>
     </div>

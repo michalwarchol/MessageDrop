@@ -1,5 +1,6 @@
 import { Form, Formik } from "formik";
 import React, { useRef, useState } from "react";
+import { BsShieldFillCheck } from "react-icons/bs";
 import {
   useGenerateNewCodeMutation,
   useUpdateUserSettingsMutation,
@@ -12,9 +13,10 @@ interface Props {
   phoneOrEmail: "phone" | "email";
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSuccess: React.Dispatch<React.SetStateAction<boolean>>;
+  setSettingChangedInfo: React.Dispatch<React.SetStateAction<JSX.Element | null>>;
 }
 
-const CodeVerification: React.FC<Props> = ({ phoneOrEmail, setIsOpen, setSuccess }) => {
+const CodeVerification: React.FC<Props> = ({ phoneOrEmail, setIsOpen, setSuccess, setSettingChangedInfo }) => {
   const [error, setError] = useState<string>("");
   const [generateNewCode] = useGenerateNewCodeMutation();
   const [updateUserSettings, { loading }] = useUpdateUserSettingsMutation();
@@ -70,6 +72,7 @@ const CodeVerification: React.FC<Props> = ({ phoneOrEmail, setIsOpen, setSuccess
             resetForm();
             setIsOpen(false);
             setSuccess(false);
+            setSettingChangedInfo(<h4><BsShieldFillCheck /> Settings changed successfully!</h4>);
           }
         }}
       >
