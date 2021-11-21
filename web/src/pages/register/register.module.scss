@@ -30,16 +30,27 @@
       .buttons {
         margin-top: 20px;
         width: 100%;
+        p {
+          text-align: center;
+        &:hover {
+          text-decoration: underline;
+          cursor: pointer;
+        }
+      }
+        .submitInfo {
+          font-size: 12px;
+          width: 100%;
+          text-align: center;
+          margin: 0;
+          &:hover{
+            text-decoration: none;
+            cursor: auto;
+          }
+        }
         .submitButton {
           font-size: 20px;
         }
-        p {
-            text-align: center;
-          &:hover {
-            text-decoration: underline;
-            cursor: pointer;
-          }
-        }
+        
       }
     }
   }
