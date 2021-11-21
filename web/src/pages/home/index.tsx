@@ -1,15 +1,14 @@
 import React from "react";
 import styles from "./Home.module.scss";
 import Wrapper from "../../components/Wrapper/Wrapper";
-import { useIsAuth } from "../../utils/useIsAuth";
 import Navbar from "../../components/Navbar/Navbar";
 import { useMeQuery } from "../../generated/graphql";
 import ChatSidebar from "../../components/ChatSidebar/ChatSidebar";
 import ExploreContent from "../../components/ExploreContent/ExploreContent";
 import { withApollo } from "../../utils/withApollo";
+import { withAuth } from "../../utils/withAuth";
 
 const Home: React.FC = () => {
-  useIsAuth();
   const { data } = useMeQuery();
   
   return (
@@ -36,4 +35,4 @@ const Home: React.FC = () => {
     </Wrapper>
   );
 };
-export default withApollo()(Home);
+export default withApollo()(withAuth(Home));

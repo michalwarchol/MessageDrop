@@ -8,16 +8,18 @@ import { withApollo } from "../../../utils/withApollo";
 import { useRouter } from "next/router";
 import ChatRoomContent from "../../../components/ChatRoomContent/ChatRoomContent";
 import { RoomContext } from "../../../utils/RoomContext";
+import { withAuth } from "../../../utils/withAuth";
 
-interface Props {
+type Props = {
   id?: string;
 }
 
-const ChatRoom: NextPage<Props> = ({ id }) => {
+const ChatRoom: NextPage<Props, {}> = ({ id }) => {
   const router = useRouter();
   if (id) {
     useIsChatMember(id);
   } else {
+    console.log("xdd?")
     router.back();
   }
 
@@ -39,4 +41,4 @@ ChatRoom.getInitialProps = async ({ query }) => {
   };
 };
 
-export default withApollo()(ChatRoom);
+export default withApollo()(withAuth(ChatRoom));

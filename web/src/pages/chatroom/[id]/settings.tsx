@@ -8,6 +8,7 @@ import { RoomContext } from "../../../utils/RoomContext";
 import { useRouter } from "next/router";
 import IconButton from "../../../components/IconButton/IconButton";
 import { MdClose } from "react-icons/md";
+import { withAuth } from "../../../utils/withAuth";
 
 interface Props {
   id?: string;
@@ -41,4 +42,4 @@ Settings.getInitialProps = async ({ query }) => {
   };
 };
 
-export default withApollo()(Settings);
+export default withApollo()(withAuth(Settings));
