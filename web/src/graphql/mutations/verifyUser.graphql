@@ -1,0 +1,10 @@
+mutation VerifyUser($code: String!) {
+    verifyUser(code: $code) {
+        isOk
+        errors {
+            field
+            message
+        }
+        redirect
+    }
+}

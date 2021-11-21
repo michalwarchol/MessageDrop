@@ -189,20 +189,6 @@ export class UserResolver {
 
       await user.save();
       req.session.userId = user._id.toString();
-
-      //sends verification code to redis
-      // while (true) {
-      //   let code = generateVerificationCode();
-      //   let key = VERIFICATION_PREFIX + code;
-      //   let isInDb = await redis.get(key);
-      //   if (!isInDb) {
-      //     await redis.set(key, user._id.toString(), "EX", 1000 * 60);
-
-      //     //TODO: send email with this code
-
-      //     break;
-      //   }
-      // }
     } catch (err) {
       //checks if name, email and phone are unique
       if (err.message.includes("duplicate key error")) {
@@ -293,6 +279,35 @@ export class UserResolver {
         resolve(true);
       })
     );
+  }
+
+  @Mutation(() => UserEditResponse)
+  @UseMiddleware(isAuth)
+  async verifyUser(
+    @Ctx() { req, redis }: Context,
+    @Arg("code", () => String) code: string
+  ): Promise<UserEditResponse> {
+    //take generated verification code from redis
+    const generatedCodeKey = VERIFICATION_PREFIX + req.session.userId;
+    const generatedCode = await redis.get(generatedCodeKey);
+
+    //check errors
+    const errors = await findErrors({
+      userId: req.session.userId,
+      code: {
+        generatedCode,
+        passedCode: code,
+      },
+    });
+    if (!errors.isOk) {
+      return errors;
+    }
+
+    await UserModel.updateOne({ _id: req.session.userId }, { verified: true });
+
+    return {
+      isOk: true,
+    };
   }
 
   @Mutation(() => UserEditResponse)
@@ -459,7 +474,8 @@ export class UserResolver {
   @UseMiddleware(isAuth)
   async generateNewCode(
     @Ctx() { req, redis, twilio }: Context,
-    @Arg("phoneOrEmail", () => String) phoneOrEmail: string
+    @Arg("phoneOrEmail", () => String) phoneOrEmail: string,
+    @Arg("email", () => String, { nullable: true }) email?: string
   ): Promise<UserEditResponse> {
     const key = VERIFICATION_PREFIX + req.session.userId;
     const code = generateVerificationCode();
@@ -489,10 +505,17 @@ export class UserResolver {
 
       //send new code by EMAIL
     } else {
-      const email = await redis.get(UPDATE_EMAIL_PREFIX + req.session.userId);
+      const redisEmail = await redis.get(
+        UPDATE_EMAIL_PREFIX + req.session.userId
+      );
+
+      if (email) {
+        await sendEmail(code, email);
+        return { isOk: true };
+      }
 
       //check if new email exists
-      if (!email) {
+      if (!redisEmail) {
         return {
           isOk: false,
           errors: [
@@ -503,8 +526,7 @@ export class UserResolver {
           ],
         };
       }
-
-      await sendEmail(code, email);
+      await sendEmail(code, redisEmail);
     }
 
     return { isOk: true };
