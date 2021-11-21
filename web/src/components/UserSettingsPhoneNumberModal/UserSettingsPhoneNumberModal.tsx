@@ -66,7 +66,6 @@ const UserSettingsPhoneNumberModal: React.FC<Props> = ({setSettingChangedInfo}) 
             ) {
               return;
             }
-            console.log("eeeee");
             setPhoneNumberError(undefined);
             if (!isValidPhoneNumber(phoneNumber as string)) {
               setPhoneNumberError({

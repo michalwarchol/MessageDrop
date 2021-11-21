@@ -19,7 +19,6 @@ const ChatRoom: NextPage<Props, {}> = ({ id }) => {
   if (id) {
     useIsChatMember(id);
   } else {
-    console.log("xdd?")
     router.back();
   }
 
