@@ -1,5 +1,5 @@
-mutation GenerateNewCode($phoneOrEmail: String!) {
-    generateNewCode(phoneOrEmail: $phoneOrEmail) {
+mutation GenerateNewCode($phoneOrEmail: String!, $email: String) {
+    generateNewCode(phoneOrEmail: $phoneOrEmail, email: $email) {
         isOk
         errors {
             field

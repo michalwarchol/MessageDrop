@@ -132,6 +132,7 @@ export type Mutation = {
   setUserAvatar?: Maybe<Scalars['String']>;
   updateChatRoomSettings: Scalars['Boolean'];
   updateUserSettings: UserEditResponse;
+  verifyUser: UserEditResponse;
 };
 
 
@@ -173,6 +174,7 @@ export type MutationCreateMessageArgs = {
 
 
 export type MutationGenerateNewCodeArgs = {
+  email?: Maybe<Scalars['String']>;
   phoneOrEmail: Scalars['String'];
 };
 
@@ -232,6 +234,11 @@ export type MutationUpdateChatRoomSettingsArgs = {
 
 export type MutationUpdateUserSettingsArgs = {
   userSettingsInput: UserSettingsInput;
+};
+
+
+export type MutationVerifyUserArgs = {
+  code: Scalars['String'];
 };
 
 export type PaginatedMessages = {
@@ -435,6 +442,7 @@ export type CreateMessageMutation = { __typename?: 'Mutation', createMessage: { 
 
 export type GenerateNewCodeMutationVariables = Exact<{
   phoneOrEmail: Scalars['String'];
+  email?: Maybe<Scalars['String']>;
 }>;
 
 
@@ -525,6 +533,13 @@ export type UpdateUserSettingsMutationVariables = Exact<{
 
 
 export type UpdateUserSettingsMutation = { __typename?: 'Mutation', updateUserSettings: { __typename?: 'UserEditResponse', isOk: boolean, redirect?: boolean | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
+
+export type VerifyUserMutationVariables = Exact<{
+  code: Scalars['String'];
+}>;
+
+
+export type VerifyUserMutation = { __typename?: 'Mutation', verifyUser: { __typename?: 'UserEditResponse', isOk: boolean, redirect?: boolean | null | undefined, errors?: Array<{ __typename?: 'FieldError', field: string, message: string }> | null | undefined } };
 
 export type GetUserChatRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -880,8 +895,8 @@ export type CreateMessageMutationHookResult = ReturnType<typeof useCreateMessage
 export type CreateMessageMutationResult = Apollo.MutationResult<CreateMessageMutation>;
 export type CreateMessageMutationOptions = Apollo.BaseMutationOptions<CreateMessageMutation, CreateMessageMutationVariables>;
 export const GenerateNewCodeDocument = gql`
-    mutation GenerateNewCode($phoneOrEmail: String!) {
-  generateNewCode(phoneOrEmail: $phoneOrEmail) {
+    mutation GenerateNewCode($phoneOrEmail: String!, $email: String) {
+  generateNewCode(phoneOrEmail: $phoneOrEmail, email: $email) {
     isOk
     errors {
       field
@@ -907,6 +922,7 @@ export type GenerateNewCodeMutationFn = Apollo.MutationFunction<GenerateNewCodeM
  * const [generateNewCodeMutation, { data, loading, error }] = useGenerateNewCodeMutation({
  *   variables: {
  *      phoneOrEmail: // value for 'phoneOrEmail'
+ *      email: // value for 'email'
  *   },
  * });
  */
@@ -1307,6 +1323,44 @@ export function useUpdateUserSettingsMutation(baseOptions?: Apollo.MutationHookO
 export type UpdateUserSettingsMutationHookResult = ReturnType<typeof useUpdateUserSettingsMutation>;
 export type UpdateUserSettingsMutationResult = Apollo.MutationResult<UpdateUserSettingsMutation>;
 export type UpdateUserSettingsMutationOptions = Apollo.BaseMutationOptions<UpdateUserSettingsMutation, UpdateUserSettingsMutationVariables>;
+export const VerifyUserDocument = gql`
+    mutation VerifyUser($code: String!) {
+  verifyUser(code: $code) {
+    isOk
+    errors {
+      field
+      message
+    }
+    redirect
+  }
+}
+    `;
+export type VerifyUserMutationFn = Apollo.MutationFunction<VerifyUserMutation, VerifyUserMutationVariables>;
+
+/**
+ * __useVerifyUserMutation__
+ *
+ * To run a mutation, you first call `useVerifyUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVerifyUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [verifyUserMutation, { data, loading, error }] = useVerifyUserMutation({
+ *   variables: {
+ *      code: // value for 'code'
+ *   },
+ * });
+ */
+export function useVerifyUserMutation(baseOptions?: Apollo.MutationHookOptions<VerifyUserMutation, VerifyUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<VerifyUserMutation, VerifyUserMutationVariables>(VerifyUserDocument, options);
+      }
+export type VerifyUserMutationHookResult = ReturnType<typeof useVerifyUserMutation>;
+export type VerifyUserMutationResult = Apollo.MutationResult<VerifyUserMutation>;
+export type VerifyUserMutationOptions = Apollo.BaseMutationOptions<VerifyUserMutation, VerifyUserMutationVariables>;
 export const GetUserChatRoomsDocument = gql`
     query GetUserChatRooms {
   getUserChatRooms {
