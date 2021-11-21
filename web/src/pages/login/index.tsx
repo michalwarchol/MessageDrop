@@ -1,18 +1,17 @@
 import React from "react";
 import { Formik, Form } from "formik";
-import NextLink from 'next/link';
+import NextLink from "next/link";
 import Wrapper from "../../components/Wrapper/Wrapper";
 import styles from "./login.module.scss";
 import InputField from "../../components/InputField/InputField";
 import Button from "../../components/Button/Button";
 import { toErrorMap } from "../../utils/toErrorMap";
 import { useRouter } from "next/dist/client/router";
-import { useLoginMutation } from "../../generated/graphql";
+import { MeDocument, MeQuery, useLoginMutation } from "../../generated/graphql";
 import { withApollo } from "../../utils/withApollo";
 
 const Login: React.FC = () => {
-
-  const [login, {loading}] = useLoginMutation();
+  const [login, { loading }] = useLoginMutation();
   const router = useRouter();
 
   return (
@@ -20,16 +19,27 @@ const Login: React.FC = () => {
       <Wrapper size="sm">
         <div className={styles.formContainer}>
           <Formik
-            initialValues={{password: "", email: ""}}
-            onSubmit={async (values, {setErrors}) => {        
-              const response = await login({variables: {
-                email: values.email,
-                password: values.password
-              }})
+            initialValues={{ password: "", email: "" }}
+            onSubmit={async (values, { setErrors }) => {
+              const response = await login({
+                variables: {
+                  email: values.email,
+                  password: values.password,
+                },
+                update: (cache, { data }) => {
+                  cache.writeQuery<MeQuery>({
+                    query: MeDocument,
+                    data: {
+                      __typename: "Query",
+                      me: data?.login?.user || null,
+                    },
+                  });
+                },
+              });
 
-              if(response.data?.login?.errors){
+              if (response.data?.login?.errors) {
                 setErrors(toErrorMap(response.data.login.errors));
-              }else if(response.data?.login?.user){
+              } else if (response.data?.login?.user) {
                 router.push("/home");
               }
             }}
@@ -51,7 +61,11 @@ const Login: React.FC = () => {
                   type="password"
                 />
                 <div className={styles.buttons}>
-                  <Button text="Log in" loading={loading} className={styles.submitButton} />
+                  <Button
+                    text="Log in"
+                    loading={loading}
+                    className={styles.submitButton}
+                  />
                   <NextLink href="/register">
                     <p>I don't have an account</p>
                   </NextLink>
@@ -62,7 +76,9 @@ const Login: React.FC = () => {
         </div>
       </Wrapper>
       <div className={styles.footer}>
-          <p>Michał Warchoł {new Date().getFullYear()} &copy;. All rights reserved</p>
+        <p>
+          Michał Warchoł {new Date().getFullYear()} &copy;. All rights reserved
+        </p>
       </div>
     </div>
   );
