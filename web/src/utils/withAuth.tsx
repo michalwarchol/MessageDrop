@@ -4,10 +4,19 @@ import React, { useEffect, useState } from "react";
 import { useMeQuery } from "../generated/graphql";
 
 export const withAuth = (WrappedComponent: NextPage<unknown, unknown>) => {
+  const EmptyComponent = () => (
+    <div
+      style={{
+        minHeight: "100vh",
+        minWidth: "100vw",
+        backgroundColor: "#17181a",
+      }}
+    ></div>
+  );
+
   const hoc = (props: any) => {
     const router = useRouter();
     const { data, loading } = useMeQuery();
-
 
     const [verified, setVerified] = useState(false);
 
@@ -26,24 +35,23 @@ export const withAuth = (WrappedComponent: NextPage<unknown, unknown>) => {
           return;
         }
       }
-      
-      if(router.pathname != "/verify" && !loading && data?.me?.verified){
-        setVerified(true);
-      }
-      if(router.pathname == "/verify" && !loading && data?.me){
-        setVerified(true);
-      }
 
+      if (router.pathname != "/verify" && !loading && data?.me?.verified) {
+        setVerified(true);
+      }
+      if (router.pathname == "/verify" && !loading && data?.me) {
+        setVerified(true);
+      }
     }, [loading, data, router]);
 
-    return verified ? <WrappedComponent {...props} /> : null; 
+    return verified ? <WrappedComponent {...props} /> : <EmptyComponent />;
   };
 
-  hoc.getInitialProps = async ({ query }: NextPageContext) =>{
+  hoc.getInitialProps = async ({ query }: NextPageContext) => {
     return {
       id: query.id as string,
     };
-  }
+  };
 
   return hoc;
 };
