@@ -135,8 +135,12 @@ const MessagesSection: React.FC = () => {
             }
             let newUser;
             if (index == 0) {
-              newUser =
-                arr[index + 1].message.creatorId != elem.message.creatorId;
+              if(arr.length<2){
+                newUser=true;
+              }else{
+                newUser =
+                  arr[index + 1].message.creatorId != elem.message.creatorId;
+              }
               return (
                 <MessageNode
                   message={elem}
