@@ -21,7 +21,6 @@ const SuggestedUser: React.FC<Props> = ({ userWithAvatar }) => {
               src={base64ToObjectURL(userWithAvatar.avatar)}
               width={100}
               height={100}
-              layout="responsive"
             />
           </div>
         </div>
