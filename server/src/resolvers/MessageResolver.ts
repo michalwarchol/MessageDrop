@@ -168,7 +168,6 @@ export class MessageResolver {
     @Ctx(){s3}: Context,
     @Args() _: ChatRoomSubArgs
   ):Promise<MessageWithMedia>{
-    console.log(message)
     let media = await getFile(s3, message.mediaId);
     let file = null;
     if (message.fileData) {
