@@ -61,7 +61,6 @@ const ExploreContent: React.FC = () => {
         <div>
           {foundUsers && foundUsers.findUsers.length > 0 && (
             <>
-              <h3>Users</h3>
               <div className={styles.suggestedChats}>
                 {foundUsers.findUsers.map((elem, index) => (
                   <SuggestedUser userWithAvatar={elem} key={index} />
@@ -72,7 +71,6 @@ const ExploreContent: React.FC = () => {
 
           {foundRooms && foundRooms.findSuggestedChatRooms.length > 0 && (
             <>
-              <h3>chat rooms</h3>
               <div className={styles.suggestedChats}>
                 {foundRooms.findSuggestedChatRooms.map((elem, index) => (
                   <SuggestedChatRoom chatRoomWithImage={elem} key={index} />
@@ -91,12 +89,15 @@ const ExploreContent: React.FC = () => {
           <h3 style={{ textAlign: "center" }}>No results found</h3>
         )}
 
-      <div className={styles.suggestedChats}>
-        {data &&
-          data.getSuggestedChatRooms.map((elem, index) => (
-            <SuggestedChatRoom chatRoomWithImage={elem} key={index} />
-          ))}
-      </div>
+      {(!foundRooms ||
+        foundRooms.findSuggestedChatRooms.length < 1) && (
+          <div className={styles.suggestedChats}>
+            {data &&
+              data.getSuggestedChatRooms.map((elem, index) => (
+                <SuggestedChatRoom chatRoomWithImage={elem} key={index} />
+              ))}
+          </div>
+        )}
     </div>
   );
 };
