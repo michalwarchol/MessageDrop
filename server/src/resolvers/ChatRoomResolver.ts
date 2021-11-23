@@ -348,7 +348,7 @@ export class ChatRoomResolver {
       { $pull: { modIds: userId, userIds: userId } }
     );
 
-    await ChatRequestModel.deleteOne({ userId });
+    await ChatRequestModel.deleteOne({ userId, roomId });
 
     return result.matchedCount > 0;
   }
