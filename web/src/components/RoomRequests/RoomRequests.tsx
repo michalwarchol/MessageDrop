@@ -26,6 +26,10 @@ const RoomRequests: React.FC = () => {
               <RoomRequestNode requestWithUser={elem} key={index} />
           )) : <div className={styles.empty}>No actions to do</div>
       }</div>}
+
+      {data && data.getChatRoomRequests.length > 0 && 
+        <div className={styles.notification}>{data.getChatRoomRequests.length}</div>
+      }
     </div>
   );
 };
