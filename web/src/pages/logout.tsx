@@ -1,4 +1,4 @@
-import { ApolloConsumer } from "@apollo/client";
+import { useApolloClient } from "@apollo/client";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
@@ -8,22 +8,25 @@ import { withApollo } from "../utils/withApollo";
 const Logout: NextPage = () => {
   const router = useRouter();
   const [logout] = useLogoutMutation();
+  const apolloClient = useApolloClient();
 
   useEffect(() => {
     async function log() {
       await logout();
+      await apolloClient.resetStore();
+      router.push("/login");
     }
     log();
   }, []);
 
   return (
-    <ApolloConsumer>
-      {(client) => {
-        client.resetStore();
-        router.push("/login");
-        return <div>You logged out!</div>;
+    <div
+      style={{
+        minHeight: "100vh",
+        minWidth: "100vw",
+        backgroundColor: "#17181a",
       }}
-    </ApolloConsumer>
+    ></div>
   );
 };
 export default withApollo()(Logout);
