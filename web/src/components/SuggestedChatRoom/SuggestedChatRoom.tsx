@@ -9,7 +9,7 @@ import {
 import Image from "next/image";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import { BsFillChatDotsFill } from "react-icons/bs";
-import { FiUserPlus, FiMail } from "react-icons/fi";
+import { FiMail } from "react-icons/fi";
 import Button from "../Button/Button";
 import { joinRoomUpdate } from "../../cacheModifications/joinRoomUpdate";
 import { sendRequestUpdate } from "../../cacheModifications/sendRequestUpdate";
@@ -70,11 +70,7 @@ const SuggestedChatRoom: React.FC<Props> = ({ chatRoomWithImage }) => {
               ? "Join"
               : "Send a request"
           }
-          Icon={
-            chatRoomWithImage.chatRoom.access == RoomAccess.Public
-              ? FiUserPlus
-              : FiMail
-          }
+          Icon={FiMail}
           loading={joinLoading || sendLoading}
           onClick={
             chatRoomWithImage.chatRoom.access == RoomAccess.Public
