@@ -329,6 +329,14 @@ export class ChatRoomResolver {
     @Arg("roomId", () => String) roomId: string,
     @Arg("userId", () => String, { nullable: true }) userId?: string
   ): Promise<boolean> {
+
+    const room = await ChatRoomModel.findById(roomId);
+    if(userId && room){
+      if(room.access != RoomAccess.public){
+        return false;
+      }
+    }
+
     await ChatRoomModel.findByIdAndUpdate(roomId, {
       $push: { userIds: userId || req.session.userId },
     });
