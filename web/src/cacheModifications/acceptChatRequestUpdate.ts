@@ -39,7 +39,6 @@ export const acceptChatRequestUpdate = (
         id: "ChatRoom:" + roomId,
         fragment: gql`
           fragment ChangeUserPermissions on ChatRoom {
-            modIds
             userIds
           }
         `,
