@@ -67,6 +67,13 @@ export type ChatRoomUsers = {
   others: Array<UserWithAvatar>;
 };
 
+export type ChatRoomUsersSub = {
+  __typename?: 'ChatRoomUsersSub';
+  modIds: Array<Scalars['String']>;
+  newUser?: Maybe<UserWithAvatar>;
+  userIds: Array<Scalars['String']>;
+};
+
 export type ChatRoomWithImage = {
   __typename?: 'ChatRoomWithImage';
   chatRoom: ChatRoom;
@@ -149,6 +156,7 @@ export type MutationChangePasswordArgs = {
 
 
 export type MutationChangeUserRoomPermissionsArgs = {
+  expectToBeMod: Scalars['Boolean'];
   roomId: Scalars['String'];
   userId: Scalars['String'];
 };
@@ -339,7 +347,13 @@ export type SettingsInput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  newChatUsers: ChatRoomUsersSub;
   newMessage: MessageWithMedia;
+};
+
+
+export type SubscriptionNewChatUsersArgs = {
+  roomId: Scalars['String'];
 };
 
 
@@ -410,6 +424,7 @@ export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: 
 export type ChangeUserRoomPermissionsMutationVariables = Exact<{
   roomId: Scalars['String'];
   userId: Scalars['String'];
+  expectToBeMod: Scalars['Boolean'];
 }>;
 
 
@@ -621,6 +636,13 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } | null | undefined };
 
+export type NewChatUsersSubscriptionVariables = Exact<{
+  roomId: Scalars['String'];
+}>;
+
+
+export type NewChatUsersSubscription = { __typename?: 'Subscription', newChatUsers: { __typename?: 'ChatRoomUsersSub', modIds: Array<string>, userIds: Array<string>, newUser?: { __typename?: 'UserWithAvatar', avatar?: string | null | undefined, user: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } } | null | undefined } };
+
 export type NewMessageSubscriptionVariables = Exact<{
   roomId: Scalars['String'];
 }>;
@@ -756,8 +778,12 @@ export type ChangePasswordMutationHookResult = ReturnType<typeof useChangePasswo
 export type ChangePasswordMutationResult = Apollo.MutationResult<ChangePasswordMutation>;
 export type ChangePasswordMutationOptions = Apollo.BaseMutationOptions<ChangePasswordMutation, ChangePasswordMutationVariables>;
 export const ChangeUserRoomPermissionsDocument = gql`
-    mutation ChangeUserRoomPermissions($roomId: String!, $userId: String!) {
-  changeUserRoomPermissions(roomId: $roomId, userId: $userId)
+    mutation ChangeUserRoomPermissions($roomId: String!, $userId: String!, $expectToBeMod: Boolean!) {
+  changeUserRoomPermissions(
+    roomId: $roomId
+    userId: $userId
+    expectToBeMod: $expectToBeMod
+  )
 }
     `;
 export type ChangeUserRoomPermissionsMutationFn = Apollo.MutationFunction<ChangeUserRoomPermissionsMutation, ChangeUserRoomPermissionsMutationVariables>;
@@ -777,6 +803,7 @@ export type ChangeUserRoomPermissionsMutationFn = Apollo.MutationFunction<Change
  *   variables: {
  *      roomId: // value for 'roomId'
  *      userId: // value for 'userId'
+ *      expectToBeMod: // value for 'expectToBeMod'
  *   },
  * });
  */
@@ -1828,6 +1855,43 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const NewChatUsersDocument = gql`
+    subscription NewChatUsers($roomId: String!) {
+  newChatUsers(roomId: $roomId) {
+    newUser {
+      user {
+        ...RegularUser
+      }
+      avatar
+    }
+    modIds
+    userIds
+  }
+}
+    ${RegularUserFragmentDoc}`;
+
+/**
+ * __useNewChatUsersSubscription__
+ *
+ * To run a query within a React component, call `useNewChatUsersSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useNewChatUsersSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNewChatUsersSubscription({
+ *   variables: {
+ *      roomId: // value for 'roomId'
+ *   },
+ * });
+ */
+export function useNewChatUsersSubscription(baseOptions: Apollo.SubscriptionHookOptions<NewChatUsersSubscription, NewChatUsersSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<NewChatUsersSubscription, NewChatUsersSubscriptionVariables>(NewChatUsersDocument, options);
+      }
+export type NewChatUsersSubscriptionHookResult = ReturnType<typeof useNewChatUsersSubscription>;
+export type NewChatUsersSubscriptionResult = Apollo.SubscriptionResult<NewChatUsersSubscription>;
 export const NewMessageDocument = gql`
     subscription NewMessage($roomId: String!) {
   newMessage(roomId: $roomId) {

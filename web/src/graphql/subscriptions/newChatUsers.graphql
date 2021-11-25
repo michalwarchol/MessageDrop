@@ -1,0 +1,12 @@
+subscription NewChatUsers($roomId: String!) {
+    newChatUsers(roomId: $roomId){
+        newUser {
+            user {
+                ...RegularUser
+            }
+            avatar
+        }
+        modIds
+        userIds
+    }
+}

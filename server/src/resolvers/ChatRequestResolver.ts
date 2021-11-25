@@ -7,7 +7,9 @@ import {
   Query,
   Resolver,
   UseMiddleware,
+  PubSub
 } from "type-graphql";
+import {PubSubEngine} from "graphql-subscriptions";
 import {
   ChatRequest,
   ChatRequestModel,
@@ -69,6 +71,19 @@ export class ChatRequestResolver {
     @Ctx() context: Context,
     @Arg("roomId", () => String) roomId: string
   ): Promise<boolean> {
+    
+    //user can send request only once
+    const request = await ChatRequestModel.findOne({roomId, userId: context.req.session.userId});
+    if(request){
+      return false;
+    }
+
+    //if user is a member of this room, then a user can't send a request
+    const room = await ChatRoomModel.findById(roomId);
+    if(room && room.userIds.includes(context.req.session.userId)){
+      return false;
+    }
+
     const newRequest = new ChatRequestModel({
       roomId,
       userId: context.req.session.userId,
@@ -83,6 +98,7 @@ export class ChatRequestResolver {
   @UseMiddleware(isAuth, hasPermissions)
   async acceptChatRequest(
     @Ctx() _: Context,
+    @PubSub() pubSub: PubSubEngine,
     @Arg("roomId", () => String) roomId: string,
     @Arg("requestId", () => String) requestId: string
   ): Promise<boolean> {
@@ -90,9 +106,16 @@ export class ChatRequestResolver {
       { _id: requestId }, //filter
       { status: ChatRequestStatus.accepted } //update
     );
+
+    if(request.status == ChatRequestStatus.accepted){
+      return false;
+    }
+
     await ChatRoomModel.findByIdAndUpdate(roomId, {
       $push: { userIds: request.userId },
     });
+
+    await pubSub.publish("CHAT_USERS", {roomId, userId: request.userId});
 
     return true;
   }

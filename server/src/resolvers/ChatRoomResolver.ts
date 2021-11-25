@@ -7,10 +7,14 @@ import {
   Field,
   Mutation,
   ObjectType,
+  PubSub,
   Query,
   Resolver,
+  Root,
+  Subscription,
   UseMiddleware,
 } from "type-graphql";
+import {PubSubEngine} from "graphql-subscriptions";
 import { ChatRoom, ChatRoomModel, RoomAccess } from "../entities/ChatRoom";
 import { Context } from "../types";
 import { ChatRoomInput } from "./types/ChatRoomInput";
@@ -53,6 +57,19 @@ class ChatRoomUsers {
 
   @Field(() => [UserWithAvatar])
   others: UserWithAvatar[];
+}
+
+@ObjectType()
+class ChatRoomUsersSub {
+
+  @Field(()=>UserWithAvatar, {nullable: true})
+  newUser?: UserWithAvatar | null;
+
+  @Field(()=>[String])
+  modIds: string[];
+
+  @Field(()=>[String])
+  userIds: string[];
 }
 
 @Resolver(ChatRoom)
@@ -130,6 +147,7 @@ export class ChatRoomResolver {
   }
 
   @Query(() => [ChatRoomWithImage])
+  @UseMiddleware(isAuth)
   async getSuggestedChatRooms(
     @Ctx() { s3, req }: Context
   ): Promise<ChatRoomWithImage[]> {
@@ -326,12 +344,15 @@ export class ChatRoomResolver {
   @UseMiddleware(isAuth)
   async joinRoom(
     @Ctx() { req }: Context,
+    @PubSub() pubSub: PubSubEngine,
     @Arg("roomId", () => String) roomId: string,
     @Arg("userId", () => String, { nullable: true }) userId?: string
   ): Promise<boolean> {
 
     const room = await ChatRoomModel.findById(roomId);
-    if(userId && room){
+
+    //if access isn't public, don't join
+    if(!userId && room){
       if(room.access != RoomAccess.public){
         return false;
       }
@@ -341,6 +362,8 @@ export class ChatRoomResolver {
       $push: { userIds: userId || req.session.userId },
     });
 
+    await pubSub.publish("CHAT_USERS", {roomId, userId: userId || req.session.userId});
+
     return true;
   }
 
@@ -348,6 +371,7 @@ export class ChatRoomResolver {
   @UseMiddleware(isAuth, isRoomMember, hasPermissions)
   async kickUser(
     @Ctx() _: Context,
+    @PubSub() pubSub: PubSubEngine,
     @Arg("roomId", () => String) roomId: string,
     @Arg("userId", () => String) userId: string
   ): Promise<boolean> {
@@ -358,6 +382,8 @@ export class ChatRoomResolver {
 
     await ChatRequestModel.deleteOne({ userId, roomId });
 
+    await pubSub.publish("CHAT_USERS", {roomId});
+
     return result.matchedCount > 0;
   }
 
@@ -365,28 +391,38 @@ export class ChatRoomResolver {
   @UseMiddleware(isAuth, isRoomMember, hasPermissions)
   async changeUserRoomPermissions(
     @Ctx() _: Context,
+    @PubSub() pubSub: PubSubEngine,
     @Arg("roomId", () => String) roomId: string,
-    @Arg("userId", () => String) userId: string
+    @Arg("userId", () => String) userId: string,
+    @Arg("expectToBeMod", ()=>Boolean) expectToBeMod: boolean
   ): Promise<boolean> {
     const room = (await ChatRoomModel.findById(roomId)) as ChatRoom;
 
     //if modIds includes userId, delete it from the array and add to userIds
-    if (room.modIds.includes(userId)) {
+    if (expectToBeMod && room.modIds.includes(userId)) {
       await ChatRoomModel.updateOne(
         { _id: roomId },
         { $pull: { modIds: userId }, $push: { userIds: userId } }
       );
+
+      await pubSub.publish("CHAT_USERS", {roomId});
+
       return true;
     }
 
     //if userIds includes userId, delete it from the array and add to modIds
-    if (room.userIds.includes(userId)) {
+    if (!expectToBeMod && room.userIds.includes(userId)) {
       await ChatRoomModel.updateOne(
         { _id: roomId },
         { $pull: { userIds: userId }, $push: { modIds: userId } }
       );
+
+      await pubSub.publish("CHAT_USERS", {roomId});
+
       return true;
     }
+
+    
 
     //if userIds and modIds don't include userId then do nothing and return false
     return false;
@@ -417,5 +453,33 @@ export class ChatRoomResolver {
       );
     }
     return true;
+  }
+
+  @Subscription(()=>ChatRoomUsersSub, {
+    topics: "CHAT_USERS",
+    filter: ({payload, args}) => payload.roomId == args.roomId
+  })
+  async newChatUsers(
+    @Root() payload: any,
+    @Ctx() {s3}: Context,
+    @Arg("roomId", ()=>String) roomId: string
+  ): Promise<ChatRoomUsersSub> {
+    const room = await ChatRoomModel.findById(roomId);
+
+    let newUser = null;
+    if(payload.userId){
+      const user = await UserModel.findById(payload.userId);
+      const avatar = await getFile(s3, user?.avatarId || null);
+      newUser = {
+        user: user as User,
+        avatar
+      }
+    }
+
+    return {
+      newUser,
+      modIds: room?.modIds || [],
+      userIds: room?.userIds || []
+    }
   }
 }
