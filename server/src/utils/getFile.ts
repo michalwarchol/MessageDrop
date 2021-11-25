@@ -3,7 +3,7 @@ import { Readable } from "stream";
 
 export const getFile = async (
   s3: S3,
-  imageId: string
+  imageId: string | null
 ): Promise<string | null> => {
   if (imageId == null) {
     return null;
