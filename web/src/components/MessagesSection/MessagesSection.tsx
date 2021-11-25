@@ -7,6 +7,8 @@ import React, {
 } from "react";
 import styles from "./MessagesSection.module.scss";
 import {
+  GetRoomMessagesDocument,
+  GetRoomMessagesQuery,
   NewMessageDocument,
   NewMessageSubscription,
   NewMessageSubscriptionVariables,
@@ -17,6 +19,8 @@ import { RoomContext } from "../../utils/RoomContext";
 import MessageNode from "../MessageNode/MessageNode";
 import NewMessageInfo from "../NewMessageInfo/NewMessageInfo";
 import { isNewDay } from "../../utils/isNewDay";
+import { useApolloClient } from "@apollo/client";
+
 
 const MessagesSection: React.FC = () => {
   const roomId = useContext(RoomContext);
@@ -32,6 +36,7 @@ const MessagesSection: React.FC = () => {
       notifyOnNetworkStatusChange: true,
     }
   );
+  const apolloClient = useApolloClient();
 
   //reference to the chat div
   const chatRef = useRef<HTMLDivElement>(null);
@@ -57,7 +62,7 @@ const MessagesSection: React.FC = () => {
       });
       if (node) observer.current.observe(node);
     },
-    [loading, data?.getRoomMessages.hasMore]
+    [loading, data?.getRoomMessages.hasMore, data?.getRoomMessages.messages.length]
   );
 
   //subscrition to new room messages
@@ -91,6 +96,18 @@ const MessagesSection: React.FC = () => {
         return newMessgs;
       },
     });
+
+    //clear cache before unmount
+    return () => {
+      const eee = apolloClient.cache.readQuery<GetRoomMessagesQuery>({query: GetRoomMessagesDocument, variables: {roomId}})
+      if(eee){
+        eee.getRoomMessages.messages.forEach(elem=>{
+          apolloClient.cache.evict({id: apolloClient.cache.identify(elem.message)})
+        })
+      }
+      apolloClient.cache.evict({fieldName: 'getRoomMessages:{"roomId":"'+roomId+'"}', })
+    }
+
   }, []);
 
   //fires when new message comes
