@@ -3,7 +3,7 @@ import {WebSocketLink} from "@apollo/client/link/ws";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { createUploadLink } from "apollo-upload-client";
 import { withApollo as createWithApollo } from "next-apollo";
-import { PaginatedMessages } from "../generated/graphql";
+import { ChatRoomUsers, PaginatedMessages } from "../generated/graphql";
 import { isServer } from "./isServer";
 
 const wsLink = isServer ? new WebSocketLink({
@@ -63,6 +63,15 @@ const client = new ApolloClient({
                 return {...incoming,
                   messages: [...(existing?.messages || []), ...incoming.messages]
                 }
+              }
+            },
+            getChatRoomUsers: {
+              keyArgs: ["roomId"],
+              merge(
+                _: ChatRoomUsers | undefined,
+                incoming: ChatRoomUsers
+              ): ChatRoomUsers {
+                return incoming;
               }
             }
           }
