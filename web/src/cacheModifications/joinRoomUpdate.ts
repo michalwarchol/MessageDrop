@@ -8,7 +8,12 @@ import {
 } from "../generated/graphql";
 
 export const joinRoomUpdate = (chatRoomWithImage: ChatRoomWithImage) => {
-  return (cache: ApolloCache<any>) => {
+  return (cache: ApolloCache<any>, {data}: any) => {
+
+    if(!data.joinRoom) {
+      return;
+    }
+
     const userRooms = cache.readQuery<GetUserChatRoomsQuery>({
       query: GetUserChatRoomsDocument,
     });

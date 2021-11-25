@@ -15,6 +15,7 @@ import { settingsKickUser } from "../../cacheModifications/settingsKickUser";
 import { settingsPromoteDemoteUser } from "../../cacheModifications/settingsPromoteDemoteUser";
 import IconButton from "../IconButton/IconButton";
 import { BsThreeDots } from "react-icons/bs";
+import { useRouter } from "next/router";
 
 interface Props {
   userWithAvatar: UserWithAvatar;
@@ -33,18 +34,29 @@ const UserNode: React.FC<Props> = ({
 
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
 
+  const router  = useRouter();
+
   const changePermissions = async () => {
-    await changeUserRoomPermissions({
-      variables: { roomId, userId: userWithAvatar.user._id },
-      update: settingsPromoteDemoteUser(roomId, userWithAvatar),
+    const response = await changeUserRoomPermissions({
+      variables: {
+        roomId,
+        userId: userWithAvatar.user._id,
+        expectToBeMod: userPermissions == Permissions.MOD,
+      },
+      update: settingsPromoteDemoteUser(roomId, userWithAvatar.user._id),
     });
-    setSettingsOpen(false);
+
+    if(!response.data?.changeUserRoomPermissions){
+      router.reload();
+    }else{
+      setSettingsOpen(false);
+    }
   };
 
   const kick = async () => {
     await kickUser({
       variables: { roomId, userId: userWithAvatar.user._id },
-      update: settingsKickUser(roomId, userWithAvatar),
+      update: settingsKickUser(roomId, userWithAvatar.user._id),
     });
     setSettingsOpen(false);
   };
@@ -70,7 +82,11 @@ const UserNode: React.FC<Props> = ({
         <div className={styles.image}>
           <div className={styles.imageContainer}>
             {userWithAvatar.avatar ? (
-              <Image height={50} width={50} src={base64ToObjectURL(userWithAvatar.avatar)} />
+              <Image
+                height={50}
+                width={50}
+                src={base64ToObjectURL(userWithAvatar.avatar)}
+              />
             ) : (
               <div className={styles.imageFallback}>
                 <FaUserAlt />

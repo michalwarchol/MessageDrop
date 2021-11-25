@@ -26,7 +26,7 @@ const RoomRequestNode: React.FC<Props> = ({ requestWithUser }) => {
       update: acceptChatRequestUpdate(
         requestWithUser.request._id,
         roomId,
-        requestWithUser.userWithAvatar
+        requestWithUser.userWithAvatar.user._id
       ),
     });
   };
