@@ -8,10 +8,17 @@
     padding: 10px;
     margin-top: 10px;
     display: flex;
+    @media screen and(max-width: $md){
+      align-items: center;
+      flex-direction: column;
+    }
 
     .imageOrIcon {
       width: 200px;
       height: 200px;
+      @media screen and(max-width: $md){
+        order: 2;
+      }
       
 
       .imageContainer {
