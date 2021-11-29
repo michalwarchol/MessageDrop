@@ -15,7 +15,6 @@ import { settingsKickUser } from "../../cacheModifications/settingsKickUser";
 import { settingsPromoteDemoteUser } from "../../cacheModifications/settingsPromoteDemoteUser";
 import IconButton from "../IconButton/IconButton";
 import { BsThreeDots } from "react-icons/bs";
-import { useRouter } from "next/router";
 
 interface Props {
   userWithAvatar: UserWithAvatar;
@@ -34,10 +33,8 @@ const UserNode: React.FC<Props> = ({
 
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
 
-  const router  = useRouter();
-
   const changePermissions = async () => {
-    const response = await changeUserRoomPermissions({
+    await changeUserRoomPermissions({
       variables: {
         roomId,
         userId: userWithAvatar.user._id,
@@ -46,11 +43,7 @@ const UserNode: React.FC<Props> = ({
       update: settingsPromoteDemoteUser(roomId, userWithAvatar.user._id),
     });
 
-    if(!response.data?.changeUserRoomPermissions){
-      router.reload();
-    }else{
-      setSettingsOpen(false);
-    }
+    setSettingsOpen(false);
   };
 
   const kick = async () => {
@@ -58,7 +51,6 @@ const UserNode: React.FC<Props> = ({
       variables: { roomId, userId: userWithAvatar.user._id },
       update: settingsKickUser(roomId, userWithAvatar.user._id),
     });
-    setSettingsOpen(false);
   };
 
   let buttons = null;
