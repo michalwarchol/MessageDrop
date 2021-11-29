@@ -5,41 +5,6 @@
     width: 100%;
     min-height: 100vh;
 
-    .greetings {
-        height: 120px;
-        font-size: 54px;
-        @media screen and (max-width: $xxl) {
-            height: 50px;
-            font-size: 27px;
-        }
-        @media screen and (max-width: $md) {
-            display: none;
-        }
-        margin-top: 20px;
-        margin-bottom: 20px;
-        padding-bottom: 40px;
-        text-align: center;
-        overflow: hidden;
-
-        .greetingsInner {
-            height: 240px;
-            animation-name: moveTextBigger;
-            @media screen and (max-width: $xxl){
-                height: 120px;
-                animation-name: moveTextSmaller;
-            }
-            animation-duration: 16s;
-            animation-delay: 4s;
-            animation-fill-mode: forwards;
-            animation-iteration-count: infinite;
-            
-        }
-
-        h1{
-            margin: 0;
-        }
-    }
-
     .content {
         display: flex;
         width: 100%;
@@ -53,35 +18,5 @@
         width: 100%;
         border-radius: 8px;
         z-index: 1;
-    }
-}
-
-@keyframes moveTextBigger {
-    from {
-        transform: translateY(0);
-    }
-    15% {
-        transform: translateY(-162px);
-    }
-    60% {
-        transform: translateY(-162px);
-    }
-    75% {
-        transform: translateY(0);
-    }
-}
-
-@keyframes moveTextSmaller {
-    from {
-        transform: translateY(0);
-    }
-    15% {
-        transform: translateY(-81px);
-    }
-    60% {
-        transform: translateY(-81px);
-    }
-    75% {
-        transform: translateY(0);
     }
 }
