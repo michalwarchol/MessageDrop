@@ -7,9 +7,9 @@ import {
   Query,
   Resolver,
   UseMiddleware,
-  PubSub
+  PubSub,
 } from "type-graphql";
-import {PubSubEngine} from "graphql-subscriptions";
+import { PubSubEngine } from "graphql-subscriptions";
 import {
   ChatRequest,
   ChatRequestModel,
@@ -23,15 +23,13 @@ import { Context } from "../types";
 import { getFile } from "../utils/getFile";
 import { UserWithAvatar } from "./UserResolver";
 
-
 @ObjectType()
 class RequestWithUser {
-  @Field(()=>ChatRequest)
+  @Field(() => ChatRequest)
   request: ChatRequest;
 
-  @Field(()=>UserWithAvatar)
+  @Field(() => UserWithAvatar)
   userWithAvatar: UserWithAvatar;
-
 }
 
 @Resolver(ChatRequest)
@@ -48,19 +46,19 @@ export class ChatRequestResolver {
     });
 
     const requestsWithUsers: RequestWithUser[] = await Promise.all(
-      requests.map(async (elem)=>{
-        const user = await UserModel.findById(elem.userId) as User;
+      requests.map(async (elem) => {
+        const user = (await UserModel.findById(elem.userId)) as User;
         const avatar = await getFile(context.s3, user.avatarId);
 
         return {
           request: elem,
           userWithAvatar: {
             user,
-            avatar
-          }
-        }
+            avatar,
+          },
+        };
       })
-    )
+    );
 
     return requestsWithUsers;
   }
@@ -71,16 +69,18 @@ export class ChatRequestResolver {
     @Ctx() context: Context,
     @Arg("roomId", () => String) roomId: string
   ): Promise<boolean> {
-    
     //user can send request only once
-    const request = await ChatRequestModel.findOne({roomId, userId: context.req.session.userId});
-    if(request){
+    const request = await ChatRequestModel.findOne({
+      roomId,
+      userId: context.req.session.userId,
+    });
+    if (request) {
       return false;
     }
 
     //if user is a member of this room, then a user can't send a request
     const room = await ChatRoomModel.findById(roomId);
-    if(room && room.userIds.includes(context.req.session.userId)){
+    if (room && room.userIds.includes(context.req.session.userId)) {
       return false;
     }
 
@@ -107,7 +107,7 @@ export class ChatRequestResolver {
       { status: ChatRequestStatus.accepted } //update
     );
 
-    if(request.status == ChatRequestStatus.accepted){
+    if (request.status == ChatRequestStatus.accepted) {
       return false;
     }
 
@@ -115,7 +115,12 @@ export class ChatRequestResolver {
       $push: { userIds: request.userId },
     });
 
-    await pubSub.publish("CHAT_USERS", {roomId, userId: request.userId});
+    await pubSub.publish("CHAT_USERS", { roomId, userId: request.userId });
+    await pubSub.publish("USER_ROOMS", {
+      roomId,
+      userId: request.userId,
+      shouldAdd: true,
+    });
 
     return true;
   }
@@ -124,7 +129,7 @@ export class ChatRequestResolver {
   @UseMiddleware(isAuth, hasPermissions)
   async rejectChatRequest(
     @Ctx() _: Context,
-    @Arg("roomId", ()=>String) __: string,
+    @Arg("roomId", () => String) __: string,
     @Arg("requestId", () => String) requestId: string
   ): Promise<boolean> {
     await ChatRequestModel.deleteOne({ _id: requestId });

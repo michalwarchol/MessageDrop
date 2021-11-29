@@ -1,0 +1,12 @@
+subscription ListenUserChatRooms($userId: String!) {
+  listenUserChatRooms(userId: $userId) {
+    shouldAdd
+    roomId
+    room {
+      chatRoom {
+        ...RegularChatRoom
+      }
+      image
+    }
+  }
+}

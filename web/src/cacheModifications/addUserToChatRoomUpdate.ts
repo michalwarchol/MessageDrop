@@ -18,7 +18,7 @@ export const addUserToChatRoomUpdate = (
     const chatRoom: any = cache.readFragment({
       id: "ChatRoom:" + roomId,
       fragment: gql`
-        fragment _ on ChatRoom {
+        fragment RegularChatRoomOthers on ChatRoom {
           _id
           userIds
         }

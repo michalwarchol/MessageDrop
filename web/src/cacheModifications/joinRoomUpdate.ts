@@ -3,29 +3,13 @@ import {
   ChatRoomWithImage,
   GetSuggestedChatRoomsDocument,
   GetSuggestedChatRoomsQuery,
-  GetUserChatRoomsDocument,
-  GetUserChatRoomsQuery,
 } from "../generated/graphql";
 
 export const joinRoomUpdate = (chatRoomWithImage: ChatRoomWithImage) => {
-  return (cache: ApolloCache<any>, {data}: any) => {
-
-    if(!data.joinRoom) {
+  return (cache: ApolloCache<any>, { data }: any) => {
+    if (!data.joinRoom) {
       return;
     }
-
-    const userRooms = cache.readQuery<GetUserChatRoomsQuery>({
-      query: GetUserChatRoomsDocument,
-    });
-    cache.writeQuery({
-      query: GetUserChatRoomsDocument,
-      data: {
-        getUserChatRooms: [
-          chatRoomWithImage,
-          ...(userRooms?.getUserChatRooms || []),
-        ],
-      },
-    });
 
     const suggestedRooms = cache.readQuery<GetSuggestedChatRoomsQuery>({
       query: GetSuggestedChatRoomsDocument,

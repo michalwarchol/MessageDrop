@@ -15,7 +15,7 @@ export const settingsKickUser = (
     const chatRoom: any = cache.readFragment({
       id: "ChatRoom:" + roomId,
       fragment: gql`
-        fragment _ on ChatRoom {
+        fragment RegularChatRoomUsers on ChatRoom {
           __typename
           _id
           userIds
