@@ -9,7 +9,7 @@ import InputField from "../InputField/InputField";
 import Modal from "../Modal/Modal";
 import Image from "next/image";
 import UploadField from "../UploadField/UploadField";
-import { GetUserChatRoomsDocument, RoomAccess, useCreateChatRoomMutation } from "../../generated/graphql";
+import { RoomAccess, useCreateChatRoomMutation } from "../../generated/graphql";
 import { toErrorMap } from "../../utils/toErrorMap";
 
 const accessInfo: Record<string, string> = {
@@ -59,8 +59,7 @@ const CreateChatButton: React.FC<Props> = ({isOpen, setIsOpen}) => {
           }}
           onSubmit={async (values, { setErrors }) => {
             const chatRoomResponse = await createChatRoom({
-              variables: { input: { ...values }, image: uploadedPhoto },
-              refetchQueries: [GetUserChatRoomsDocument]
+              variables: { input: { ...values }, image: uploadedPhoto }
             });
 
             if (chatRoomResponse.data?.createChatRoom.errors) {
