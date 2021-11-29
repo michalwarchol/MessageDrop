@@ -1,7 +1,7 @@
 import { NextPage, NextPageContext } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { useMeQuery } from "../generated/graphql";
+import { useIsChatMemberQuery, useMeQuery } from "../generated/graphql";
 
 export const withAuth = (WrappedComponent: NextPage<unknown, unknown>) => {
   const EmptyComponent = () => (
@@ -19,6 +19,11 @@ export const withAuth = (WrappedComponent: NextPage<unknown, unknown>) => {
     const { data, loading } = useMeQuery();
 
     const [verified, setVerified] = useState(false);
+    const { data: isChatMember, loading: loadingIsChatMember } = useIsChatMemberQuery({
+      variables: { roomId: props.id },
+      skip: !props.id,
+      fetchPolicy: "network-only",
+    });
 
     useEffect(() => {
       if (!loading && !data?.me) {
@@ -36,13 +41,18 @@ export const withAuth = (WrappedComponent: NextPage<unknown, unknown>) => {
         }
       }
 
-      if (router.pathname != "/verify" && !loading && data?.me?.verified) {
+      if (props.id && !isChatMember?.isChatMember && !loadingIsChatMember) {
+        router.push("/home");
+        return;
+      }
+
+      if (router.pathname != "/verify" && !loading && !loadingIsChatMember && data?.me?.verified) {
         setVerified(true);
       }
-      if (router.pathname == "/verify" && !loading && data?.me) {
+      if (router.pathname == "/verify" && !loading && !loadingIsChatMember && data?.me) {
         setVerified(true);
       }
-    }, [loading, data, router]);
+    }, [loading, data, router, isChatMember, loadingIsChatMember]);
 
     return verified ? <WrappedComponent {...props} /> : <EmptyComponent />;
   };
