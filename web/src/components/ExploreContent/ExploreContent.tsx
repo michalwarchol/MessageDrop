@@ -18,9 +18,9 @@ const ExploreContent: React.FC = () => {
   const { data } = useGetSuggestedChatRoomsQuery();
 
   const [findUsers, { data: foundUsers, loading: usersLoading }] =
-    useFindUsersLazyQuery();
+    useFindUsersLazyQuery({fetchPolicy: "network-only"});
   const [findChatRooms, { data: foundRooms, loading: roomsLoading }] =
-    useFindSuggestedChatRoomsLazyQuery();
+    useFindSuggestedChatRoomsLazyQuery({fetchPolicy: "network-only"});
 
   return (
     <div className={styles.exploreContent}>
