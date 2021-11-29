@@ -7,7 +7,7 @@ import {
   useGetChatRoomUsersQuery,
   useMeQuery,
   RoomAccess,
-  useUpdateChatRoomSettingsMutation,
+  useUpdateChatRoomSettingsMutation
 } from "../../generated/graphql";
 import { base64ToObjectURL } from "../../utils/base64ToObjectURL";
 import { RoomContext } from "../../utils/RoomContext";
@@ -19,15 +19,23 @@ import UserNode from "../UserNode/UserNode";
 import Image from "next/image";
 import { Permissions } from "../../utils/UserPermissions";
 import { settingsUpdateChatRoom } from "../../cacheModifications/settingsUpdateChatRoom";
+import { useChatRoomUsersSub } from "../../utils/useChatRoomUsersSub";
 
 const RoomSettingsMobile: React.FC = () => {
   const roomId = useContext(RoomContext);
   const { data } = useGetChatRoomByIdQuery({ variables: { roomId } });
-  const { data: users } = useGetChatRoomUsersQuery({ variables: { roomId } });
+  const { data: users } = useGetChatRoomUsersQuery({
+    variables: { roomId },
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-only",
+  });
   const { data: me } = useMeQuery();
   const [updateChatRoomSettings] = useUpdateChatRoomSettingsMutation();
 
   const [uploadedPhoto, setUploadedPhoto] = useState<File | null>(null);
+
+  useChatRoomUsersSub(roomId);
+
 
   let photoContent = (
     <div className={styles.photoFallback}>
@@ -65,26 +73,30 @@ const RoomSettingsMobile: React.FC = () => {
         }}
         onSubmit={async (values) => {
           let disabled = false;
-            //check if any value has changed, so the apply button can be enabled
-            if(values.description == data?.getChatRoomById.chatRoom.description && 
-              values.access == data?.getChatRoomById.chatRoom.access &&
-              uploadedPhoto==null){
-                disabled = true;
-              }
+          //check if any value has changed, so the apply button can be enabled
+          if (
+            values.description == data?.getChatRoomById.chatRoom.description &&
+            values.access == data?.getChatRoomById.chatRoom.access &&
+            uploadedPhoto == null
+          ) {
+            disabled = true;
+          }
 
-              if(disabled){
-                return;
-              }
-              
-              await updateChatRoomSettings({variables: {
-                roomId,
-                settings: {
-                  access: values.access || RoomAccess.Private,
-                  description: values.description || ""
-                },
-                image: uploadedPhoto
+          if (disabled) {
+            return;
+          }
+
+          await updateChatRoomSettings({
+            variables: {
+              roomId,
+              settings: {
+                access: values.access || RoomAccess.Private,
+                description: values.description || "",
               },
-            update: settingsUpdateChatRoom(roomId)})
+              image: uploadedPhoto,
+            },
+            update: settingsUpdateChatRoom(roomId),
+          });
         }}
       >
         {({ values }) => {
