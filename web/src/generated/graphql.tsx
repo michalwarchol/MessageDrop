@@ -347,8 +347,14 @@ export type SettingsInput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  listenUserChatRooms: UserChatRoomsSub;
   newChatUsers: ChatRoomUsersSub;
   newMessage: MessageWithMedia;
+};
+
+
+export type SubscriptionListenUserChatRoomsArgs = {
+  userId: Scalars['String'];
 };
 
 
@@ -371,6 +377,13 @@ export type User = {
   phone: Scalars['String'];
   updatedAt: Scalars['DateTime'];
   verified: Scalars['Boolean'];
+};
+
+export type UserChatRoomsSub = {
+  __typename?: 'UserChatRoomsSub';
+  room?: Maybe<ChatRoomWithImage>;
+  roomId?: Maybe<Scalars['String']>;
+  shouldAdd: Scalars['Boolean'];
 };
 
 export type UserEditResponse = {
@@ -635,6 +648,13 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', _id: string, name: string, email: string, phone: string, verified: boolean, avatarId?: string | null | undefined, createdAt: any, updatedAt: any } | null | undefined };
+
+export type ListenUserChatRoomsSubscriptionVariables = Exact<{
+  userId: Scalars['String'];
+}>;
+
+
+export type ListenUserChatRoomsSubscription = { __typename?: 'Subscription', listenUserChatRooms: { __typename?: 'UserChatRoomsSub', shouldAdd: boolean, roomId?: string | null | undefined, room?: { __typename?: 'ChatRoomWithImage', image?: string | null | undefined, chatRoom: { __typename?: 'ChatRoom', _id: string, name: string, description: string, access: RoomAccess, imageId?: string | null | undefined, adminId: string, modIds: Array<string>, userIds: Array<string>, createdAt: any, updatedAt: any } } | null | undefined } };
 
 export type NewChatUsersSubscriptionVariables = Exact<{
   roomId: Scalars['String'];
@@ -1855,6 +1875,43 @@ export function useMeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MeQuery
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const ListenUserChatRoomsDocument = gql`
+    subscription ListenUserChatRooms($userId: String!) {
+  listenUserChatRooms(userId: $userId) {
+    shouldAdd
+    roomId
+    room {
+      chatRoom {
+        ...RegularChatRoom
+      }
+      image
+    }
+  }
+}
+    ${RegularChatRoomFragmentDoc}`;
+
+/**
+ * __useListenUserChatRoomsSubscription__
+ *
+ * To run a query within a React component, call `useListenUserChatRoomsSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useListenUserChatRoomsSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useListenUserChatRoomsSubscription({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useListenUserChatRoomsSubscription(baseOptions: Apollo.SubscriptionHookOptions<ListenUserChatRoomsSubscription, ListenUserChatRoomsSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<ListenUserChatRoomsSubscription, ListenUserChatRoomsSubscriptionVariables>(ListenUserChatRoomsDocument, options);
+      }
+export type ListenUserChatRoomsSubscriptionHookResult = ReturnType<typeof useListenUserChatRoomsSubscription>;
+export type ListenUserChatRoomsSubscriptionResult = Apollo.SubscriptionResult<ListenUserChatRoomsSubscription>;
 export const NewChatUsersDocument = gql`
     subscription NewChatUsers($roomId: String!) {
   newChatUsers(roomId: $roomId) {
