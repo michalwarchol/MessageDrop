@@ -1,0 +1,94 @@
+@import "../../styles/config";
+
+.indexContent {
+  margin-top: 200px;
+
+  .section {
+    @media screen and(max-width: $lg) {
+      flex-direction: column;
+      .headers {
+        order: -1;
+      }
+    }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 200px;
+    .headers {
+      h1 {
+        font-weight: bold;
+        margin-bottom: 0;
+      }
+      h3 {
+        margin-top: 0;
+        font-weight: 300;
+      }
+    }
+
+    .photo {
+      margin-right: 100px;
+      margin-left: 100px;
+      @media screen and(max-width: $lg) {
+        margin-right: 0;
+        margin-left: 0;
+      }
+      .photoInner {
+        box-sizing: border-box;
+        border: 2px solid $alternativeColor;
+        border-radius: 8px;
+        height: fit-content;
+        box-shadow: 0 0 10px $alternativeColor;
+        height: 300px;
+        overflow: hidden;
+
+        @media screen and (max-width: $xxl) {
+          height: 200px;
+        }
+
+        * {
+          border-radius: 8px;
+          height: 100%;
+        }
+      }
+      .photoInnerBig {
+        box-sizing: border-box;
+        border: 2px solid $alternativeColor;
+        border-radius: 8px;
+        height: fit-content;
+        box-shadow: 0 0 10px $alternativeColor;
+        height: 600px;
+        overflow: hidden;
+
+        @media screen and (max-width: $xxl) {
+          height: 300px;
+        }
+
+        * {
+          border-radius: 8px;
+          height: 100%;
+        }
+      }
+    }
+  }
+
+  .buttonContainer {
+    margin-bottom: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .signUpButton {
+      font-size: 20px;
+      width: 400px;
+    }
+  }
+
+  .footer {
+    p {
+      margin: 0;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+  }
+}

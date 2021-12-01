@@ -1,0 +1,31 @@
+@import "../../styles/config";
+
+.navigation {
+    background-color: $secondaryColor;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+
+    .content{
+
+        .invitation {
+            p{
+                margin: 0;
+                font-size: 20px;
+                text-align: center;
+            }
+            button {
+                font-size: 18px;
+            }
+        }
+        
+        .buttons {
+            display: flex;
+            & > * {
+                margin-left: 20px;
+                width: 100px;
+                font-size: 18px;
+            }
+        }
+    }
+}
