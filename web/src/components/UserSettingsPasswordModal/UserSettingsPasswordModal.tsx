@@ -29,7 +29,7 @@ const UserSettingsPasswordModal: React.FC<Props> = ({setSettingChangedInfo}) => 
     >
       <Formik
         initialValues={{
-          old_password: "",
+          password: "",
           new_password: "",
           repeat_new_password: "",
         }}
@@ -44,7 +44,7 @@ const UserSettingsPasswordModal: React.FC<Props> = ({setSettingChangedInfo}) => 
             return;
           }
 
-          const response = await changePassword({variables: {...values}});
+          const response = await changePassword({variables: {old_password: values.password, new_password: values.new_password}});
 
           if(response.data?.changePassword.errors){
               setErrors(toErrorMap(response.data.changePassword.errors));
@@ -69,7 +69,7 @@ const UserSettingsPasswordModal: React.FC<Props> = ({setSettingChangedInfo}) => 
           return (
           <Form className={styles.userSettingsPassordModal}>
             <InputField
-              name="old_password"
+              name="password"
               placeholder="old password"
               type="password"
             />
