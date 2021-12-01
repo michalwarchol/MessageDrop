@@ -157,7 +157,8 @@ const ChatRoomSettingsForm:React.FC = () => {
                     text="Browse"
                     accept="image/png, image/jpeg"
                     onChange={(e) => {
-                      setUploadedPhoto(e.target.files![0]);
+                      if(e.currentTarget.files)
+                      setUploadedPhoto(e.currentTarget.files[0]);
                     }}
                   />
                 </div>
