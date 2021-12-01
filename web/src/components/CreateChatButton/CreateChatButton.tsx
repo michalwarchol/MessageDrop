@@ -163,7 +163,10 @@ const CreateChatButton: React.FC<Props> = ({isOpen, setIsOpen}) => {
                 <Button
                   text="Cancel"
                   variant="outline"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setUploadedPhoto(null);
+                  }}
                   className={styles.rightButton}
                 />
               </div>
