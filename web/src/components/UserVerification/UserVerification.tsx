@@ -154,10 +154,12 @@ const UserVerification:React.FC = () => {
                   type="button"
                   onClick={async () => {
                     const response = await generateNewCode({
-                      variables: { phoneOrEmail: "email" },
+                      variables: { phoneOrEmail: "email", email: data?.me?.email },
                     });
                     if (response.data?.generateNewCode.errors) {
                       setError(response.data.generateNewCode.errors[0].message);
+                    }else{
+                      setError("");
                     }
                   }}
                 />
