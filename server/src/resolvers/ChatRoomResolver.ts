@@ -469,22 +469,32 @@ export class ChatRoomResolver {
     @Arg("settings", () => SettingsInput) settings: SettingsInput,
     @Arg("image", () => GraphQLUpload, { nullable: true }) image?: FileUpload
   ): Promise<boolean> {
-    const result = await ChatRoomModel.findOneAndUpdate(
-      { _id: roomId }, //filter
-      { ...settings } //updates
-    );
+    let key = null;
 
     //update image
     if (image) {
+      key=v4();
       const buffer: Buffer = await createFileBuffer(image);
       await context.s3.send(
         new PutObjectCommand({
           Bucket: process.env.AWS_BUCKET_NAME,
-          Key: result.imageId,
+          Key: key,
           Body: buffer,
         })
       );
+      await ChatRoomModel.updateOne(
+        { _id: roomId }, //filter
+        { ...settings, imageId: key } //updates
+      );
+
+      return true;
     }
+
+    await ChatRoomModel.updateOne(
+      { _id: roomId }, //filter
+      { ...settings } //updates
+    );
+
     return true;
   }
 
