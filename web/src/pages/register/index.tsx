@@ -64,6 +64,9 @@ const Register: React.FC = () => {
 
               if (response.data?.register.errors) {
                 setErrors(toErrorMap(response.data.register.errors));
+                if(response.data.register.errors[0].field=="phone"){
+                  setPhoneNumberError(response.data.register.errors[0]);
+                }
               } else if (response.data?.register.user) {
                 router.push("/verify");
               }
