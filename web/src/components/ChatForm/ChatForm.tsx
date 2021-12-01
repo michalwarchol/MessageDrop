@@ -21,7 +21,7 @@ const roomId = useContext(RoomContext);
   const [file, setFile] = useState<File | null>(null);
 
   const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
-  const [createMessage] = useCreateMessageMutation();
+  const [createMessage, {loading}] = useCreateMessageMutation();
 
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -33,7 +33,7 @@ const roomId = useContext(RoomContext);
     <Formik
       initialValues={{ text: "" }}
       onSubmit={async (_, { resetForm }) => {
-        if (!text && !file && !media) {
+        if ((!text && !file && !media) || loading) {
           return;
         }
 
@@ -59,7 +59,7 @@ const roomId = useContext(RoomContext);
     >
       {() => {
         let disabled = false;
-        if (!text && !media && !file) {
+        if ((!text && !media && !file) || loading) {
           disabled = true;
         }
         return (
