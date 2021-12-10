@@ -15,7 +15,7 @@ import styles from "./ExploreContent.module.scss";
 
 const ExploreContent: React.FC = () => {
   const [search, setSearch] = useState<string>("");
-  const { data } = useGetSuggestedChatRoomsQuery();
+  const { data, loading } = useGetSuggestedChatRoomsQuery();
 
   const [findUsers, { data: foundUsers, loading: usersLoading }] =
     useFindUsersLazyQuery({fetchPolicy: "network-only"});
@@ -88,6 +88,11 @@ const ExploreContent: React.FC = () => {
         !roomsLoading && (
           <h3 style={{ textAlign: "center" }}>No results found</h3>
         )}
+        
+      {!foundRooms && loading && 
+      <div className={styles.loading}>
+          <LoadingIndicator />
+        </div>}
 
       {(!foundRooms ||
         foundRooms.findSuggestedChatRooms.length < 1) && (
