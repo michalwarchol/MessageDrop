@@ -16,6 +16,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
           rel="stylesheet"
         />
+        <title>Message-Drop</title>
       </Head>
       <Component {...pageProps} />
     </>
