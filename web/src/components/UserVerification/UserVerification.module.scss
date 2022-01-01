@@ -43,6 +43,18 @@
             margin-top: 10px;
             font-size: 14px;
         }
+
+        .newCode {
+            color: $green;
+            margin: 0;
+            padding: 0;
+            margin-bottom: 20px;
+            & > * {
+                animation-name: newCodeAnimation;
+                animation-duration: 5s;
+            }
+        }
+
         .generateButton {
             font-size: 16px;
             padding: 4px;
@@ -67,5 +79,21 @@
             cursor: not-allowed;
             margin-left: 10px;
         }
+    }
+}
+
+@keyframes newCodeAnimation {
+    from {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+
+    60% {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
     }
 }

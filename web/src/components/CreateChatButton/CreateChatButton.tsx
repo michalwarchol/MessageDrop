@@ -26,7 +26,7 @@ interface Props {
 const CreateChatButton: React.FC<Props> = ({isOpen, setIsOpen}) => {
   
   const [uploadedPhoto, setUploadedPhoto] = useState<File | null>(null);
-  const [createChatRoom] = useCreateChatRoomMutation();
+  const [createChatRoom, {loading}] = useCreateChatRoomMutation();
 
   return (
     <Modal
@@ -159,6 +159,7 @@ const CreateChatButton: React.FC<Props> = ({isOpen, setIsOpen}) => {
                   text="Create"
                   type="submit"
                   className={styles.leftButton}
+                  loading={loading}
                 />
                 <Button
                   text="Cancel"

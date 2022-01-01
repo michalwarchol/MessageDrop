@@ -1,5 +1,5 @@
 import { Form, Formik } from 'formik';
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styles from "./UserVerification.module.scss";
 import { MeDocument, useGenerateNewCodeMutation, useMeQuery, useVerifyUserMutation } from '../../generated/graphql';
 import Button from '../Button/Button';
@@ -7,21 +7,29 @@ import InputField from '../InputField/InputField';
 import { useRouter } from 'next/router';
 
 const UserVerification:React.FC = () => {
-
-    const [error, setError] = useState<string>("");
+  const [generatedNewCode, setGeneratedNewCode] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const {data} = useMeQuery();
-  const [generateNewCode] = useGenerateNewCodeMutation();
+  const [generateNewCode, {loading: codeLoading}] = useGenerateNewCodeMutation();
   const [verifyUser, {loading}] = useVerifyUserMutation();
 
   const router = useRouter();
 
-    const val1 = useRef<HTMLInputElement>(null);
+  const val1 = useRef<HTMLInputElement>(null);
   const val2 = useRef<HTMLInputElement>(null);
   const val3 = useRef<HTMLInputElement>(null);
   const val4 = useRef<HTMLInputElement>(null);
   const val5 = useRef<HTMLInputElement>(null);
   const val6 = useRef<HTMLInputElement>(null);
+
+  useEffect(()=> {
+    if(generatedNewCode){
+      setTimeout(()=>{
+        setGeneratedNewCode(false)
+      }, 5000);
+    }
+  }, [generatedNewCode])
 
   const handleInput = (
     e: React.FormEvent<HTMLInputElement>,
@@ -149,6 +157,7 @@ const UserVerification:React.FC = () => {
                 </p>
                 <Button
                   text="Generate a new code"
+                  loading={codeLoading}
                   variant="outline"
                   className={styles.generateButton}
                   type="button"
@@ -158,11 +167,13 @@ const UserVerification:React.FC = () => {
                     });
                     if (response.data?.generateNewCode.errors) {
                       setError(response.data.generateNewCode.errors[0].message);
-                    }else{
+                    }if(response.data?.generateNewCode.isOk){
+                      setGeneratedNewCode(true);
                       setError("");
                     }
                   }}
                 />
+                <p className={styles.newCode}>{generatedNewCode && <span>Generated new code</span>}</p>
                 <div className={styles.actionButtons}>
                   <Button
                     text="Submit"

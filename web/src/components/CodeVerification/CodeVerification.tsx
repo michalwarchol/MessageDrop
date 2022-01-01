@@ -1,5 +1,6 @@
 import { Form, Formik } from "formik";
 import React, { useRef, useState } from "react";
+import { useEffect } from "react";
 import { BsShieldFillCheck } from "react-icons/bs";
 import {
   MeDocument,
@@ -25,8 +26,9 @@ const CodeVerification: React.FC<Props> = ({
   setSuccess,
   setSettingChangedInfo,
 }) => {
+  const [generatedNewCode, setGeneratedNewCode] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [generateNewCode] = useGenerateNewCodeMutation();
+  const [generateNewCode, {loading: codeLoading}] = useGenerateNewCodeMutation();
   const [updateUserSettings, { loading }] = useUpdateUserSettingsMutation();
 
   const val1 = useRef<HTMLInputElement>(null);
@@ -53,6 +55,14 @@ const CodeVerification: React.FC<Props> = ({
     setFieldValue(e.currentTarget.name, currentValue);
     if (nextFocus.current) nextFocus.current?.focus();
   };
+
+  useEffect(()=> {
+    if(generatedNewCode){
+      setTimeout(()=>{
+        setGeneratedNewCode(false)
+      }, 5000);
+    }
+  }, [generatedNewCode])
 
   return (
     <div className={styles.codeVerification}>
@@ -167,6 +177,7 @@ const CodeVerification: React.FC<Props> = ({
                   variant="outline"
                   className={styles.generateButton}
                   type="button"
+                  loading={codeLoading}
                   onClick={async () => {
                     const response = await generateNewCode({
                       variables: { phoneOrEmail },
@@ -174,8 +185,13 @@ const CodeVerification: React.FC<Props> = ({
                     if (response.data?.generateNewCode.errors) {
                       setError(response.data.generateNewCode.errors[0].message);
                     }
+                    if(response.data?.generateNewCode.isOk){
+                      setGeneratedNewCode(true);
+                      setError("");
+                    }
                   }}
                 />
+                <p className={styles.newCode}>{generatedNewCode && <span>Generated new code</span>}</p>
                 <div className={styles.actionButtons}>
                   <Button
                     text="Cancel"
