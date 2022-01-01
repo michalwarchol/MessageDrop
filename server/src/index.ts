@@ -12,29 +12,32 @@ import { S3 } from "@aws-sdk/client-s3";
 import { UserResolver } from "./resolvers/UserResolver";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import cors from "cors";
-import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
-import { SubscriptionServer } from 'subscriptions-transport-ws';
-import { execute, subscribe } from 'graphql';
-import { createServer } from 'http';
+import {
+  ApolloServerPluginLandingPageGraphQLPlayground,
+  ApolloServerPluginLandingPageProductionDefault,
+} from "apollo-server-core";
+import { SubscriptionServer } from "subscriptions-transport-ws";
+import { execute, subscribe } from "graphql";
+import { createServer } from "http";
 import twilio from "twilio";
 import { ChatRoomResolver } from "./resolvers/ChatRoomResolver";
 import { MessageResolver } from "./resolvers/MessageResolver";
 import { ChatRequestResolver } from "./resolvers/ChatRequestResolver";
 
 const main = async () => {
-  await mongoose.connect(process.env.DB_URL, {
-    dbName: process.env.DB_NAME,
-  });
+  await mongoose.connect(process.env.MONGO_URL);
 
   const app = express();
 
   const RedisStore = connectRedis(session);
-  const redis = new Redis();
+  const redis = new Redis(process.env.REDIS_URL);
+
+  app.set("trust proxy", 1);
 
   app.use(
     cors({
       credentials: true,
-      origin: "http://localhost:3000",
+      origin: process.env.CORS_ORIGIN,
     })
   );
 
@@ -50,14 +53,18 @@ const main = async () => {
         httpOnly: true,
         sameSite: "lax",
         secure: __prod__,
+        domain: __prod__ ? ".message-drop.com" : undefined
       },
     })
   );
 
-  const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  const twilioClient = twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+  );
 
   app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 2 }));
-  app.use(express.json({limit: '100mb'}));
+  app.use(express.json({ limit: "100mb" }));
 
   const s3 = new S3({
     region: process.env.AWS_REGION,
@@ -68,9 +75,14 @@ const main = async () => {
   });
 
   const schema = await buildSchema({
-    resolvers: [UserResolver, ChatRoomResolver, MessageResolver, ChatRequestResolver],
+    resolvers: [
+      UserResolver,
+      ChatRoomResolver,
+      MessageResolver,
+      ChatRequestResolver,
+    ],
     validate: false,
-  })
+  });
 
   const httpServer = createServer(app);
 
@@ -81,34 +93,41 @@ const main = async () => {
       res,
       redis,
       s3,
-      twilio: twilioClient
+      twilio: twilioClient,
     }),
-    plugins: [ApolloServerPluginLandingPageGraphQLPlayground(),
+    plugins: [
+      __prod__
+        ? ApolloServerPluginLandingPageProductionDefault
+        : ApolloServerPluginLandingPageGraphQLPlayground(),
       {
         async serverWillStart() {
           return {
             async drainServer() {
               subscriptionServer.close();
-            }
+            },
           };
-        }
-      }],
+        },
+      },
+    ],
   });
 
-  const subscriptionServer = SubscriptionServer.create({
-    schema,
-    execute,
-    subscribe,
-    onConnect: ()=> ({s3})
-  },{
-    server: httpServer,
-    path: apolloServer.graphqlPath,
-  })
+  const subscriptionServer = SubscriptionServer.create(
+    {
+      schema,
+      execute,
+      subscribe,
+      onConnect: () => ({ s3 }),
+    },
+    {
+      server: httpServer,
+      path: apolloServer.graphqlPath,
+    }
+  );
 
   await apolloServer.start();
   apolloServer.applyMiddleware({ app, cors: false });
 
-  httpServer.listen(4000, () => {
+  httpServer.listen(parseInt(process.env.PORT), () => {
     console.log("Server started on localhost:4000");
   });
 };

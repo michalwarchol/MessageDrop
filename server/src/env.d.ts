@@ -1,8 +1,10 @@
 declare namespace NodeJS {
     export interface ProcessEnv {
-      DB_NAME: string;
-      DB_URL: string;
+      PORT: string;
+      MONGO_URL: string;
       SESSION_SECRET: string;
+      CORS_ORIGIN: string;
+      REDIS_URL: string;
       AWS_BUCKET_NAME: string;
       AWS_ACCESS_KEY_ID: string;
       AWS_SECRET_ACCESS_KEY: string;
