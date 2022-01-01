@@ -17,7 +17,7 @@ import { isServer } from "./isServer";
 
 const wsLink = isServer
   ? new WebSocketLink({
-      uri: "ws://localhost:4000/graphql",
+      uri: process.env.NEXT_PUBLIC_WS_URI as string,
       options: {
         reconnect: true,
         connectionParams: {
@@ -28,7 +28,7 @@ const wsLink = isServer
   : null;
 
 const uploadLink = createUploadLink({
-  uri: "http://localhost:4000/graphql",
+  uri: process.env.NEXT_PUBLIC_API_URL,
   credentials: "include",
 });
 
@@ -47,7 +47,7 @@ const splitLink = isServer
   : uploadLink;
 
 const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql",
+  uri: process.env.NEXT_PUBLIC_API_URL,
   cache: new InMemoryCache({
     dataIdFromObject(responseObject) {
       switch (responseObject.__typename) {
