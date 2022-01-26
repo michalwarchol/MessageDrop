@@ -30,7 +30,7 @@ MessageDrop is a web app allowing you to communicate with others. Conversations 
 * [redis](https://redis.io/)
 * [Twilio](https://www.twilio.com/)
 
-##Setup
+## Setup
 1. Clone the repo
 2. Go under `/server` and create `.env` file with variables provided in `.env.example`
 3. Repeat second point under `/web`
