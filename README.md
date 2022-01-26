@@ -39,7 +39,7 @@ MessageDrop is a web app allowing you to communicate with others. Conversations 
 6. In a first terminal run `yarn dev` under `/server`
 7. In a second terminal run `yarn dev` under `/web`
 
-## Licence
+## License
 > You can check out the full license [here](https://github.com/michalwarchol/MessageDrop/blob/main/LICENSE)
 
 ## Quick View
