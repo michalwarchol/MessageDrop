@@ -66,6 +66,11 @@ const Login: React.FC = () => {
                     loading={loading}
                     className={styles.submitButton}
                   />
+                  <p className={styles.credentials}>You can use these credentials:</p>
+                  <p className={styles.credentials}>
+                    email: <span>guest@abc.abc</span> password:{" "}
+                    <span>guest123</span>
+                  </p>
                   <NextLink href="/register">
                     <p>I don't have an account</p>
                   </NextLink>

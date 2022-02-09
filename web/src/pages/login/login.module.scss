@@ -41,6 +41,17 @@
             cursor: pointer;
           }
         }
+        .credentials {
+          font-size: 10px;
+          &:hover {
+            text-decoration: none;
+            cursor: text;
+          }
+
+          span {
+            font-weight: bold;
+          }
+        }
       }
     }
   }
