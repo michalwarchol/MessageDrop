@@ -61,7 +61,7 @@ const ChatSidebar: React.FC = () => {
   }, [me]);
 
   return (
-    <div className={styles.chatSidebar} style={{ zIndex: isOpen ? 99 : 1 }}>
+    <div className={styles.chatSidebar}>
       <div className={styles.create}>
         <CreateChatButton isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>

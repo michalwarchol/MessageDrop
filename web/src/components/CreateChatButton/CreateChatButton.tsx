@@ -29,27 +29,26 @@ const CreateChatButton: React.FC<Props> = ({isOpen, setIsOpen}) => {
   const [createChatRoom, {loading}] = useCreateChatRoomMutation();
 
   return (
-    <Modal
-      closeButton
-      title="Create Chat Room"
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      triggers={
-        <>
-          <Button
+    <>
+    <Button
             text="Create chat"
             Icon={BsPlus}
             variant="outline"
             className={styles.createButton}
+            onClick={()=>setIsOpen(!isOpen)}
           />
           <IconButton
             Icon={BsPlus}
             className={styles.createIconButton}
             variant="outline"
+            onClick={()=>setIsOpen(!isOpen)}
           />
-        </>
-      }
-    >
+    <Modal
+      closeButton
+      title="Create Chat Room"
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      >
       <div className={styles.creator}>
         <Formik
           initialValues={{
@@ -176,6 +175,7 @@ const CreateChatButton: React.FC<Props> = ({isOpen, setIsOpen}) => {
         </Formik>
       </div>
     </Modal>
+    </>
   );
 };
 export default CreateChatButton;

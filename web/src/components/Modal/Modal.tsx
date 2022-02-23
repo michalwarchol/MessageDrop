@@ -1,10 +1,10 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import IconButton from "../IconButton/IconButton";
 import styles from "./Modal.module.scss";
 import { MdClose } from "react-icons/md";
 
 interface Props {
-  triggers: JSX.Element | JSX.Element[];
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   title?: string;
@@ -12,35 +12,34 @@ interface Props {
 }
 
 const Modal: React.FC<Props> = ({
-  triggers,
   isOpen,
   setIsOpen,
   title,
   closeButton,
   children,
 }) => {
-  return (
+  if (!isOpen) return null;
+
+  return ReactDOM.createPortal(
     <div className={styles.modal}>
-      <div onClick={() => setIsOpen(true)}>{triggers}</div>
-      {isOpen && (
-        <div className={styles.modalBody}>
-          <div className={styles.modalBodyInner}>
-            <div className={styles.modalHeader}>
-              {title && <h5>{title}</h5>}
-              {closeButton && (
-                <IconButton
-                  Icon={MdClose}
-                  className={styles.closeButton}
-                  variant="outline"
-                  onClick={() => setIsOpen(false)}
-                />
-              )}
-            </div>
-            {children}
+      <div className={styles.modalBody}>
+        <div className={styles.modalBodyInner}>
+          <div className={styles.modalHeader}>
+            {title && <h5>{title}</h5>}
+            {closeButton && (
+              <IconButton
+                Icon={MdClose}
+                className={styles.closeButton}
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+              />
+            )}
           </div>
+          {children}
         </div>
-      )}
-    </div>
+      </div>
+    </div>,
+    document.getElementById("portal") as HTMLElement
   );
 };
 export default Modal;

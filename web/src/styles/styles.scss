@@ -6,6 +6,10 @@ html, body {
   font-family: 'Poppins', sans-serif;
 }
 
+#portal{
+  color: $textColor;
+}
+
 * {
   ::-webkit-scrollbar {
     width: 10px;

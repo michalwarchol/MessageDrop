@@ -56,14 +56,13 @@ const ChooseChat: React.FC<Props> = ({ userWithAvatar, isOpen, setIsOpen }) => {
   }
   
   return (
+    <>
+    <Button className={styles.joinButton} Icon={FiUserPlus} text="Add" onClick={()=>setIsOpen(!isOpen)} />
     <Modal
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       closeButton
       title="Select chat room"
-      triggers={
-        <Button className={styles.joinButton} Icon={FiUserPlus} text="Add" />
-      }
     >
       <div className={styles.chats}>
         {roomsToChoose.length < 1 ? (
@@ -97,6 +96,7 @@ const ChooseChat: React.FC<Props> = ({ userWithAvatar, isOpen, setIsOpen }) => {
         />
       </div>
     </Modal>
+    </>
   );
 };
 export default ChooseChat;

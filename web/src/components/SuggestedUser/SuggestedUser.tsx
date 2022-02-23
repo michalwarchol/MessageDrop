@@ -13,7 +13,7 @@ interface Props {
 const SuggestedUser: React.FC<Props> = ({ userWithAvatar }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
-    <div className={styles.suggestedUser} style={{ zIndex: isOpen ? 99 : 1 }}>
+    <div className={styles.suggestedUser}>
       {userWithAvatar.avatar ? (
         <div className={styles.imageOrIcon}>
           <div className={styles.imageContainer}>
